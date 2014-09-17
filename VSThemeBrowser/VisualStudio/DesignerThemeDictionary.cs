@@ -77,12 +77,11 @@ namespace VSThemeBrowser.VisualStudio {
 		// Microsoft.VisualStudio.Platform.WindowManagement.ColorNameTranslator
 		static readonly Guid environmentColors = new Guid("{624ed9c3-bdfd-41fa-96c3-7c824ea32e3d}");
 		static int VsColorFromName(ColorName colorName) {
-			// Stolen from VsColors.TryGetColorIDFromBaseKey, which is new to 2012
-			try {
-				if (colorName.Category == environmentColors)
-					return VsColors.GetColorID("VsColor." + colorName.Name);
-			} catch (ArgumentOutOfRangeException) { }
-			return 0;
+			if (colorName.Category != environmentColors)
+				return 0;
+			int result;
+			VsColors.TryGetColorIDFromBaseKey("VsColor." + colorName.Name, out result);
+			return result;
 		}
 	}
 }
