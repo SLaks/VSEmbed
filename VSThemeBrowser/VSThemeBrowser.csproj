@@ -85,7 +85,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="VisualStudio\DesignerThemeDictionary.cs" />
+    <Compile Include="VisualStudio\ThemeColorsDictionary.cs.cs" />
     <Compile Include="VisualStudio\FakeServiceProvider.cs" />
     <Page Include="Controls\VsResizeGrip.xaml">
       <SubType>Designer</SubType>

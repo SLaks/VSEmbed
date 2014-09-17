@@ -6,17 +6,16 @@ using System.Windows;
 using System.Windows.Media;
 using Microsoft.Internal.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
-using System.Buffer;
 
 namespace VSThemeBrowser.VisualStudio {
-	public class DesignerThemeDictionary : ResourceDictionary {
+	public class ThemeColorsDictionary : ResourceDictionary {
 
 		// We must access everything from these classes using dynamic due to NoPIA conflicts.
 		// The compiler gives some errors since we do not have the right PIA, and the runtime
 		// gives more errors because NoPIA doesn't unify for managed implementations.
 		dynamic currentTheme;
 		readonly dynamic service;
-		public DesignerThemeDictionary() {
+		public ThemeColorsDictionary() {
 			if (ServiceProvider.GlobalProvider.GetService(new Guid("FD57C398-FDE3-42c2-A358-660F269CBE43")) != null)
 				return;	// Do nothing when hosted in VS
 						//AssemblyResolverHack.AddHandler();
