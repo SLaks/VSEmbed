@@ -4,7 +4,19 @@
              xmlns:local="clr-namespace:VSThemeBrowser"
              xmlns:vs="clr-namespace:VSThemeBrowser.VisualStudio"
              StartupUri="MainWindow.xaml">
-    <Application.Resources>
-		<vs:DesignerThemeDictionary ThemeIndex="0" />
+	<Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<vs:DesignerThemeDictionary ThemeIndex="0"></vs:DesignerThemeDictionary>
+			</ResourceDictionary.MergedDictionaries>
+			<GeometryGroup FillRule="EvenOdd" x:Key="VectorIcon">
+				<EllipseGeometry Center="1, 1" RadiusX="1" RadiusY="1" />
+				<RectangleGeometry Rect=".6 .6 .8 .8" >
+					<RectangleGeometry.Transform>
+						<RotateTransform Angle="45" CenterX="1" CenterY="1" />
+					</RectangleGeometry.Transform>
+				</RectangleGeometry>
+			</GeometryGroup>
+		</ResourceDictionary>
 	</Application.Resources>
 </Application>

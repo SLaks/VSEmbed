@@ -38,7 +38,7 @@
 					</Grid.RowDefinitions>
 					<bmicc:MainWindowTitleBar Name="MainWindowTitleBar" Grid.Row="0" Grid.Column="0" Background="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowActiveCaptionBrushKey}}" TextElement.Foreground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowActiveCaptionTextBrushKey}}">
 						<DockPanel x:Uid="DockPanel_2">
-							<wcp:SystemMenu Name="SystemMenu" x:Uid="Image_1" Source="{TemplateBinding Window.Icon}" VectorFill="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowActiveIconDefaultBrushKey}}" Width="32" Height="27" Margin="0,0,12,4" Padding="12,7,0,0" DockPanel.Dock="Left" VectorIcon="{Binding Source={x:Static Application.Current}, Path=VectorIcon}" />
+							<wcp:SystemMenu Name="SystemMenu" x:Uid="Image_1" Source="{TemplateBinding Window.Icon}" VectorFill="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowActiveIconDefaultBrushKey}}" Width="32" Height="27" Margin="0,0,12,4" Padding="12,7,0,0" DockPanel.Dock="Left" VectorIcon="{StaticResource VectorIcon}" />
 							<StackPanel Name="WindowTitleBarButtons" x:Uid="WindowTitleBarButtons" Orientation="Horizontal" DockPanel.Dock="Right">
 								<wcp:WindowTitleBarButton Name="MinimizeButton" x:Uid="MinimizeButton" VerticalAlignment="Top" Command="{x:Static vsc:ViewCommands.MinimizeWindow}" BorderBrush="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonActiveBorderBrushKey}}" BorderThickness="1,0,1,1" GlyphForeground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonActiveGlyphBrushKey}}" HoverBackground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverActiveBrushKey}}" HoverBorderBrush="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverActiveBorderBrushKey}}" HoverForeground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverActiveGlyphBrushKey}}" HoverBorderThickness="1,0,1,1" PressedBackground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonDownBrushKey}}" PressedBorderBrush="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonDownBorderBrushKey}}" PressedForeground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonDownGlyphBrushKey}}" PressedBorderThickness="1,0,1,1" Padding="0,3,0,0" Width="34" Height="26" AutomationProperties.Name="Minimize" AutomationProperties.AutomationId="Minimize" ToolTip="Minimize" CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}">
 									<Path Name="MinimizeButtonPath" x:Uid="MinimizeButtonPath" Width="9" Height="9" Stretch="None" Data="F1M0,6L0,9 9,9 9,6 0,6z" Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}" />
@@ -114,6 +114,6 @@
 		</ControlTemplate>
 	</vsc:CustomChromeWindow.Template>
 	<StackPanel>
-		<TextBox Text="{Binding Resources.ThemeIndex, Source={x:Static Application.Current}}" />
+		<TextBox Text="{Binding Resources.MergedDictionaries[0].ThemeIndex, Source={x:Static Application.Current}}" />
 	</StackPanel>
 </vsc:CustomChromeWindow>
