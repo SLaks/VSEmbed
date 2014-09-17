@@ -1,12 +1,119 @@
-﻿<Window x:Class="VSThemeBrowser.MainWindow"
+﻿<vsc:CustomChromeWindow
+		x:Class="VSThemeBrowser.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vsc="clr-namespace:Microsoft.VisualStudio.PlatformUI.Shell.Controls;assembly=Microsoft.VisualStudio.Shell.ViewManager"
+		xmlns:pui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.14.0"
+		xmlns:wsc="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.14.0"
+		xmlns:bmicc="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.UI.Internal,Version=14.0.0.0,Culture=neutral,PublicKeyToken=b03f5f7f11d50a3a"
+		xmlns:wcp="clr-namespace:Microsoft.VisualStudio.PlatformUI.Shell.Controls;assembly=Microsoft.VisualStudio.Shell.ViewManager"
+		xmlns:controls="clr-namespace:VSThemeBrowser.Controls"
         xmlns:local="clr-namespace:VSThemeBrowser"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
-    </Grid>
-</Window>
+        Title="Not Visual Studio!" Height="350" Width="525">
+	<vsc:CustomChromeWindow.Resources>
+		<ResourceDictionary x:Uid="ResourceDictionary_2" Source="/Microsoft.VisualStudio.Shell.UI.Internal,Version=14.0.0.0,Culture=neutral,PublicKeyToken=b03f5f7f11d50a3a;component/Styles/ContextMenuBaseStyle.xaml" />
+	</vsc:CustomChromeWindow.Resources>
+
+	<vsc:CustomChromeWindow.Style>
+		<Style TargetType="vsc:CustomChromeWindow">
+			<Setter Property="vsc:CustomChromeWindow.ActiveGlowColor" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowActiveDefaultBorderColorKey}}" />
+			<Setter Property="vsc:CustomChromeWindow.InactiveGlowColor" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowInactiveBorderColorKey}}" />
+			<Setter Property="vsc:CustomChromeWindow.NonClientFillColor" Value="{DynamicResource {x:Static pui:EnvironmentColors.EnvironmentBackgroundColorKey}}" />
+
+			<Setter x:Uid="Setter_26" Property="Control.Background" Value="{DynamicResource {x:Static pui:EnvironmentColors.EnvironmentBackgroundBrushKey}}" />
+		</Style>
+	</vsc:CustomChromeWindow.Style>
+	<vsc:CustomChromeWindow.Template>
+		<ControlTemplate x:Uid="ControlTemplate_1" TargetType="{x:Type vsc:CustomChromeWindow}">
+			<wcp:WindowContentPresenter>
+				<Grid Name="RootGrid" x:Uid="Grid_1" Background="{TemplateBinding Control.Background}">
+					<Grid.RowDefinitions>
+						<RowDefinition x:Uid="RowDefinition_2" Height="Auto" />
+						<RowDefinition x:Uid="RowDefinition_5" Height="Auto" />
+						<RowDefinition x:Uid="RowDefinition_3" Height="*" />
+						<RowDefinition x:Uid="RowDefinition_4" Height="Auto" />
+					</Grid.RowDefinitions>
+					<bmicc:MainWindowTitleBar Name="MainWindowTitleBar" Grid.Row="0" Grid.Column="0" Background="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowActiveCaptionBrushKey}}" TextElement.Foreground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowActiveCaptionTextBrushKey}}">
+						<DockPanel x:Uid="DockPanel_2">
+							<wcp:SystemMenu Name="SystemMenu" x:Uid="Image_1" Source="{TemplateBinding Window.Icon}" VectorFill="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowActiveIconDefaultBrushKey}}" Width="32" Height="27" Margin="0,0,12,4" Padding="12,7,0,0" DockPanel.Dock="Left" VectorIcon="{Binding Source={x:Static Application.Current}, Path=VectorIcon}" />
+							<StackPanel Name="WindowTitleBarButtons" x:Uid="WindowTitleBarButtons" Orientation="Horizontal" DockPanel.Dock="Right">
+								<wcp:WindowTitleBarButton Name="MinimizeButton" x:Uid="MinimizeButton" VerticalAlignment="Top" Command="{x:Static vsc:ViewCommands.MinimizeWindow}" BorderBrush="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonActiveBorderBrushKey}}" BorderThickness="1,0,1,1" GlyphForeground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonActiveGlyphBrushKey}}" HoverBackground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverActiveBrushKey}}" HoverBorderBrush="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverActiveBorderBrushKey}}" HoverForeground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverActiveGlyphBrushKey}}" HoverBorderThickness="1,0,1,1" PressedBackground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonDownBrushKey}}" PressedBorderBrush="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonDownBorderBrushKey}}" PressedForeground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonDownGlyphBrushKey}}" PressedBorderThickness="1,0,1,1" Padding="0,3,0,0" Width="34" Height="26" AutomationProperties.Name="Minimize" AutomationProperties.AutomationId="Minimize" ToolTip="Minimize" CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+									<Path Name="MinimizeButtonPath" x:Uid="MinimizeButtonPath" Width="9" Height="9" Stretch="None" Data="F1M0,6L0,9 9,9 9,6 0,6z" Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}" />
+								</wcp:WindowTitleBarButton>
+								<wcp:WindowTitleBarButton Name="MaximizeRestoreButton" x:Uid="MaximizeRestoreButton" VerticalAlignment="Top" Command="{x:Static vsc:ViewCommands.ToggleMaximizeRestoreWindow}" BorderBrush="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonActiveBorderBrushKey}}" BorderThickness="1,0,1,1" GlyphForeground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonActiveGlyphBrushKey}}" HoverBackground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverActiveBrushKey}}" HoverBorderBrush="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverActiveBorderBrushKey}}" HoverForeground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverActiveGlyphBrushKey}}" HoverBorderThickness="1,0,1,1" PressedBackground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonDownBrushKey}}" PressedBorderBrush="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonDownBorderBrushKey}}" PressedForeground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonDownGlyphBrushKey}}" PressedBorderThickness="1,0,1,1" Padding="0,3,0,0" Width="34" Height="26" AutomationProperties.Name="Maximize" AutomationProperties.AutomationId="Maximize" ToolTip="Maximize" CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+									<Path Name="MaximizeRestoreButtonPath" x:Uid="MaximizeRestoreButtonPath" Width="9" Height="9" Stretch="Uniform" Data="F1M0,0L0,9 9,9 9,0 0,0 0,3 8,3 8,8 1,8 1,3z" Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}" />
+								</wcp:WindowTitleBarButton>
+								<wcp:WindowTitleBarButton Name="HideButton" x:Uid="HideButton" VerticalAlignment="Top" Command="{x:Static vsc:ViewCommands.CloseWindow}" BorderBrush="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonActiveBorderBrushKey}}" BorderThickness="1,0,1,1" GlyphForeground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonActiveGlyphBrushKey}}" HoverBackground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverActiveBrushKey}}" HoverBorderBrush="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverActiveBorderBrushKey}}" HoverForeground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverActiveGlyphBrushKey}}" HoverBorderThickness="1,0,1,1" PressedBackground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonDownBrushKey}}" PressedBorderBrush="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonDownBorderBrushKey}}" PressedForeground="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonDownGlyphBrushKey}}" PressedBorderThickness="1,0,1,1" Padding="0,3,0,0" Width="34" Height="26" AutomationProperties.Name="Close" AutomationProperties.AutomationId="Close" ToolTip="Close" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}">
+									<Path Name="HideButtonPath" x:Uid="HideButtonPath" Width="10" Height="8" Stretch="Uniform" Data="F1M0,0L2,0 5,3 8,0 10,0 6,4 10,8 8,8 5,5 2,8 0,8 4,4 0,0z" Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}" />
+								</wcp:WindowTitleBarButton>
+							</StackPanel>
+							<!--<bmicc:FrameControlContainer Name="PART_TitleBarFrameControlContainer" x:Uid="PART_TitleBarFrameControlContainer" DockPanel.Dock="Right" TextElement.FontSize="{DynamicResource VsFont.EnvironmentFontSize}" TextElement.FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}" Margin="0,0,2,0" DataContext="{Binding FrameControls}" />-->
+							<TextBlock x:Uid="TextBlock_1" Text="{TemplateBinding Window.Title}" TextBlock.FontFamily="{DynamicResource VsFont.CaptionFontFamily}" TextBlock.FontSize="{DynamicResource VsFont.CaptionFontSize}" TextBlock.FontWeight="{DynamicResource VsFont.CaptionFontWeight}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="0,7,0,4" />
+						</DockPanel>
+					</bmicc:MainWindowTitleBar>
+					<!--<DockPanel x:Uid="DockPanel_0" Grid.Row="1" Background="{DynamicResource {x:Static pui:EnvironmentColors.CommandShelfHighlightGradientBrushKey}}">
+						<bmicc:FrameControlContainer Name="PART_MenuBarFrameControlContainer" x:Uid="PART_MenuBarFrameControlContainer" DockPanel.Dock="Right" TextElement.FontSize="{DynamicResource VsFont.EnvironmentFontSize}" TextElement.FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}" Margin="0,0,6,0" DataContext="{Binding FrameControls}" />
+						<ContentPresenter x:Uid="ContentPresenter_1" Content="{Binding MainMenu.Model}">
+							<ContentPresenter.ContentTemplate>
+								<DataTemplate x:Uid="DataTemplate_1">
+									<bmicc:VsMenu x:Uid="vs:VsMenu_1" AutomationProperties.Name="MenuBar" AutomationProperties.AutomationId="MenuBar" IsMainMenu="False" ItemsSource="{Binding Items, Converter={StaticResource BackstageMenuItemCollectionConverter}}">
+										<bmicc:VsMenu.ContextMenu>
+											<bmicc:VsContextMenu x:Uid="vs:VsContextMenu_1" DataContext="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget.(vs:MainWindow.RawDataSource).ToolBarSet.ToolBarContextMenu}" ItemsSource="{Binding Items}" />
+										</bmicc:VsMenu.ContextMenu>
+									</bmicc:VsMenu>
+								</DataTemplate>
+							</ContentPresenter.ContentTemplate>
+						</ContentPresenter>
+					</DockPanel>-->
+					<bmicc:VsToolBarHostControl Content="{TemplateBinding ContentControl.Content}" Grid.Row="2" DataContext="{Binding ToolBarSet}" />
+					<DockPanel Name="StatusBarPanel" x:Uid="DockPanel_1" Grid.Row="3" MinHeight="22" Background="{DynamicResource {x:Static pui:EnvironmentColors.StatusBarDefaultBrushKey}}">
+						<controls:VsResizeGrip Name="ResizeGripControl" x:Uid="ResizeGripControl" DockPanel.Dock="Right" Padding="0" Cursor="SizeNWSE" VerticalAlignment="Bottom" />
+						<!--<bmicc:WorkerThreadStatusBarContainer Name="StatusBarContainer" TextElement.Foreground="{DynamicResource {x:Static pui:EnvironmentColors.StatusBarDefaultTextBrushKey}}" TextElement.FontSize="{DynamicResource VsFont.EnvironmentFontSize}" TextElement.FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}" />-->
+					</DockPanel>
+				</Grid>
+			</wcp:WindowContentPresenter>
+			<ControlTemplate.Triggers>
+				<Trigger x:Uid="Trigger_1" Property="FrameworkElement.FlowDirection" Value="RightToLeft">
+					<Setter x:Uid="Setter_30" TargetName="ResizeGripControl" Property="FrameworkElement.Cursor" Value="SizeNESW" />
+				</Trigger>
+				<DataTrigger x:Uid="DataTrigger_2" Value="True" Binding="{Binding IsFullScreen}">
+					<Setter x:Uid="Setter_58" TargetName="MainWindowTitleBar" Property="UIElement.Visibility" Value="Collapsed" />
+				</DataTrigger>
+				<Trigger x:Uid="Trigger_2" Property="Window.WindowState" Value="Maximized">
+					<Setter x:Uid="Setter_54" TargetName="MaximizeRestoreButtonPath" Property="Path.Data" Value="F1M0,10L0,3 3,3 3,0 10,0 10,2 4,2 4,3 7,3 7,6 6,6 6,5 1,5 1,10z M1,10L7,10 7,7 10,7 10,2 9,2 9,6 6,6 6,9 1,9z" />
+					<Setter x:Uid="Setter_55" TargetName="MaximizeRestoreButtonPath" Property="FrameworkElement.Height" Value="10" />
+					<Setter x:Uid="Setter_56" TargetName="MaximizeRestoreButtonPath" Property="FrameworkElement.Width" Value="10" />
+					<Setter x:Uid="Setter_41" TargetName="MaximizeRestoreButton" Value="Restore" Property="FrameworkElement.ToolTip" />
+					<Setter x:Uid="Setter_71" TargetName="MaximizeRestoreButton" Property="AutomationProperties.Name" Value="Restore" />
+					<Setter x:Uid="Setter_72" TargetName="MaximizeRestoreButton" Property="AutomationProperties.AutomationId" Value="Restore" />
+				</Trigger>
+				<Trigger x:Uid="Trigger_3" Property="Window.IsActive" Value="False">
+					<Setter x:Uid="Setter_42" TargetName="MainWindowTitleBar" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowInactiveCaptionBrushKey}}" Property="Border.Background" />
+					<Setter x:Uid="Setter_43" TargetName="MainWindowTitleBar" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowInactiveCaptionTextBrushKey}}" Property="TextElement.Foreground" />
+					<Setter x:Uid="Setter_76" TargetName="SystemMenu" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowInactiveIconDefaultBrushKey}}" Property="vsc:SystemMenu.VectorFill" />
+					<Setter x:Uid="Setter_47" TargetName="MinimizeButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonInactiveBorderBrushKey}}" Property="Control.BorderBrush" />
+					<Setter x:Uid="Setter_48" TargetName="MinimizeButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonInactiveGlyphBrushKey}}" Property="vsc:GlyphButton.GlyphForeground" />
+					<Setter x:Uid="Setter_45" TargetName="MinimizeButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverInactiveBrushKey}}" Property="vsc:GlyphButton.HoverBackground" />
+					<Setter x:Uid="Setter_46" TargetName="MinimizeButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverInactiveBorderBrushKey}}" Property="vsc:GlyphButton.HoverBorderBrush" />
+					<Setter x:Uid="Setter_19_1" TargetName="MinimizeButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverInactiveGlyphBrushKey}}" Property="vsc:GlyphButton.HoverForeground" />
+					<Setter x:Uid="Setter_49" TargetName="MaximizeRestoreButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonInactiveBorderBrushKey}}" Property="Control.BorderBrush" />
+					<Setter x:Uid="Setter_50" TargetName="MaximizeRestoreButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonInactiveGlyphBrushKey}}" Property="vsc:GlyphButton.GlyphForeground" />
+					<Setter x:Uid="Setter_22" TargetName="MaximizeRestoreButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverInactiveBrushKey}}" Property="vsc:GlyphButton.HoverBackground" />
+					<Setter x:Uid="Setter_23" TargetName="MaximizeRestoreButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverInactiveBorderBrushKey}}" Property="vsc:GlyphButton.HoverBorderBrush" />
+					<Setter x:Uid="Setter_24" TargetName="MaximizeRestoreButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverInactiveGlyphBrushKey}}" Property="vsc:GlyphButton.HoverForeground" />
+					<Setter x:Uid="Setter_25" TargetName="HideButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonInactiveBorderBrushKey}}" Property="Control.BorderBrush" />
+					<Setter x:Uid="Setter_51" TargetName="HideButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonInactiveGlyphBrushKey}}" Property="vsc:GlyphButton.GlyphForeground" />
+					<Setter x:Uid="Setter_52" TargetName="HideButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverInactiveBrushKey}}" Property="vsc:GlyphButton.HoverBackground" />
+					<Setter x:Uid="Setter_53" TargetName="HideButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverInactiveBorderBrushKey}}" Property="vsc:GlyphButton.HoverBorderBrush" />
+					<Setter x:Uid="Setter_29" TargetName="HideButton" Value="{DynamicResource {x:Static pui:EnvironmentColors.MainWindowButtonHoverInactiveGlyphBrushKey}}" Property="vsc:GlyphButton.HoverForeground" />
+				</Trigger>
+			</ControlTemplate.Triggers>
+		</ControlTemplate>
+	</vsc:CustomChromeWindow.Template>
+	<StackPanel>
+		<TextBox Text="{Binding Resources.ThemeIndex, Source={x:Static Application.Current}}" />
+	</StackPanel>
+</vsc:CustomChromeWindow>
