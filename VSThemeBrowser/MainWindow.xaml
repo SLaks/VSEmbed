@@ -7,7 +7,7 @@
 		xmlns:vsc="clr-namespace:Microsoft.VisualStudio.PlatformUI.Shell.Controls;assembly=Microsoft.VisualStudio.Shell.ViewManager"
 		xmlns:pui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.14.0"
 		xmlns:wsc="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.14.0"
-		xmlns:bmicc="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.UI.Internal,Version=14.0.0.0,Culture=neutral,PublicKeyToken=b03f5f7f11d50a3a"
+		xmlns:bmicc="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.UI.Internal"
 		xmlns:wcp="clr-namespace:Microsoft.VisualStudio.PlatformUI.Shell.Controls;assembly=Microsoft.VisualStudio.Shell.ViewManager"
 		xmlns:controls="clr-namespace:VSThemeBrowser.Controls"
         xmlns:local="clr-namespace:VSThemeBrowser"
