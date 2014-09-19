@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using Microsoft.Internal.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 
 namespace VSThemeBrowser.VisualStudio {
@@ -71,7 +72,35 @@ namespace VSThemeBrowser.VisualStudio {
 					Add(fgColor, color);
 				}
 			}
+			AddFonts();
 		}
+		void AddFonts() {
+			var dialogFont = System.Drawing.SystemFonts.CaptionFont;
+
+			Add(VsFonts.EnvironmentFontFamilyKey, new FontFamily(dialogFont.Name));
+			Add(VsFonts.EnvironmentFontSizeKey, dialogFont.Size);
+			AddCaptionFonts();
+		}
+		private void AddCaptionFonts() {
+			NONCLIENTMETRICS nONCLIENTMETRICS = default(NONCLIENTMETRICS);
+			nONCLIENTMETRICS.cbSize = Marshal.SizeOf(typeof(NONCLIENTMETRICS));
+			if (!NativeMethods.SystemParametersInfo(41, nONCLIENTMETRICS.cbSize, ref nONCLIENTMETRICS, 0)) {
+				Add(VsFonts.CaptionFontFamilyKey, this[VsFonts.EnvironmentFontFamilyKey]);
+				Add(VsFonts.CaptionFontSizeKey, this[VsFonts.EnvironmentFontSizeKey]);
+				Add(VsFonts.CaptionFontWeightKey, FontWeights.Normal);
+				return;
+			}
+			FontFamily value = new FontFamily(nONCLIENTMETRICS.lfCaptionFont.lfFaceName);
+			double num = this.FontSizeFromLOGFONTHeight(nONCLIENTMETRICS.lfCaptionFont.lfHeight);
+			FontWeight fontWeight = FontWeight.FromOpenTypeWeight(nONCLIENTMETRICS.lfCaptionFont.lfWeight);
+			Add(VsFonts.CaptionFontFamilyKey, value);
+			Add(VsFonts.CaptionFontSizeKey, num);
+			Add(VsFonts.CaptionFontWeightKey, fontWeight);
+		}
+		private double FontSizeFromLOGFONTHeight(int lfHeight) {
+			return Math.Abs(lfHeight) * DpiHelper.DeviceToLogicalUnitsScalingFactorY;
+		}
+
 
 		// Microsoft.VisualStudio.Platform.WindowManagement.ColorNameTranslator
 		static readonly Guid environmentColors = new Guid("{624ed9c3-bdfd-41fa-96c3-7c824ea32e3d}");
