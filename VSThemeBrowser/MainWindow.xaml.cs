@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.VisualStudio.PlatformUI.Shell;
 using Microsoft.VisualStudio.PlatformUI.Shell.Controls;
 
 namespace VSThemeBrowser {
@@ -21,6 +22,7 @@ namespace VSThemeBrowser {
 	public partial class MainWindow : CustomChromeWindow {
 		public MainWindow() {
 			InitializeComponent();
+			ViewManager.Instance.Initialize(new ContentControl());
 		}
 	}
 }
