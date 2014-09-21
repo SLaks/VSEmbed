@@ -22,9 +22,6 @@ namespace VSThemeBrowser.Controls {
 	public partial class VsResizeGrip : ResizeGrip {
 		private const int SizeBottomLeft = 7;
 		private const int SizeBottomRight = 8;
-		static VsResizeGrip() {
-			DefaultStyleKeyProperty.OverrideMetadata(typeof(VsResizeGrip), new FrameworkPropertyMetadata(typeof(VsResizeGrip)));
-		}
 		protected override void OnMouseDown(MouseButtonEventArgs e) {
 			base.OnMouseDown(e);
 			if (e.ChangedButton == MouseButton.Left) {

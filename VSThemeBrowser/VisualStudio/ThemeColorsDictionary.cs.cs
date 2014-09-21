@@ -29,7 +29,7 @@ namespace VSThemeBrowser.VisualStudio {
 			//service = Activator.CreateInstance(Type.GetType("Microsoft.VisualStudio.Platform.WindowManagement.ColorThemeService, Microsoft.VisualStudio.Platform.WindowManagement"));
 
 			// Add an empty dictionary for the loader to replace.
-			MergedDictionaries.Add(new ResourceDictionary());		
+			MergedDictionaries.Add(new ResourceDictionary());
 			ThemeIndex = 0;
 
 			typeof(EnvironmentRenderCapabilities)
@@ -68,7 +68,7 @@ namespace VSThemeBrowser.VisualStudio {
 			// Replace the old dictionary as a single operation to avoid extra lookups
 			MergedDictionaries[0] = newDictionary;
 		}
-		
+
 		#region AddSolidColorKeys
 		// Copied from ResourceSynchronizer and modified to use currentTheme and to add actual values instead of deferred keys.
 		void AddSolidColorKeys(ResourceDictionary newDictionary) {
@@ -158,10 +158,10 @@ namespace VSThemeBrowser.VisualStudio {
 		}
 
 		static readonly Type Gradient = WindowManagement.GetType("Microsoft.VisualStudio.Platform.WindowManagement.Gradient");
-		static readonly Func<object, object> GradientKey 
+		static readonly Func<object, object> GradientKey
 			= MakeRuntimeTypeFunc<object>(Gradient, Gradient.GetProperty("Key").GetMethod);
-		static readonly Func<object, ResourceDictionary, Brush> GradientCreateBrush 
-			= MakeRuntimeTypeFunc<ResourceDictionary,Brush>(Gradient, Gradient.GetMethod("CreateBrush"));
+		static readonly Func<object, ResourceDictionary, Brush> GradientCreateBrush
+			= MakeRuntimeTypeFunc<ResourceDictionary, Brush>(Gradient, Gradient.GetMethod("CreateBrush"));
 
 		void AddGradients(ResourceDictionary newDictionary) {
 			foreach (var gradient in gradients) {
@@ -176,7 +176,7 @@ namespace VSThemeBrowser.VisualStudio {
 			var dialogFont = System.Drawing.SystemFonts.CaptionFont;
 
 			newDictionary.Add(VsFonts.EnvironmentFontFamilyKey, new FontFamily(dialogFont.Name));
-			newDictionary.Add(VsFonts.EnvironmentFontSizeKey, dialogFont.Size);
+			newDictionary.Add(VsFonts.EnvironmentFontSizeKey, (double)dialogFont.Size);
 			AddCaptionFonts(newDictionary);
 		}
 
@@ -189,11 +189,11 @@ namespace VSThemeBrowser.VisualStudio {
 				newDictionary.Add(VsFonts.CaptionFontWeightKey, FontWeights.Normal);
 				return;
 			}
-			FontFamily value = new FontFamily(nONCLIENTMETRICS.lfCaptionFont.lfFaceName);
-			double num = this.FontSizeFromLOGFONTHeight(nONCLIENTMETRICS.lfCaptionFont.lfHeight);
+			FontFamily captionFont = new FontFamily(nONCLIENTMETRICS.lfCaptionFont.lfFaceName);
+			double captionSize = FontSizeFromLOGFONTHeight(nONCLIENTMETRICS.lfCaptionFont.lfHeight);
 			FontWeight fontWeight = FontWeight.FromOpenTypeWeight(nONCLIENTMETRICS.lfCaptionFont.lfWeight);
-			newDictionary.Add(VsFonts.CaptionFontFamilyKey, value);
-			newDictionary.Add(VsFonts.CaptionFontSizeKey, num);
+			newDictionary.Add(VsFonts.CaptionFontFamilyKey, captionFont);
+			newDictionary.Add(VsFonts.CaptionFontSizeKey, captionSize);
 			newDictionary.Add(VsFonts.CaptionFontWeightKey, fontWeight);
 		}
 		private double FontSizeFromLOGFONTHeight(int lfHeight) {

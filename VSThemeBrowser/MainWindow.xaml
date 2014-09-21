@@ -78,7 +78,7 @@
 					<bmicc:VsToolBarHostControl Content="{TemplateBinding ContentControl.Content}" Grid.Row="2" DataContext="{Binding ToolBarSet}" />
 					<DockPanel Name="StatusBarPanel" x:Uid="DockPanel_1" Grid.Row="3" MinHeight="22" Background="{DynamicResource {x:Static pui:EnvironmentColors.StatusBarDefaultBrushKey}}">
 						<controls:VsResizeGrip Name="ResizeGripControl" x:Uid="ResizeGripControl" DockPanel.Dock="Right" Padding="0" Cursor="SizeNWSE" VerticalAlignment="Bottom" />
-						<!--<bmicc:WorkerThreadStatusBarContainer Name="StatusBarContainer" TextElement.Foreground="{DynamicResource {x:Static pui:EnvironmentColors.StatusBarDefaultTextBrushKey}}" TextElement.FontSize="{DynamicResource VsFont.EnvironmentFontSize}" TextElement.FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}" />-->
+						<bmicc:WorkerThreadStatusBarContainer Name="StatusBarContainer" TextElement.Foreground="{DynamicResource {x:Static pui:EnvironmentColors.StatusBarDefaultTextBrushKey}}" TextElement.FontSize="{DynamicResource VsFont.EnvironmentFontSize}" TextElement.FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}" />
 					</DockPanel>
 				</Grid>
 			</wcp:WindowContentPresenter>
@@ -90,6 +90,9 @@
 					<Setter x:Uid="Setter_58" TargetName="MainWindowTitleBar" Property="UIElement.Visibility" Value="Collapsed" />
 				</DataTrigger>
 				<Trigger x:Uid="Trigger_2" Property="Window.WindowState" Value="Maximized">
+					<!-- In VS, this is bound to IsGripVisible, but I can't find that defined anywhere. -->
+					<Setter TargetName="ResizeGripControl" Property="Visibility" Value="Collapsed" />
+
 					<Setter x:Uid="Setter_54" TargetName="MaximizeRestoreButtonPath" Property="Path.Data" Value="F1M0,10L0,3 3,3 3,0 10,0 10,2 4,2 4,3 7,3 7,6 6,6 6,5 1,5 1,10z M1,10L7,10 7,7 10,7 10,2 9,2 9,6 6,6 6,9 1,9z" />
 					<Setter x:Uid="Setter_55" TargetName="MaximizeRestoreButtonPath" Property="FrameworkElement.Height" Value="10" />
 					<Setter x:Uid="Setter_56" TargetName="MaximizeRestoreButtonPath" Property="FrameworkElement.Width" Value="10" />
