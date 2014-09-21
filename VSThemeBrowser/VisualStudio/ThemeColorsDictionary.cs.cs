@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -26,6 +27,9 @@ namespace VSThemeBrowser.VisualStudio {
 			FakeServiceProvider.Initialize();
 			service = new Microsoft.VisualStudio.Platform.WindowManagement.ColorThemeService();
 			//service = Activator.CreateInstance(Type.GetType("Microsoft.VisualStudio.Platform.WindowManagement.ColorThemeService, Microsoft.VisualStudio.Platform.WindowManagement"));
+
+			// Add an empty dictionary for the loader to replace.
+			MergedDictionaries.Add(new ResourceDictionary());		
 			ThemeIndex = 0;
 
 			Themes = Enumerable.Range(0, (int)service.Themes.Count)
@@ -45,28 +49,25 @@ namespace VSThemeBrowser.VisualStudio {
 			set { themeIndex = value; LoadTheme(value); }
 		}
 
-		static Color ToColorFromRgba(uint colorValue) {
-			return Color.FromArgb((byte)(colorValue >> 24), (byte)colorValue, (byte)(colorValue >> 8), (byte)(colorValue >> 16));
-		}
-		static SolidColorBrush GetBrush(Color color) {
-			var brush = new SolidColorBrush(color);
-			brush.Freeze();
-			return brush;
-		}
-		// Loosely based on Microsoft.VisualStudio.Platform.WindowManagement.ResourceSynchronizer.AddSolidColorKeys()
 		public void LoadTheme(int index) {
 			if (service == null)
 				return;
 			var newDictionary = new ResourceDictionary();
 
 			currentTheme = service.Themes[index % service.Themes.Count];
-			AddColors(newDictionary);
-			AddFonts(newDictionary);
-			MergedDictionaries.Clear();
-			MergedDictionaries.Add(newDictionary);
-		}
 
-		void AddColors(ResourceDictionary newDictionary) { 
+			AddSolidColorKeys(newDictionary);
+			AddGradients(newDictionary);
+			AddTextureBrushes(newDictionary);
+			AddFonts(newDictionary);
+
+			// Replace the old dictionary as a single operation to avoid extra lookups
+			MergedDictionaries[0] = newDictionary;
+		}
+		
+		#region AddSolidColorKeys
+		// Copied from ResourceSynchronizer and modified to use currentTheme and to add actual values instead of deferred keys.
+		void AddSolidColorKeys(ResourceDictionary newDictionary) {
 			foreach (ColorName colorName in service.ColorNames) {
 				IVsColorEntry entry = currentTheme[colorName];
 				if (entry == null)
@@ -82,8 +83,8 @@ namespace VSThemeBrowser.VisualStudio {
 
 					int colorId = VsColorFromName(colorName);
 					if (colorId != 0) {
-						Add(VsColors.GetColorKey(colorId), color);
-						Add(VsBrushes.GetBrushKey(colorId), GetBrush(color));
+						newDictionary.Add(VsColors.GetColorKey(colorId), color);
+						newDictionary.Add(VsBrushes.GetBrushKey(colorId), GetBrush(color));
 					}
 				}
 				if (entry.ForegroundType != 0) {
@@ -95,7 +96,78 @@ namespace VSThemeBrowser.VisualStudio {
 				}
 			}
 		}
+		static Color ToColorFromRgba(uint colorValue) {
+			return Color.FromArgb((byte)(colorValue >> 24), (byte)colorValue, (byte)(colorValue >> 8), (byte)(colorValue >> 16));
+		}
+		static SolidColorBrush GetBrush(Color color) {
+			var brush = new SolidColorBrush(color);
+			brush.Freeze();
+			return brush;
+		}
+		// Microsoft.VisualStudio.Platform.WindowManagement.ColorNameTranslator
+		static readonly Guid environmentColors = new Guid("{624ed9c3-bdfd-41fa-96c3-7c824ea32e3d}");
+		static int VsColorFromName(ColorName colorName) {
+			if (colorName.Category != environmentColors)
+				return 0;
+			int result;
+			VsColors.TryGetColorIDFromBaseKey(colorName.Name, out result);
+			return result;
+		}
+		#endregion
 
+
+		// All of these types are internal.
+		static readonly Assembly WindowManagement = typeof(Microsoft.VisualStudio.Platform.WindowManagement.ColorThemeService).Assembly;
+		static readonly Type ResourceSynchronizer = WindowManagement.GetType("Microsoft.VisualStudio.Platform.WindowManagement.ResourceSynchronizer");
+
+		// This method doesn't use the instance at all, and adds values directly, so I can use it as-is.
+		static readonly Action<ResourceDictionary> AddTextureBrushes =
+			(Action<ResourceDictionary>)Delegate.CreateDelegate(
+				typeof(Action<ResourceDictionary>),
+				null,
+				ResourceSynchronizer.GetMethod("AddTextureBrushes", BindingFlags.NonPublic | BindingFlags.Instance));
+
+		#region AddGradients
+		static readonly IEnumerable<object> gradients = (IEnumerable<object>)ResourceSynchronizer.GetField("gradients", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+
+		// Ugly hack to call a method that takes an internal type as a parameter
+		static Func<object, TResult> MakeRuntimeTypeFunc<TResult>(Type privateType, MethodInfo method) {
+			return (Func<object, TResult>)MakeFunc1Method
+				.MakeGenericMethod(privateType, typeof(TResult))
+				.Invoke(null, new[] { method });
+		}
+		static readonly MethodInfo MakeFunc1Method = typeof(ThemeColorsDictionary).GetMethod("MakeFunc1", BindingFlags.Static | BindingFlags.NonPublic);
+		static Func<object, TResult> MakeFunc1<TPrivate, TResult>(MethodInfo method) {
+			var typedDelegate = (Func<TPrivate, TResult>)Delegate.CreateDelegate(typeof(Func<TPrivate, TResult>), method);
+			return o => typedDelegate((TPrivate)o);
+		}
+
+		static Func<object, T2, TResult> MakeRuntimeTypeFunc<T2, TResult>(Type privateType, MethodInfo method) {
+			return (Func<object, T2, TResult>)MakeFunc2Method
+				.MakeGenericMethod(privateType, typeof(T2), typeof(TResult))
+				.Invoke(null, new[] { method });
+		}
+		static readonly MethodInfo MakeFunc2Method = typeof(ThemeColorsDictionary).GetMethod("MakeFunc2", BindingFlags.Static | BindingFlags.NonPublic);
+		static Func<object, T2, TResult> MakeFunc2<TPrivate, T2, TResult>(MethodInfo method) {
+			var typedDelegate = (Func<TPrivate, T2, TResult>)Delegate.CreateDelegate(typeof(Func<TPrivate, T2, TResult>), method);
+			return (o1, o2) => typedDelegate((TPrivate)o1, o2);
+		}
+
+		static readonly Type Gradient = WindowManagement.GetType("Microsoft.VisualStudio.Platform.WindowManagement.Gradient");
+		static readonly Func<object, object> GradientKey 
+			= MakeRuntimeTypeFunc<object>(Gradient, Gradient.GetProperty("Key").GetMethod);
+		static readonly Func<object, ResourceDictionary, Brush> GradientCreateBrush 
+			= MakeRuntimeTypeFunc<ResourceDictionary,Brush>(Gradient, Gradient.GetMethod("CreateBrush"));
+
+		void AddGradients(ResourceDictionary newDictionary) {
+			foreach (var gradient in gradients) {
+				newDictionary.Add(GradientKey(gradient), GradientCreateBrush(gradient, newDictionary));
+			}
+		}
+		#endregion
+
+		#region AddFonts
+		// Copied from ResourceSynchronizer and modified to not use VS native font utilities
 		void AddFonts(ResourceDictionary newDictionary) {
 			var dialogFont = System.Drawing.SystemFonts.CaptionFont;
 
@@ -123,17 +195,7 @@ namespace VSThemeBrowser.VisualStudio {
 		private double FontSizeFromLOGFONTHeight(int lfHeight) {
 			return Math.Abs(lfHeight) * DpiHelper.DeviceToLogicalUnitsScalingFactorY;
 		}
-
-
-		// Microsoft.VisualStudio.Platform.WindowManagement.ColorNameTranslator
-		static readonly Guid environmentColors = new Guid("{624ed9c3-bdfd-41fa-96c3-7c824ea32e3d}");
-		static int VsColorFromName(ColorName colorName) {
-			if (colorName.Category != environmentColors)
-				return 0;
-			int result;
-			VsColors.TryGetColorIDFromBaseKey("VsColor." + colorName.Name, out result);
-			return result;
-		}
+		#endregion
 	}
 	public class ColorTheme {
 		public ColorTheme(int index, object theme) {
@@ -156,6 +218,7 @@ namespace VSThemeBrowser.VisualStudio {
 		public string Name { get; private set; }
 	}
 }
+
 namespace Microsoft.Internal.VisualStudio.Shell.Interop {
 	[CompilerGenerated, Guid("413D8344-C0DB-4949-9DBC-69C12BADB6AC"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), TypeIdentifier]
 	[ComImport]
