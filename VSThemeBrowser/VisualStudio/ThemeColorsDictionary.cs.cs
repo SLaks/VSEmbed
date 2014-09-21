@@ -175,8 +175,8 @@ namespace VSThemeBrowser.VisualStudio {
 		void AddFonts(ResourceDictionary newDictionary) {
 			var dialogFont = System.Drawing.SystemFonts.CaptionFont;
 
-			newDictionary.Add(VsFonts.EnvironmentFontFamilyKey, new FontFamily(dialogFont.Name));
-			newDictionary.Add(VsFonts.EnvironmentFontSizeKey, (double)dialogFont.Size);
+			newDictionary.Add("VsFont.EnvironmentFontFamily", new FontFamily(dialogFont.Name));
+			newDictionary.Add("VsFont.EnvironmentFontSize", (double)dialogFont.Size);
 			AddCaptionFonts(newDictionary);
 		}
 
@@ -184,17 +184,17 @@ namespace VSThemeBrowser.VisualStudio {
 			NONCLIENTMETRICS nONCLIENTMETRICS = default(NONCLIENTMETRICS);
 			nONCLIENTMETRICS.cbSize = Marshal.SizeOf(typeof(NONCLIENTMETRICS));
 			if (!NativeMethods.SystemParametersInfo(41, nONCLIENTMETRICS.cbSize, ref nONCLIENTMETRICS, 0)) {
-				newDictionary.Add(VsFonts.CaptionFontFamilyKey, this[VsFonts.EnvironmentFontFamilyKey]);
-				newDictionary.Add(VsFonts.CaptionFontSizeKey, this[VsFonts.EnvironmentFontSizeKey]);
-				newDictionary.Add(VsFonts.CaptionFontWeightKey, FontWeights.Normal);
+				newDictionary.Add("VsFont.CaptionFontFamily", this["VsFont.EnvironmentFontFamilyKey"]);
+				newDictionary.Add("VsFont.CaptionFontSize", this["VsFont.EnvironmentFontSizeKey"]);
+				newDictionary.Add("VsFont.CaptionFontWeight", FontWeights.Normal);
 				return;
 			}
 			FontFamily captionFont = new FontFamily(nONCLIENTMETRICS.lfCaptionFont.lfFaceName);
 			double captionSize = FontSizeFromLOGFONTHeight(nONCLIENTMETRICS.lfCaptionFont.lfHeight);
 			FontWeight fontWeight = FontWeight.FromOpenTypeWeight(nONCLIENTMETRICS.lfCaptionFont.lfWeight);
-			newDictionary.Add(VsFonts.CaptionFontFamilyKey, captionFont);
-			newDictionary.Add(VsFonts.CaptionFontSizeKey, captionSize);
-			newDictionary.Add(VsFonts.CaptionFontWeightKey, fontWeight);
+			newDictionary.Add("VsFont.CaptionFontFamily", captionFont);
+			newDictionary.Add("VsFont.CaptionFontSize", captionSize);
+			newDictionary.Add("VsFont.CaptionFontWeight", fontWeight);
 		}
 		private double FontSizeFromLOGFONTHeight(int lfHeight) {
 			return Math.Abs(lfHeight) * DpiHelper.DeviceToLogicalUnitsScalingFactorY;

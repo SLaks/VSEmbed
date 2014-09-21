@@ -5,9 +5,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:vsc="clr-namespace:Microsoft.VisualStudio.PlatformUI.Shell.Controls;assembly=Microsoft.VisualStudio.Shell.ViewManager"
-		xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.14.0"
-		xmlns:pui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.14.0"
-		xmlns:wsc="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.14.0"
+		xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.11.0"
+		xmlns:pui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.11.0"
+		xmlns:wsc="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.11.0"
 		xmlns:bmicc="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.UI.Internal"
 		xmlns:wcp="clr-namespace:Microsoft.VisualStudio.PlatformUI.Shell.Controls;assembly=Microsoft.VisualStudio.Shell.ViewManager"
 		xmlns:controls="clr-namespace:VSThemeBrowser.Controls"
@@ -18,8 +18,8 @@
 	<vsc:CustomChromeWindow.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="/Microsoft.VisualStudio.Platform.WindowManagement,Version=14.0.0.0,Culture=neutral,PublicKeyToken=b03f5f7f11d50a3a;component/Themes/Resources.xaml" />
-				<ResourceDictionary Source="/Microsoft.VisualStudio.Shell.UI.Internal,Version=14.0.0.0,Culture=neutral,PublicKeyToken=b03f5f7f11d50a3a;component/Themes/Generic.xaml" />
+				<ResourceDictionary Source="/Microsoft.VisualStudio.Shell.UI.Internal;component/Themes/Generic.xaml" />
+				<ResourceDictionary Source="/Microsoft.VisualStudio.Platform.WindowManagement;component/Themes/Resources.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</vsc:CustomChromeWindow.Resources>
@@ -124,12 +124,14 @@
 		</ControlTemplate>
 	</vsc:CustomChromeWindow.Template>
 	<StackPanel>
-		<ComboBox Style="{StaticResource {x:Static vsfx:VsResourceKeys.ComboBoxStyleKey}}"
+		<!-- Style="{StaticResource {x:Static vsfx:VsResourceKeys.ComboBoxStyleKey}}"-->
+		<ComboBox
 				  DataContext="{Binding Resources.MergedDictionaries[0], Source={x:Static Application.Current}}"
 				  SelectedItem="{Binding CurrentTheme}" DisplayMemberPath="Name"
 				  ItemsSource="{Binding Themes}">
 		</ComboBox>
-		<Button Style="{StaticResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">Hello!</Button>
-		<CheckBox Style="{StaticResource {x:Static vsfx:VsResourceKeys.CheckBoxStyleKey}}">Hello!</CheckBox>
+		<wsc:DialogButton>Hello!</wsc:DialogButton>
+		<!--<Button Style="{StaticResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">Hello!</Button>
+		<CheckBox Style="{StaticResource {x:Static vsfx:VsResourceKeys.CheckBoxStyleKey}}">Hello!</CheckBox>-->
 	</StackPanel>
 </vsc:CustomChromeWindow>
