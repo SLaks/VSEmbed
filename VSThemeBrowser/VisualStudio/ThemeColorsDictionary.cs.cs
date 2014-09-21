@@ -32,6 +32,10 @@ namespace VSThemeBrowser.VisualStudio {
 			MergedDictionaries.Add(new ResourceDictionary());		
 			ThemeIndex = 0;
 
+			typeof(EnvironmentRenderCapabilities)
+				.GetProperty("VisualEffectsAllowed")
+				.SetValue(EnvironmentRenderCapabilities.Current, 1 | 2);
+
 			Themes = Enumerable.Range(0, (int)service.Themes.Count)
 				.Select(i => new ColorTheme(i, service.Themes[i]))
 				.ToList()
