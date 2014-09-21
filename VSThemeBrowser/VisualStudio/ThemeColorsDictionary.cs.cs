@@ -57,20 +57,28 @@ namespace VSThemeBrowser.VisualStudio {
 		public void LoadTheme(int index) {
 			if (service == null)
 				return;
-			Clear();
+			var newDictionary = new ResourceDictionary();
 
 			currentTheme = service.Themes[index % service.Themes.Count];
+			AddColors(newDictionary);
+			AddFonts(newDictionary);
+			MergedDictionaries.Clear();
+			MergedDictionaries.Add(newDictionary);
+		}
+
+		void AddColors(ResourceDictionary newDictionary) { 
 			foreach (ColorName colorName in service.ColorNames) {
 				IVsColorEntry entry = currentTheme[colorName];
-				if (entry == null) continue;
+				if (entry == null)
+					continue;
 
 				if (entry.BackgroundType != 0) {
 					ThemeResourceKey bgBrush = new ThemeResourceKey(entry.ColorName.Category, entry.ColorName.Name, ThemeResourceKeyType.BackgroundBrush);
 					ThemeResourceKey bgColor = new ThemeResourceKey(entry.ColorName.Category, entry.ColorName.Name, ThemeResourceKeyType.BackgroundColor);
 
 					var color = ToColorFromRgba(entry.Background);
-					Add(bgBrush, GetBrush(color));
-					Add(bgColor, color);
+					newDictionary.Add(bgBrush, GetBrush(color));
+					newDictionary.Add(bgColor, color);
 
 					int colorId = VsColorFromName(colorName);
 					if (colorId != 0) {
@@ -82,34 +90,35 @@ namespace VSThemeBrowser.VisualStudio {
 					ThemeResourceKey fgBrush = new ThemeResourceKey(entry.ColorName.Category, entry.ColorName.Name, ThemeResourceKeyType.ForegroundBrush);
 					ThemeResourceKey fgColor = new ThemeResourceKey(entry.ColorName.Category, entry.ColorName.Name, ThemeResourceKeyType.ForegroundColor);
 					var color = ToColorFromRgba(entry.Foreground);
-					Add(fgBrush, GetBrush(color));
-					Add(fgColor, color);
+					newDictionary.Add(fgBrush, GetBrush(color));
+					newDictionary.Add(fgColor, color);
 				}
 			}
-			AddFonts();
 		}
-		void AddFonts() {
+
+		void AddFonts(ResourceDictionary newDictionary) {
 			var dialogFont = System.Drawing.SystemFonts.CaptionFont;
 
-			Add(VsFonts.EnvironmentFontFamilyKey, new FontFamily(dialogFont.Name));
-			Add(VsFonts.EnvironmentFontSizeKey, dialogFont.Size);
-			AddCaptionFonts();
+			newDictionary.Add(VsFonts.EnvironmentFontFamilyKey, new FontFamily(dialogFont.Name));
+			newDictionary.Add(VsFonts.EnvironmentFontSizeKey, dialogFont.Size);
+			AddCaptionFonts(newDictionary);
 		}
-		private void AddCaptionFonts() {
+
+		private void AddCaptionFonts(ResourceDictionary newDictionary) {
 			NONCLIENTMETRICS nONCLIENTMETRICS = default(NONCLIENTMETRICS);
 			nONCLIENTMETRICS.cbSize = Marshal.SizeOf(typeof(NONCLIENTMETRICS));
 			if (!NativeMethods.SystemParametersInfo(41, nONCLIENTMETRICS.cbSize, ref nONCLIENTMETRICS, 0)) {
-				Add(VsFonts.CaptionFontFamilyKey, this[VsFonts.EnvironmentFontFamilyKey]);
-				Add(VsFonts.CaptionFontSizeKey, this[VsFonts.EnvironmentFontSizeKey]);
-				Add(VsFonts.CaptionFontWeightKey, FontWeights.Normal);
+				newDictionary.Add(VsFonts.CaptionFontFamilyKey, this[VsFonts.EnvironmentFontFamilyKey]);
+				newDictionary.Add(VsFonts.CaptionFontSizeKey, this[VsFonts.EnvironmentFontSizeKey]);
+				newDictionary.Add(VsFonts.CaptionFontWeightKey, FontWeights.Normal);
 				return;
 			}
 			FontFamily value = new FontFamily(nONCLIENTMETRICS.lfCaptionFont.lfFaceName);
 			double num = this.FontSizeFromLOGFONTHeight(nONCLIENTMETRICS.lfCaptionFont.lfHeight);
 			FontWeight fontWeight = FontWeight.FromOpenTypeWeight(nONCLIENTMETRICS.lfCaptionFont.lfWeight);
-			Add(VsFonts.CaptionFontFamilyKey, value);
-			Add(VsFonts.CaptionFontSizeKey, num);
-			Add(VsFonts.CaptionFontWeightKey, fontWeight);
+			newDictionary.Add(VsFonts.CaptionFontFamilyKey, value);
+			newDictionary.Add(VsFonts.CaptionFontSizeKey, num);
+			newDictionary.Add(VsFonts.CaptionFontWeightKey, fontWeight);
 		}
 		private double FontSizeFromLOGFONTHeight(int lfHeight) {
 			return Math.Abs(lfHeight) * DpiHelper.DeviceToLogicalUnitsScalingFactorY;
