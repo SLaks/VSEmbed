@@ -5,16 +5,23 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:vsc="clr-namespace:Microsoft.VisualStudio.PlatformUI.Shell.Controls;assembly=Microsoft.VisualStudio.Shell.ViewManager"
+		xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.14.0"
 		xmlns:pui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.14.0"
 		xmlns:wsc="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.14.0"
 		xmlns:bmicc="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.UI.Internal"
 		xmlns:wcp="clr-namespace:Microsoft.VisualStudio.PlatformUI.Shell.Controls;assembly=Microsoft.VisualStudio.Shell.ViewManager"
 		xmlns:controls="clr-namespace:VSThemeBrowser.Controls"
         xmlns:local="clr-namespace:VSThemeBrowser"
+        xmlns:localvs="clr-namespace:VSThemeBrowser.VisualStudio"
         mc:Ignorable="d"
         Title="Not Visual Studio!" Height="350" Width="525">
 	<vsc:CustomChromeWindow.Resources>
-		<ResourceDictionary x:Uid="ResourceDictionary_2" Source="/Microsoft.VisualStudio.Shell.UI.Internal,Version=14.0.0.0,Culture=neutral,PublicKeyToken=b03f5f7f11d50a3a;component/Styles/ContextMenuBaseStyle.xaml" />
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="/Microsoft.VisualStudio.Platform.WindowManagement,Version=14.0.0.0,Culture=neutral,PublicKeyToken=b03f5f7f11d50a3a;component/Themes/Resources.xaml" />
+				<ResourceDictionary Source="/Microsoft.VisualStudio.Shell.UI.Internal,Version=14.0.0.0,Culture=neutral,PublicKeyToken=b03f5f7f11d50a3a;component/Themes/Generic.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
 	</vsc:CustomChromeWindow.Resources>
 
 	<vsc:CustomChromeWindow.Style>
@@ -114,6 +121,12 @@
 		</ControlTemplate>
 	</vsc:CustomChromeWindow.Template>
 	<StackPanel>
-		<TextBox Text="{Binding Resources.MergedDictionaries[0].ThemeIndex, Source={x:Static Application.Current}}" />
+		<ComboBox Style="{StaticResource {x:Static vsfx:VsResourceKeys.ComboBoxStyleKey}}"
+				  DataContext="{Binding Resources.MergedDictionaries[0], Source={x:Static Application.Current}}"
+				  SelectedItem="{Binding CurrentTheme}" DisplayMemberPath="Name"
+				  ItemsSource="{Binding Themes}">
+		</ComboBox>
+		<Button Style="{StaticResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">Hello!</Button>
+		<CheckBox Style="{StaticResource {x:Static vsfx:VsResourceKeys.CheckBoxStyleKey}}">Hello!</CheckBox>
 	</StackPanel>
 </vsc:CustomChromeWindow>

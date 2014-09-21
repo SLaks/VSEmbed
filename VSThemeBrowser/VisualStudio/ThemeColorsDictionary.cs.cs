@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -24,6 +27,17 @@ namespace VSThemeBrowser.VisualStudio {
 			service = new Microsoft.VisualStudio.Platform.WindowManagement.ColorThemeService();
 			//service = Activator.CreateInstance(Type.GetType("Microsoft.VisualStudio.Platform.WindowManagement.ColorThemeService, Microsoft.VisualStudio.Platform.WindowManagement"));
 			ThemeIndex = 0;
+
+			Themes = Enumerable.Range(0, (int)service.Themes.Count)
+				.Select(i => new ColorTheme(i, service.Themes[i]))
+				.ToList()
+				.AsReadOnly();
+		}
+
+		public ReadOnlyCollection<ColorTheme> Themes { get; private set; }
+		public ColorTheme CurrentTheme {
+			get { return Themes[ThemeIndex]; }
+			set { ThemeIndex = value.Index; }
 		}
 		int themeIndex;
 		public int ThemeIndex {
@@ -111,6 +125,26 @@ namespace VSThemeBrowser.VisualStudio {
 			VsColors.TryGetColorIDFromBaseKey("VsColor." + colorName.Name, out result);
 			return result;
 		}
+	}
+	public class ColorTheme {
+		public ColorTheme(int index, object theme) {
+			Index = index;
+
+			// The VS ColorTheme.Name property tries to read the translated
+			// name from the resource ID using IVsResourceManager, which is
+			// native code.  I extract the name from the ID instead.
+			theme.GetType().GetMethod("RealizeLocalizedResourceID", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(theme, null);
+			var nameId = (string)theme.GetType().GetField("_localizedNameResourceId", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(theme);
+			if (nameId[0] == '@') {
+				nameId = nameId.Replace("@ThemeName_", "");
+				var end = nameId.IndexOf(";");
+				if (end > 0)
+					nameId = nameId.Remove(end);
+			}
+			Name = nameId;
+		}
+		public int Index { get; private set; }
+		public string Name { get; private set; }
 	}
 }
 namespace Microsoft.Internal.VisualStudio.Shell.Interop {
