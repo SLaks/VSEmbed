@@ -20,6 +20,7 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="/Microsoft.VisualStudio.Shell.UI.Internal;component/Themes/Generic.xaml" />
 				<ResourceDictionary Source="/Microsoft.VisualStudio.Platform.WindowManagement;component/Themes/Resources.xaml" />
+				<ResourceDictionary Source="VisualStudio/ComboBoxStyles.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</vsc:CustomChromeWindow.Resources>
