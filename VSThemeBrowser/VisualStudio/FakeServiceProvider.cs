@@ -24,7 +24,11 @@ namespace VSThemeBrowser.VisualStudio {
 			if (ServiceProviderRegistration.GlobalProvider.GetService(typeof(SVsSettingsManager)) != null)
 				return;
 
-			var esm = ExternalSettingsManager.CreateForApplication(GetVersionExe(FindVsVersions().LastOrDefault().ToString()));
+			if (VsLoader.VsVersion==null) {		// If the App() ctor didn't set this, we're in the designer
+				VsLoader.Initialize(new Version(12, 0, 0, 0));
+			}
+
+			var esm = ExternalSettingsManager.CreateForApplication(VsLoader.GetVersionExe(VsLoader.VsVersion), "Exp");	// FindVsVersions().LastOrDefault().ToString()));
 			var sp = new FakeServiceProvider {
 				serviceInstances =
 				{
@@ -32,39 +36,23 @@ namespace VSThemeBrowser.VisualStudio {
 					{ typeof(SVsActivityLog).GUID, new DummyLog() },
 					{ typeof(SVsSettingsManager).GUID, new SettingsWrapper(esm) },
 					{ new Guid("45652379-D0E3-4EA0-8B60-F2579AA29C93"), new DummyWindowManager() },
-						// Activator.CreateInstance(Type.GetType("Microsoft.VisualStudio.Platform.WindowManagement.WindowManagerService, Microsoft.VisualStudio.Platform.WindowManagement, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"))
-                }
+					// Activator.CreateInstance(Type.GetType("Microsoft.VisualStudio.Platform.WindowManagement.WindowManagerService, Microsoft.VisualStudio.Platform.WindowManagement, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"))
+				}
 			};
 
 			ServiceProviderRegistration.CreateFromSetSite(sp);
+
 			// The designer loads Microsoft.VisualStudio.Shell.XX.0,
 			// which we cannot reference directly (to avoid breaking
 			// older versions). Therefore, I set the global property
 			// for every available version using Reflection instead.
-			foreach (var vsVersion in FindVsVersions().Where(v => v.Major >= 10)) {
+			foreach (var vsVersion in VsLoader.FindVsVersions().Where(v => v.Major >= 10)) {
 				var type = Type.GetType("Microsoft.VisualStudio.Shell.ServiceProvider, Microsoft.VisualStudio.Shell." + vsVersion.ToString(2));
-				if (type == null) continue;
+				if (type == null)
+					continue;
 				type.GetMethod("CreateFromSetSite", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static)
 					.Invoke(null, new[] { sp });
 			}
-		}
-
-		public static IEnumerable<Version> FindVsVersions() {
-			using (var software = Registry.LocalMachine.OpenSubKey("SOFTWARE"))
-			using (var ms = software.OpenSubKey("Microsoft"))
-			using (var vs = ms.OpenSubKey("VisualStudio"))
-				return vs.GetSubKeyNames()
-						.Select(s => {
-							Version v;
-							Version.TryParse(s, out v);
-							return v;
-						})
-				.Where(d => d != null)
-				.OrderBy(d => d);
-		}
-
-		public static string GetVersionExe(string version) {
-			return Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\" + version + @"\Setup\VS", "EnvironmentPath", null) as string;
 		}
 
 		readonly Dictionary<Guid, object> serviceInstances = new Dictionary<Guid, object>();

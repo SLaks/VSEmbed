@@ -11,8 +11,11 @@ namespace VSThemeBrowser {
 	/// Interaction logic for App.xaml
 	/// </summary>
 	public partial class App : Application {
-		protected override void OnStartup(StartupEventArgs e) {
+		public App() {
+			VisualStudio.VsLoader.Initialize(new Version(12, 0, 0, 0));
 			VisualStudio.FakeServiceProvider.Initialize();
+		}
+		protected override void OnStartup(StartupEventArgs e) {
 			base.OnStartup(e);
 		}
 	}
