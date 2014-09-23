@@ -41,6 +41,24 @@ namespace VSThemeBrowser.VisualStudio {
 				.ToList()
 				.AsReadOnly();
 		}
+		bool designerOnly;
+		///<summary>Gets or sets whether the theme resources should only be added in the designer.</summary>
+		///<remarks>
+		/// Use this property to create a theme dictionary for the designer 
+		/// while still inheriting an application-level theme at runtime.
+		///</remarks>
+		public bool DesignerOnly {
+			get { return designerOnly; }
+			set {
+				designerOnly = value;
+				if (value) {
+					if (IsDesignMode)
+						LoadTheme(new Random().Next(Themes.Count));
+					else
+						MergedDictionaries[0].Clear();
+				}
+			}
+		}
 
 		public ReadOnlyCollection<ColorTheme> Themes { get; private set; }
 		public ColorTheme CurrentTheme {
@@ -53,8 +71,13 @@ namespace VSThemeBrowser.VisualStudio {
 			set { themeIndex = value; LoadTheme(value); }
 		}
 
+
+		private bool IsDesignMode {
+			get { return (bool)DesignerProperties.IsInDesignModeProperty.GetMetadata(typeof(DependencyObject)).DefaultValue; }
+		}
+
 		public void LoadTheme(int index) {
-			if (service == null)
+			if (service == null || (DesignerOnly && IsDesignMode))
 				return;
 			var newDictionary = new ResourceDictionary();
 

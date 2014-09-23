@@ -16,13 +16,13 @@
         mc:Ignorable="d"
         Title="Not Visual Studio!" Height="350" Width="525">
 	<vsc:CustomChromeWindow.Resources>
-		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
+		<localvs:ThemeColorsDictionary DesignerOnly="True">
+			<localvs:ThemeColorsDictionary.MergedDictionaries>
 				<ResourceDictionary Source="/Microsoft.VisualStudio.Shell.UI.Internal;component/Themes/Generic.xaml" />
 				<ResourceDictionary Source="/Microsoft.VisualStudio.Platform.WindowManagement;component/Themes/Resources.xaml" />
 				<ResourceDictionary Source="VisualStudio/ComboBoxStyles.xaml" />
-			</ResourceDictionary.MergedDictionaries>
-		</ResourceDictionary>
+			</localvs:ThemeColorsDictionary.MergedDictionaries>
+		</localvs:ThemeColorsDictionary>
 	</vsc:CustomChromeWindow.Resources>
 
 	<vsc:CustomChromeWindow.Style>

@@ -56,7 +56,7 @@
 									</Border>
 								</vsui:SystemDropShadowChrome>
 							</Popup>
-							<ToggleButton Name="ToggleButton" Grid.Column="0" Grid.ColumnSpan="2" Background="#00FFFFFF" BorderBrush="#00FFFFFF" TextElement.Foreground="{DynamicResource {x:Static vsui:EnvironmentColors.DropDownGlyphBrushKey}}" Style="{StaticResource DropDownToggleButton}" IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+							<ToggleButton Name="ToggleButton" Grid.Column="0" Grid.ColumnSpan="2" Background="#00FFFFFF" BorderBrush="#00FFFFFF" TextElement.Foreground="{DynamicResource {x:Static vsui:EnvironmentColors.DropDownGlyphBrushKey}}" Style="{DynamicResource DropDownToggleButton}" IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
 							<ContentPresenter Grid.Column="0" IsHitTestVisible="False" Margin="{TemplateBinding Control.Padding}" Content="{TemplateBinding ComboBox.SelectedItem}" ContentTemplate="{TemplateBinding ItemsControl.ItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemsControl.ItemTemplateSelector}" VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}" HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
 						</Grid>
 					</Border>
