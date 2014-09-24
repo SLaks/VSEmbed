@@ -53,7 +53,8 @@ namespace VSThemeBrowser.VisualStudio {
 			if (name.Version != null && name.Version.Major == VsVersion.Major)
 				return null;	// Don't recurse.  I check the major version only because AssemblyName will resolve the build number from the GAC.
 
-			name.Version = VsVersion;
+			// Always specify a complete version to avoid partial assembly loading, which skips the GAC.
+			name.Version = new Version(VsVersion.Major, VsVersion.Minor, 0, 0);
 			name.Name = versionMatcher.Replace(name.Name, VsVersion.ToString(2));
 			Debug.WriteLine("Redirecting load of " + args.Name + ",\tfrom " + (args.RequestingAssembly == null ? "(unknown)" : args.RequestingAssembly.FullName));
 
