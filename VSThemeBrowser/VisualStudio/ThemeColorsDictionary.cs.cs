@@ -11,9 +11,10 @@ using System.Windows.Media;
 using Microsoft.Internal.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using VSThemeBrowser.Controls;
 
 namespace VSThemeBrowser.VisualStudio {
-	public class ThemeColorsDictionary : ResourceDictionary {
+	public class ThemeColorsDictionary : ConditionalResourceDictionary {
 
 		// We must access everything from these classes using dynamic due to NoPIA conflicts.
 		// The compiler gives some errors since we do not have the right PIA, and the runtime

@@ -20,7 +20,16 @@
 			<localvs:ThemeColorsDictionary.MergedDictionaries>
 				<ResourceDictionary Source="/Microsoft.VisualStudio.Shell.UI.Internal;component/Themes/Generic.xaml" />
 				<ResourceDictionary Source="/Microsoft.VisualStudio.Platform.WindowManagement;component/Themes/Resources.xaml" />
-				<ResourceDictionary Source="VisualStudio/ComboBoxStyles.xaml" />
+				<!-- On Dev14+, use the new global styles by default -->
+				<controls:ConditionalResourceDictionary MinVersion="14">
+					<controls:ConditionalResourceDictionary.MergedDictionaries>
+						<ResourceDictionary Source="/Microsoft.VisualStudio.Platform.WindowManagement;component/Themes/Resources.xaml" />
+					</controls:ConditionalResourceDictionary.MergedDictionaries>
+					<Style BasedOn="{StaticResource VsButtonStyleKey}"   x:Key="{x:Type Button}"   TargetType="Button"   />
+					<Style BasedOn="{StaticResource VsCheckBoxStyleKey}" x:Key="{x:Type CheckBox}" TargetType="CheckBox" />
+					<Style BasedOn="{StaticResource VsComboBoxStyleKey}" x:Key="{x:Type ComboBox}" TargetType="ComboBox" />
+				</controls:ConditionalResourceDictionary>
+				<!--<controls:ConditionalResourceDictionary MaxVersion="12" Source="VisualStudio/ComboBoxStyles.xaml" />-->
 			</localvs:ThemeColorsDictionary.MergedDictionaries>
 		</localvs:ThemeColorsDictionary>
 	</vsc:CustomChromeWindow.Resources>
@@ -79,7 +88,8 @@
 					<bmicc:VsToolBarHostControl Content="{TemplateBinding ContentControl.Content}" Grid.Row="2" DataContext="{Binding ToolBarSet}" />
 					<DockPanel Name="StatusBarPanel" x:Uid="DockPanel_1" Grid.Row="3" MinHeight="22" Background="{DynamicResource {x:Static pui:EnvironmentColors.StatusBarDefaultBrushKey}}">
 						<controls:VsResizeGrip Name="ResizeGripControl" x:Uid="ResizeGripControl" DockPanel.Dock="Right" Padding="0" Cursor="SizeNWSE" VerticalAlignment="Bottom" />
-						<bmicc:WorkerThreadStatusBarContainer Name="StatusBarContainer" TextElement.Foreground="{DynamicResource {x:Static pui:EnvironmentColors.StatusBarDefaultTextBrushKey}}" TextElement.FontSize="{DynamicResource VsFont.EnvironmentFontSize}" TextElement.FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}" />
+						<DockPanel />
+						<!--<bmicc:WorkerThreadStatusBarContainer Name="StatusBarContainer" TextElement.Foreground="{DynamicResource {x:Static pui:EnvironmentColors.StatusBarDefaultTextBrushKey}}" TextElement.FontSize="{DynamicResource VsFont.EnvironmentFontSize}" TextElement.FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}" />-->
 					</DockPanel>
 				</Grid>
 			</wcp:WindowContentPresenter>
@@ -132,7 +142,9 @@
 				  ItemsSource="{Binding Themes}">
 		</ComboBox>
 		<wsc:DialogButton>Hello!</wsc:DialogButton>
-		<!--<Button Style="{StaticResource {x:Static vsfx:VsResourceKeys.ButtonStyleKey}}">Hello!</Button>
-		<CheckBox Style="{StaticResource {x:Static vsfx:VsResourceKeys.CheckBoxStyleKey}}">Hello!</CheckBox>-->
+		<Button>Default!</Button>
+		<CheckBox>Default!</CheckBox>
+		<Button Style="{DynamicResource VsButtonStyleKey}">Hello!</Button>
+		<CheckBox Style="{DynamicResource VsCheckBoxStyleKey}">Hello!</CheckBox>
 	</StackPanel>
 </vsc:CustomChromeWindow>
