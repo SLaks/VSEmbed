@@ -37,6 +37,9 @@ namespace VSThemeBrowser.VisualStudio {
 					{ typeof(SVsSettingsManager).GUID, new SettingsWrapper(esm) },
 					{ new Guid("45652379-D0E3-4EA0-8B60-F2579AA29C93"), new DummyWindowManager() },
 					// Activator.CreateInstance(Type.GetType("Microsoft.VisualStudio.Platform.WindowManagement.WindowManagerService, Microsoft.VisualStudio.Platform.WindowManagement, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"))
+
+					// Used by KnownUIContexts
+					{ typeof(IVsMonitorSelection).GUID, new DummyVsMonitorSelection() },
 				}
 			};
 
@@ -304,6 +307,44 @@ namespace VSThemeBrowser.VisualStudio {
 			}
 
 			public void _VtblGap1_3() { }
+		}
+	}
+
+	class DummyVsMonitorSelection : IVsMonitorSelection {
+		public int AdviseSelectionEvents(IVsSelectionEvents pSink, out uint pdwCookie) {
+			pdwCookie = 0;
+			return 0;
+		}
+
+		public int GetCmdUIContextCookie(ref Guid rguidCmdUI, out uint pdwCmdUICookie) {
+			pdwCmdUICookie = 0;
+			return 0;
+		}
+
+		public int GetCurrentElementValue(uint elementid, out object pvarValue) {
+			pvarValue = null;
+			return 0;
+		}
+
+		public int GetCurrentSelection(out IntPtr ppHier, out uint pitemid, out IVsMultiItemSelect ppMIS, out IntPtr ppSC) {
+			pitemid = 0;
+			ppHier = IntPtr.Zero;
+			ppMIS = null;
+			ppSC = IntPtr.Zero;
+			return 0;
+		}
+
+		public int IsCmdUIContextActive(uint dwCmdUICookie, out int pfActive) {
+			pfActive = 0;
+			return 0;
+		}
+
+		public int SetCmdUIContext(uint dwCmdUICookie, int fActive) {
+			return 0;
+		}
+
+		public int UnadviseSelectionEvents(uint dwCookie) {
+			return 0;
 		}
 	}
 }
