@@ -19,7 +19,7 @@ namespace VSThemeBrowser.Controls {
 			if (e.NewItems == null)
 				return;
 			foreach (var child in e.NewItems.OfType<ConditionalResourceDictionary>()) {
-				if (child.IsRelevant)
+				if (!child.IsRelevant)
 					child.Clear();
 			}
 		}
