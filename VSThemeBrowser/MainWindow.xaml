@@ -16,22 +16,26 @@
         mc:Ignorable="d"
         Title="Not Visual Studio!" Height="350" Width="525">
 	<vsc:CustomChromeWindow.Resources>
-		<localvs:ThemeColorsDictionary DesignerOnly="True">
-			<localvs:ThemeColorsDictionary.MergedDictionaries>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="/Microsoft.VisualStudio.Shell.UI.Internal;component/Themes/Generic.xaml" />
-				<ResourceDictionary Source="/Microsoft.VisualStudio.Platform.WindowManagement;component/Themes/Resources.xaml" />
-				<!-- On Dev14+, use the new global styles by default -->
-				<controls:ConditionalResourceDictionary MinVersion="14">
-					<controls:ConditionalResourceDictionary.MergedDictionaries>
-						<ResourceDictionary Source="/Microsoft.VisualStudio.Platform.WindowManagement;component/Themes/Resources.xaml" />
-					</controls:ConditionalResourceDictionary.MergedDictionaries>
-					<Style BasedOn="{StaticResource VsButtonStyleKey}"   x:Key="{x:Type Button}"   TargetType="Button"   />
-					<Style BasedOn="{StaticResource VsCheckBoxStyleKey}" x:Key="{x:Type CheckBox}" TargetType="CheckBox" />
-					<Style BasedOn="{StaticResource VsComboBoxStyleKey}" x:Key="{x:Type ComboBox}" TargetType="ComboBox" />
-				</controls:ConditionalResourceDictionary>
-				<!--<controls:ConditionalResourceDictionary MaxVersion="12" Source="VisualStudio/ComboBoxStyles.xaml" />-->
-			</localvs:ThemeColorsDictionary.MergedDictionaries>
-		</localvs:ThemeColorsDictionary>
+				<!--<ResourceDictionary Source="/Microsoft.VisualStudio.Platform.WindowManagement;component/Themes/Resources.xaml" />-->
+				<ResourceDictionary Source="VisualStudio/ComboBoxStyles.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+
+			<!-- TODO: Create themed styles for Dev12. -->
+			<Style x:Key="SLaks.ButtonStyleKey" TargetType="Button">
+				<Setter Property="Foreground" Value="Red" />
+			</Style>
+			<Style x:Key="SLaks.CheckBoxStyleKey" TargetType="CheckBox">
+				<Setter Property="Foreground" Value="Red" />
+			</Style>
+
+			<!-- Create default styles that inherit the standard styles (Dev14) or my styles (older versions) -->
+			<Style BasedOn="{StaticResource {x:Static localvs:ResourceKeys.ButtonStyleKey}}"   x:Key="{x:Type Button}"   TargetType="Button"   />
+			<Style BasedOn="{StaticResource {x:Static localvs:ResourceKeys.CheckBoxStyleKey}}" x:Key="{x:Type CheckBox}" TargetType="CheckBox" />
+			<Style BasedOn="{StaticResource {x:Static localvs:ResourceKeys.ComboBoxStyleKey}}" x:Key="{x:Type ComboBox}" TargetType="ComboBox" />
+		</ResourceDictionary>
 	</vsc:CustomChromeWindow.Resources>
 
 	<vsc:CustomChromeWindow.Style>
@@ -141,10 +145,7 @@
 				  SelectedItem="{Binding CurrentTheme}" DisplayMemberPath="Name"
 				  ItemsSource="{Binding Themes}">
 		</ComboBox>
-		<wsc:DialogButton>Hello!</wsc:DialogButton>
 		<Button>Default!</Button>
 		<CheckBox>Default!</CheckBox>
-		<Button Style="{DynamicResource VsButtonStyleKey}">Hello!</Button>
-		<CheckBox Style="{DynamicResource VsCheckBoxStyleKey}">Hello!</CheckBox>
 	</StackPanel>
 </vsc:CustomChromeWindow>

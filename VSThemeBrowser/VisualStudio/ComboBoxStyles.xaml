@@ -11,7 +11,7 @@
 		 I copied all styles that reference it directly, changed them to target ComboBox, and
 		 inherited all other resources directly from Shell.UI.Internal. -->
 
-	<Style x:Key="{x:Type ComboBox}" TargetType="{x:Type ComboBox}">
+	<Style x:Key="SLaks.ComboBoxStyleKey" TargetType="{x:Type ComboBox}">
 		<Setter Property="Control.Background" Value="#00FFFFFF" />
 		<Setter Property="AutomationProperties.Name" Value="{Binding Path=Text, Converter={StaticResource AccessKeyRemovingConverter}}" />
 		<Setter Property="FrameworkElement.FocusVisualStyle" Value="{StaticResource ComboBoxFocusVisual}" />
