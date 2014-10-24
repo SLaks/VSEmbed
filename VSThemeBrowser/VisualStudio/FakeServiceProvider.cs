@@ -28,7 +28,7 @@ namespace VSThemeBrowser.VisualStudio {
 				VsLoader.Initialize(new Version(12, 0, 0, 0));
 			}
 
-			var esm = ExternalSettingsManager.CreateForApplication(VsLoader.GetVersionExe(VsLoader.VsVersion), "Exp");	// FindVsVersions().LastOrDefault().ToString()));
+			var esm = ExternalSettingsManager.CreateForApplication(Path.Combine(VsLoader.GetVersionPath(VsLoader.VsVersion), "devenv.exe"), "Exp");	// FindVsVersions().LastOrDefault().ToString()));
 			var sp = new FakeServiceProvider {
 				serviceInstances =
 				{

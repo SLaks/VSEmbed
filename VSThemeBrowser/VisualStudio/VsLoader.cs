@@ -13,21 +13,44 @@ using Microsoft.Win32;
 namespace VSThemeBrowser.VisualStudio {
 	static class VsLoader {
 		public static IEnumerable<Version> FindVsVersions() {
+			// Grab every version of every SKU, sorted by SKU priority
+			// Then, filter out duplicate versions in later SKUs only.
+			return SkuKeyNames
+				.SelectMany(GetSkuVersions)
+				.Distinct()
+				.OrderBy(d => d);
+		}
+		private static IEnumerable<Version> GetSkuVersions(string sku) {
 			using (var software = Registry.LocalMachine.OpenSubKey("SOFTWARE"))
 			using (var ms = software.OpenSubKey("Microsoft"))
-			using (var vs = ms.OpenSubKey("VisualStudio"))
-				return vs.GetSubKeyNames()
+			using (var vs = ms.OpenSubKey(sku))
+				return vs == null ? new Version[0] : vs.GetSubKeyNames()
 						.Select(s => {
 							Version v;
 							Version.TryParse(s, out v);
 							return v;
 						})
-				.Where(d => d != null)
-				.OrderBy(d => d);
+						.Where(d => d != null);
 		}
 
-		public static string GetVersionExe(Version version) {
-			return Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\" + version.ToString(2) + @"\Setup\VS", "EnvironmentPath", null) as string;
+
+		/// <summary>
+		/// A list of key names for versions of Visual Studio which have the editor components 
+		/// necessary to create an EditorHost instance.  Listed in preference order.
+		/// Stolen from @JaredPar
+		/// </summary>
+		private static readonly string[] SkuKeyNames = {
+			"VisualStudio",	// Standard non-express SKU of Visual Studio
+			"WDExpress",	// Windows Desktop express
+			"VCSExpress",	// Visual C# express
+			"VCExpress",	// Visual C++ express
+			"VBExpress",	// Visual Basic Express
+		};
+
+		public static string GetVersionPath(Version version) {
+			return SkuKeyNames.Select(sku =>
+				Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\" + sku + @"\" + version.ToString(2), "InstallDir", null) as string
+			).FirstOrDefault(p => p != null);
 		}
 
 		public static void InitializeLatest() {
@@ -61,7 +84,7 @@ namespace VSThemeBrowser.VisualStudio {
 			try {
 				return Assembly.Load(name);
 			} catch (FileNotFoundException) {
-				var directory = Path.GetDirectoryName(GetVersionExe(VsVersion));
+				var directory = GetVersionPath(VsVersion);
 				if (name.Name.EndsWith(".resources"))
 					return LoadResourceDll(name, directory, name.CultureInfo)
 						?? LoadResourceDll(name, directory, name.CultureInfo.Parent);
