@@ -61,8 +61,9 @@ namespace VSThemeBrowser.VisualStudio {
 			if (VsVersion != null)
 				throw new InvalidOperationException("VsLoader cannot be initialized twice");
 			VsVersion = vsVersion;
+			TryLoadInteropAssembly(GetVersionPath(vsVersion));
 			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-		}
+        }
 
 		///<summary>The version of Visual Studio that will be loaded.  This cannot be changed, because the CLR caches assembly loads.</summary>
 		public static Version VsVersion { get; private set; }
@@ -96,6 +97,37 @@ namespace VSThemeBrowser.VisualStudio {
 			if (!File.Exists(dllPath))
 				return null;
 			return Assembly.LoadFile(dllPath);
+		}
+
+		/// <summary>
+		/// The interop assembly isn't included in the GAC and it doesn't offer any MEF components (it's
+		/// just a simple COM interop library).  Hence it needs to be loaded a bit specially.  Just find
+		/// the assembly on disk and hook into the resolve event.
+		/// Copied from @JaredPar's EditorUtils.
+		/// </summary>
+		private static bool TryLoadInteropAssembly(string installDirectory) {
+			const string interopName = "Microsoft.VisualStudio.Platform.VSEditor.Interop";
+			const string interopNameWithExtension = interopName + ".dll";
+			var interopAssemblyPath = Path.Combine(installDirectory, "PrivateAssemblies");
+			interopAssemblyPath = Path.Combine(interopAssemblyPath, interopNameWithExtension);
+			try {
+				var interopAssembly = Assembly.LoadFrom(interopAssemblyPath);
+				if (interopAssembly == null) {
+					return false;
+				}
+
+				var comparer = StringComparer.OrdinalIgnoreCase;
+				AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => {
+					if (comparer.Equals(e.Name, interopAssembly.FullName)) {
+						return interopAssembly;
+					}
+					return null;
+				};
+
+				return true;
+			} catch (Exception) {
+				return false;
+			}
 		}
 	}
 }
