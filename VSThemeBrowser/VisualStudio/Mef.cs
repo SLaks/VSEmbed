@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Text.Storage;
 
 namespace VSThemeBrowser.VisualStudio {
@@ -34,8 +35,11 @@ namespace VSThemeBrowser.VisualStudio {
 			// Include this DLL to get more EditorOptions values and the core editor
 			"Microsoft.VisualStudio.Text.UI.Wpf",
 
-			// SLaks: Needed for VsUndoHistoryRegistry, VsWpfKeyboardTrackingService, & probably others
-			"Microsoft.VisualStudio.Editor.Implementation"
+			// SLaks: Needed for VsUndoHistoryRegistry (which doesn't actually work), VsWpfKeyboardTrackingService, & probably others
+			"Microsoft.VisualStudio.Editor.Implementation",
+
+			// SLaks: Needed for IVsHierarchyItemManager, used by peek providers
+			"Microsoft.VisualStudio.Shell.TreeNavigation.HierarchyProvider"
 		};
 
 		// I need to specify a full name to load from the GAC.
@@ -51,9 +55,14 @@ namespace VSThemeBrowser.VisualStudio {
 			Container.ComposeExportedValue<SVsServiceProvider>(
 				new VsServiceProviderWrapper(ServiceProvider.GlobalProvider));
 
-
 			Container.ComposeExportedValue<IDataStorageService>(
 				new DataStorageService());
+
+			// Needed because VsUndoHistoryRegistry tries to create IOleUndoManager from ILocalRegistry, which I presumably cannot do.
+			Container.ComposeExportedValue((ITextUndoHistoryRegistry)
+                Activator.CreateInstance(
+					typeof(EditorUtils.EditorHost).Assembly
+						.GetType("EditorUtils.Implementation.BasicUndo.BasicTextUndoHistoryRegistry"), true));
 		}
 
 		// Microsoft.VisualStudio.Editor.Implementation.DataStorage uses COM services
