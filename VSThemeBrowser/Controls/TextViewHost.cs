@@ -16,10 +16,11 @@ namespace VSThemeBrowser.Controls {
 		public TextViewHost() {
 			var bufferFactory = Mef.Container.GetExportedValue<ITextBufferFactoryService>();
 			var editorFactory = Mef.Container.GetExportedValue<ITextEditorFactoryService>();
-			Content = TextView = editorFactory.CreateTextView(
+			TextView = editorFactory.CreateTextView(
 				bufferFactory.CreateTextBuffer(),
 				editorFactory.AllPredefinedRoles
 			);
+			Content = editorFactory.CreateTextViewHost(TextView, false).HostControl;
 		}
 
 		public string Text {
