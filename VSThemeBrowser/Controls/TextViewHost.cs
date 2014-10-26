@@ -34,6 +34,7 @@ namespace VSThemeBrowser.Controls {
 	class SimpleKeyProcessor : KeyProcessor {
 		readonly IWpfTextView textView;
 		readonly IEditorOperations editorOperations;
+		readonly ITextUndoHistory undoHistory;
 
 		readonly Dictionary<Tuple<ModifierKeys, Key>, Func<bool>> shortcuts = new Dictionary<Tuple<ModifierKeys, Key>, Func<bool>>();
 		#region Shortcuts
@@ -85,6 +86,24 @@ namespace VSThemeBrowser.Controls {
 			AddControlShiftCommand(Key.L, editorOperations.DeleteFullLine);
 			AddControlCommand(Key.T, editorOperations.TransposeCharacter);
 			AddControlShiftCommand(Key.T, editorOperations.TransposeWord);
+			
+			// There is currently no way for me to tell whether 
+			// a transaction is available without reflection.
+			Func<bool> undo = () => {
+				try {
+					undoHistory.Undo(1);
+					return true;
+				} catch { return false; }
+			};
+			Func<bool> redo = () => {
+				try {
+					undoHistory.Redo(1);
+					return true;
+				} catch { return false; }
+			};
+			AddControlCommand(Key.Z, undo);
+			AddControlCommand(Key.Y, redo);
+			AddControlShiftCommand(Key.Z, redo);
 		}
 
 		static Func<bool> WithTrue(Action method) { return () => { method(); return true; }; }
@@ -121,9 +140,10 @@ namespace VSThemeBrowser.Controls {
 		#endregion
 
 
-		public SimpleKeyProcessor(IWpfTextView textView, IEditorOperations editorOperations) {
+		public SimpleKeyProcessor(IWpfTextView textView, IEditorOperations editorOperations, ITextUndoHistory undoHistory) {
 			this.textView = textView;
 			this.editorOperations = editorOperations;
+			this.undoHistory = undoHistory;
 			AddShortcuts();
 		}
 

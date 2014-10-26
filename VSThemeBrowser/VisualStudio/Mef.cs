@@ -89,7 +89,7 @@ namespace VSThemeBrowser.VisualStudio {
 			[Import]
 			public ITextUndoHistoryRegistry UndoHistoryRegistry { get; set; }
 			public KeyProcessor GetAssociatedProcessor(IWpfTextView wpfTextView) {
-				return new SimpleKeyProcessor(wpfTextView, EditorOperationsFactory.GetEditorOperations(wpfTextView));
+				return new SimpleKeyProcessor(wpfTextView, EditorOperationsFactory.GetEditorOperations(wpfTextView), UndoHistoryRegistry.GetHistory(wpfTextView.TextBuffer));
 			}
 		}
 	}
