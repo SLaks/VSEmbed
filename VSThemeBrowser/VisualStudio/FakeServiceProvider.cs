@@ -23,17 +23,19 @@ using ServiceProviderRegistration = Microsoft.VisualStudio.Shell.ServiceProvider
 
 namespace VSThemeBrowser.VisualStudio {
 	class FakeServiceProvider : Microsoft.VisualStudio.OLE.Interop.IServiceProvider {
+		public static FakeServiceProvider Instance { get; private set; }
+
 		[SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "These objects become global and must not be disposed yet")]
 		public static void Initialize() {
 			if (ServiceProviderRegistration.GlobalProvider.GetService(typeof(SVsSettingsManager)) != null)
 				return;
 
-			if (VsLoader.VsVersion==null) {		// If the App() ctor didn't set this, we're in the designer
+			if (VsLoader.VsVersion == null) {		// If the App() ctor didn't set this, we're in the designer
 				VsLoader.Initialize(new Version(12, 0, 0, 0));
 			}
 
 			var esm = ExternalSettingsManager.CreateForApplication(Path.Combine(VsLoader.GetVersionPath(VsLoader.VsVersion), "devenv.exe"), "Exp");	// FindVsVersions().LastOrDefault().ToString()));
-			var sp = new FakeServiceProvider {
+			Instance = new FakeServiceProvider {
 				serviceInstances =
 				{
 					// Used by ServiceProvider
@@ -50,7 +52,7 @@ namespace VSThemeBrowser.VisualStudio {
 				}
 			};
 
-			ServiceProviderRegistration.CreateFromSetSite(sp);
+			ServiceProviderRegistration.CreateFromSetSite(Instance);
 
 			// The designer loads Microsoft.VisualStudio.Shell.XX.0,
 			// which we cannot reference directly (to avoid breaking
@@ -61,7 +63,7 @@ namespace VSThemeBrowser.VisualStudio {
 				if (type == null)
 					continue;
 				type.GetMethod("CreateFromSetSite", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static)
-					.Invoke(null, new[] { sp });
+					.Invoke(null, new[] { Instance });
 			}
 		}
 
