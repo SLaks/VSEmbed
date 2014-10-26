@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -15,7 +12,6 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using Microsoft.Internal.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
@@ -23,19 +19,17 @@ using ServiceProviderRegistration = Microsoft.VisualStudio.Shell.ServiceProvider
 
 namespace VSThemeBrowser.VisualStudio {
 	class FakeServiceProvider : Microsoft.VisualStudio.OLE.Interop.IServiceProvider {
-		public static FakeServiceProvider Instance { get; private set; }
-
 		[SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "These objects become global and must not be disposed yet")]
 		public static void Initialize() {
 			if (ServiceProviderRegistration.GlobalProvider.GetService(typeof(SVsSettingsManager)) != null)
 				return;
 
-			if (VsLoader.VsVersion == null) {		// If the App() ctor didn't set this, we're in the designer
+			if (VsLoader.VsVersion==null) {		// If the App() ctor didn't set this, we're in the designer
 				VsLoader.Initialize(new Version(12, 0, 0, 0));
 			}
 
 			var esm = ExternalSettingsManager.CreateForApplication(Path.Combine(VsLoader.GetVersionPath(VsLoader.VsVersion), "devenv.exe"), "Exp");	// FindVsVersions().LastOrDefault().ToString()));
-			Instance = new FakeServiceProvider {
+			var sp = new FakeServiceProvider {
 				serviceInstances =
 				{
 					// Used by ServiceProvider
@@ -46,13 +40,10 @@ namespace VSThemeBrowser.VisualStudio {
 
 					// Used by KnownUIContexts
 					{ typeof(IVsMonitorSelection).GUID, new DummyVsMonitorSelection() },
-
-					// Used by editor components
-					{ typeof(SComponentModel).GUID, new MefComponentModel() },
 				}
 			};
 
-			ServiceProviderRegistration.CreateFromSetSite(Instance);
+			ServiceProviderRegistration.CreateFromSetSite(sp);
 
 			// The designer loads Microsoft.VisualStudio.Shell.XX.0,
 			// which we cannot reference directly (to avoid breaking
@@ -63,7 +54,7 @@ namespace VSThemeBrowser.VisualStudio {
 				if (type == null)
 					continue;
 				type.GetMethod("CreateFromSetSite", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static)
-					.Invoke(null, new[] { Instance });
+					.Invoke(null, new[] { sp });
 			}
 		}
 
@@ -317,18 +308,6 @@ namespace VSThemeBrowser.VisualStudio {
 
 			public void _VtblGap1_3() { }
 		}
-
-	}
-	class MefComponentModel : IComponentModel {
-		public ComposablePartCatalog DefaultCatalog { get { return Mef.Catalog; } }
-
-		public ICompositionService DefaultCompositionService { get { return Mef.Container; } }
-		public ExportProvider DefaultExportProvider { get { return Mef.Container; } }
-
-		public ComposablePartCatalog GetCatalog(string catalogName) { return DefaultCatalog; }
-
-		public IEnumerable<T> GetExtensions<T>() where T : class { return DefaultExportProvider.GetExportedValues<T>(); }
-		public T GetService<T>() where T : class { return DefaultExportProvider.GetExportedValue<T>(); }
 	}
 
 	class DummyVsMonitorSelection : IVsMonitorSelection {
