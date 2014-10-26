@@ -66,44 +66,13 @@ namespace VSThemeBrowser.VisualStudio {
 		}
 
 		// Microsoft.VisualStudio.Editor.Implementation.DataStorage uses COM services
-		// that read the user's color settings, which I cannot easily duplicate.
+		// that read the user's color settings, which I cannot easily duplicate.  The
+		// editor reads MEF-exported defaults in EditorFormatMap, so I do not need to
+		// implement this at all unless I want to allow user customization.
 		class SimpleDataStorage : IDataStorage {
 			public bool TryGetItemValue(string itemKey, out ResourceDictionary itemValue) {
-				itemValue = new ResourceDictionary();
-				var SetBackground = CreateSetter(itemValue, "Background");
-				var SetForeground = CreateSetter(itemValue, "Foreground");
-
-				// TODO: Use MEF-exported default formats; copy from MEFFontAndColorCategory
-				switch (itemKey) {
-					case "TextView Background":
-						SetBackground(SystemColors.WindowColor);
-						break;
-					case "Plain Text":
-						SetForeground(SystemColors.WindowTextColor);
-						break;
-					case "Selected Text":
-						SetBackground(SystemColors.HighlightColor);
-						SetForeground(SystemColors.HighlightTextColor);
-						break;
-					case "Inactive Selected Text":
-						SetBackground(SystemColors.ControlColor);
-						SetForeground(SystemColors.ControlTextColor);
-						break;
-					default:
-						Debug.WriteLine("Returning unknown color key " + itemKey);
-						SetBackground(Colors.Beige);
-						SetForeground(Colors.MidnightBlue);
-						break;
-				}
-
-				return true;
-			}
-
-			static Action<Color> CreateSetter(ResourceDictionary dict, string prefix) {
-				return c => {
-					dict[prefix] = new SolidColorBrush(c);
-					dict[prefix + "Color"] = c;
-				};
+				itemValue = null;
+				return false;
 			}
 		}
 		[Export(typeof(IDataStorageService))]
