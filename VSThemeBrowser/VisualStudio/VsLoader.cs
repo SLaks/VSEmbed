@@ -111,7 +111,7 @@ namespace VSThemeBrowser.VisualStudio {
 			var interopAssemblyPath = Path.Combine(installDirectory, "PrivateAssemblies");
 			interopAssemblyPath = Path.Combine(interopAssemblyPath, interopNameWithExtension);
 			try {
-				var interopAssembly = Assembly.LoadFrom(interopAssemblyPath);
+				var interopAssembly = Assembly.LoadFile(interopAssemblyPath);
 				if (interopAssembly == null) {
 					return false;
 				}

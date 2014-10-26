@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text.Storage;
 
 namespace VSThemeBrowser.VisualStudio {
 	///<summary>Creates the MEF composition container used by the editor services.</summary>
@@ -37,14 +41,57 @@ namespace VSThemeBrowser.VisualStudio {
 		// I need to specify a full name to load from the GAC.
 		// The version is added by my AssemblyResolve handler.
 		const string FullNameSuffix = ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL";
-        static IEnumerable<ComposablePartCatalog> GetCatalogs() {
+		static IEnumerable<ComposablePartCatalog> GetCatalogs() {
 			return EditorComponents.Select(c => new AssemblyCatalog(Assembly.Load(c + FullNameSuffix)));
 		}
-		public static readonly CompositionContainer Container = 
+		public static readonly CompositionContainer Container =
 			new CompositionContainer(new AggregateCatalog(GetCatalogs()));
 		static Mef() {
+			// Copied from Microsoft.VisualStudio.ComponentModelHost.ComponentModel.DefaultCompositionContainer
 			Container.ComposeExportedValue<SVsServiceProvider>(
 				new VsServiceProviderWrapper(ServiceProvider.GlobalProvider));
+
+
+			Container.ComposeExportedValue<IDataStorageService>(
+				new DataStorageService());
+		}
+
+		// Microsoft.VisualStudio.Editor.Implementation.DataStorage uses COM services
+		// that read the user's color settings, which I cannot easily duplicate.
+		class SimpleDataStorage : IDataStorage {
+			public bool TryGetItemValue(string itemKey, out ResourceDictionary itemValue) {
+				itemValue = new ResourceDictionary();
+				var SetBackground = CreateSetter(itemValue, "Background");
+				var SetForeground = CreateSetter(itemValue, "Foreground");
+
+				switch (itemKey) {
+					case "TextView Background":
+						SetBackground(Colors.White);
+						break;
+					case "Plain Text":
+						SetBackground(Colors.Black);
+						break;
+					default:
+						Debug.WriteLine("Returning unknown color key " + itemKey);
+						SetBackground(Colors.Beige);
+						SetForeground(Colors.MidnightBlue);
+						break;
+				}
+
+				return true;
+			}
+
+			static Action<Color> CreateSetter(ResourceDictionary dict, string prefix) {
+				return c => {
+					dict[prefix] = new SolidColorBrush(c);
+					dict[prefix + "Color"] = c;
+				};
+			}
+		}
+		[Export(typeof(IDataStorageService))]
+		internal sealed class DataStorageService : IDataStorageService {
+			readonly IDataStorage instance = new SimpleDataStorage();
+			public IDataStorage GetDataStorage(string storageKey) { return instance; }
 		}
 	}
 }
