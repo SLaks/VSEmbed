@@ -11,8 +11,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Text.Storage;
+using Microsoft.VisualStudio.Utilities;
+using VSThemeBrowser.Controls;
 
 namespace VSThemeBrowser.VisualStudio {
 	///<summary>Creates the MEF composition container used by the editor services.</summary>
@@ -77,6 +80,20 @@ namespace VSThemeBrowser.VisualStudio {
 		sealed class DataStorageService : IDataStorageService {
 			readonly IDataStorage instance = new SimpleDataStorage();
 			public IDataStorage GetDataStorage(string storageKey) { return instance; }
+		}
+
+		[Export(typeof(IKeyProcessorProvider))]
+		[TextViewRole(PredefinedTextViewRoles.Interactive)]
+		[ContentType("text")]
+		[Name("Simple KeyProcessor")]
+		sealed class SimpleKeyProcessorProvider : IKeyProcessorProvider {
+			[Import]
+			public IEditorOperationsFactoryService EditorOperationsFactory { get; set; }
+			[Import]
+			public ITextUndoHistoryRegistry UndoHistoryRegistry { get; set; }
+			public KeyProcessor GetAssociatedProcessor(IWpfTextView wpfTextView) {
+				return new SimpleKeyProcessor(wpfTextView, EditorOperationsFactory.GetEditorOperations(wpfTextView));
+			}
 		}
 	}
 }
