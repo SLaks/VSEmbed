@@ -60,10 +60,7 @@ namespace VSThemeBrowser.VisualStudio {
 				new VsServiceProviderWrapper(ServiceProvider.GlobalProvider));
 
 			// Needed because VsUndoHistoryRegistry tries to create IOleUndoManager from ILocalRegistry, which I presumably cannot do.
-			Container.ComposeExportedValue((ITextUndoHistoryRegistry)
-				Activator.CreateInstance(
-					typeof(EditorUtils.EditorHost).Assembly
-						.GetType("EditorUtils.Implementation.BasicUndo.BasicTextUndoHistoryRegistry"), true));
+			Container.ComposeExportedValue((ITextUndoHistoryRegistry)EditorUtils.EditorUtilsFactory.CreateBasicUndoHistoryRegistry());
 		}
 
 		// Microsoft.VisualStudio.Editor.Implementation.DataStorage uses COM services
