@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
+using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -12,6 +15,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using Microsoft.Internal.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
@@ -40,6 +44,9 @@ namespace VSThemeBrowser.VisualStudio {
 
 					// Used by KnownUIContexts
 					{ typeof(IVsMonitorSelection).GUID, new DummyVsMonitorSelection() },
+
+					// Used by editor components
+					{ typeof(SComponentModel).GUID, new MefComponentModel() },
 				}
 			};
 
@@ -308,6 +315,18 @@ namespace VSThemeBrowser.VisualStudio {
 
 			public void _VtblGap1_3() { }
 		}
+
+	}
+	class MefComponentModel : IComponentModel {
+		public ComposablePartCatalog DefaultCatalog { get { return Mef.Catalog; } }
+
+		public ICompositionService DefaultCompositionService { get { return Mef.Container; } }
+		public ExportProvider DefaultExportProvider { get { return Mef.Container; } }
+
+		public ComposablePartCatalog GetCatalog(string catalogName) { return DefaultCatalog; }
+
+		public IEnumerable<T> GetExtensions<T>() where T : class { return DefaultExportProvider.GetExportedValues<T>(); }
+		public T GetService<T>() where T : class { return DefaultExportProvider.GetExportedValue<T>(); }
 	}
 
 	class DummyVsMonitorSelection : IVsMonitorSelection {

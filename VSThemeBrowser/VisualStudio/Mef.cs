@@ -48,8 +48,8 @@ namespace VSThemeBrowser.VisualStudio {
 		static IEnumerable<ComposablePartCatalog> GetCatalogs() {
 			return EditorComponents.Select(c => new AssemblyCatalog(Assembly.Load(c + FullNameSuffix)));
 		}
-		public static readonly CompositionContainer Container =
-			new CompositionContainer(new AggregateCatalog(GetCatalogs()));
+		public static readonly ComposablePartCatalog Catalog = new AggregateCatalog(GetCatalogs());
+		public static readonly CompositionContainer Container = new CompositionContainer(Catalog);
 		static Mef() {
 			// Copied from Microsoft.VisualStudio.ComponentModelHost.ComponentModel.DefaultCompositionContainer
 			Container.ComposeExportedValue<SVsServiceProvider>(
