@@ -46,7 +46,8 @@ namespace VSThemeBrowser.VisualStudio {
 		// The version is added by my AssemblyResolve handler.
 		const string FullNameSuffix = ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL";
 		static IEnumerable<ComposablePartCatalog> GetCatalogs() {
-			return EditorComponents.Select(c => new AssemblyCatalog(Assembly.Load(c + FullNameSuffix)));
+			return EditorComponents.Select(c => new AssemblyCatalog(Assembly.Load(c + FullNameSuffix)))
+					.Concat(new[] { new AssemblyCatalog(typeof(Mef).Assembly) });
 		}
 		public static readonly CompositionContainer Container =
 			new CompositionContainer(new AggregateCatalog(GetCatalogs()));
@@ -55,12 +56,9 @@ namespace VSThemeBrowser.VisualStudio {
 			Container.ComposeExportedValue<SVsServiceProvider>(
 				new VsServiceProviderWrapper(ServiceProvider.GlobalProvider));
 
-			Container.ComposeExportedValue<IDataStorageService>(
-				new DataStorageService());
-
 			// Needed because VsUndoHistoryRegistry tries to create IOleUndoManager from ILocalRegistry, which I presumably cannot do.
 			Container.ComposeExportedValue((ITextUndoHistoryRegistry)
-                Activator.CreateInstance(
+				Activator.CreateInstance(
 					typeof(EditorUtils.EditorHost).Assembly
 						.GetType("EditorUtils.Implementation.BasicUndo.BasicTextUndoHistoryRegistry"), true));
 		}
@@ -69,14 +67,14 @@ namespace VSThemeBrowser.VisualStudio {
 		// that read the user's color settings, which I cannot easily duplicate.  The
 		// editor reads MEF-exported defaults in EditorFormatMap, so I do not need to
 		// implement this at all unless I want to allow user customization.
-		class SimpleDataStorage : IDataStorage {
+		sealed class SimpleDataStorage : IDataStorage {
 			public bool TryGetItemValue(string itemKey, out ResourceDictionary itemValue) {
 				itemValue = null;
 				return false;
 			}
 		}
 		[Export(typeof(IDataStorageService))]
-		internal sealed class DataStorageService : IDataStorageService {
+		sealed class DataStorageService : IDataStorageService {
 			readonly IDataStorage instance = new SimpleDataStorage();
 			public IDataStorage GetDataStorage(string storageKey) { return instance; }
 		}
