@@ -73,12 +73,21 @@ namespace VSThemeBrowser.VisualStudio {
 				var SetBackground = CreateSetter(itemValue, "Background");
 				var SetForeground = CreateSetter(itemValue, "Foreground");
 
+				// TODO: Use MEF-exported default formats; copy from MEFFontAndColorCategory
 				switch (itemKey) {
 					case "TextView Background":
-						SetBackground(Colors.White);
+						SetBackground(SystemColors.WindowColor);
 						break;
 					case "Plain Text":
-						SetBackground(Colors.Black);
+						SetForeground(SystemColors.WindowTextColor);
+						break;
+					case "Selected Text":
+						SetBackground(SystemColors.HighlightColor);
+						SetForeground(SystemColors.HighlightTextColor);
+						break;
+					case "Inactive Selected Text":
+						SetBackground(SystemColors.ControlColor);
+						SetForeground(SystemColors.ControlTextColor);
 						break;
 					default:
 						Debug.WriteLine("Returning unknown color key " + itemKey);
