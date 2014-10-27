@@ -147,6 +147,6 @@
 		</ComboBox>
 		<Button>Default!</Button>
 		<CheckBox>Default!</CheckBox>
-		<controls:TextViewHost Text="Hi, everyone!" />
+		<controls:TextViewHost Text="Hi, everyone!" ContentType="CSharp" />
 	</StackPanel>
 </vsc:CustomChromeWindow>

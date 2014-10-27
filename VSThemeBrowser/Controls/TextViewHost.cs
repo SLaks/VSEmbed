@@ -8,6 +8,7 @@ using System.Windows.Input;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
+using Microsoft.VisualStudio.Utilities;
 using VSThemeBrowser.VisualStudio;
 
 namespace VSThemeBrowser.Controls {
@@ -27,6 +28,13 @@ namespace VSThemeBrowser.Controls {
 			get { return TextView.TextSnapshot.GetText(); }
 			set {
 				TextView.TextBuffer.Replace(new Span(0, TextView.TextSnapshot.Length), value);
+			}
+		}
+		public string ContentType {
+			get { return TextView.TextBuffer.ContentType.TypeName; }
+			set {
+				var contentType = Mef.Container.GetExportedValue<IContentTypeRegistryService>().GetContentType(value);
+				TextView.TextBuffer.ChangeContentType(contentType, null);
 			}
 		}
 	}
@@ -86,7 +94,7 @@ namespace VSThemeBrowser.Controls {
 			AddControlShiftCommand(Key.L, editorOperations.DeleteFullLine);
 			AddControlCommand(Key.T, editorOperations.TransposeCharacter);
 			AddControlShiftCommand(Key.T, editorOperations.TransposeWord);
-			
+
 			// There is currently no way for me to tell whether 
 			// a transaction is available without reflection.
 			Func<bool> undo = () => {
