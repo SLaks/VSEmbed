@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -50,8 +51,17 @@ namespace VSThemeBrowser.VisualStudio {
 		const string FullNameSuffix = ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL";
 		static IEnumerable<ComposablePartCatalog> GetCatalogs() {
 			return EditorComponents.Select(c => new AssemblyCatalog(Assembly.Load(c + FullNameSuffix)))
+					.Concat(GetRoslynCatalogs())
 					.Concat(new[] { new AssemblyCatalog(typeof(Mef).Assembly) });
 		}
+		static IEnumerable<ComposablePartCatalog> GetRoslynCatalogs() {
+			if (VsLoader.RoslynAssemblyPath == null)
+				return new ComposablePartCatalog[0];
+			return Directory.EnumerateFiles(VsLoader.RoslynAssemblyPath, "Microsoft.CodeAnalysis*.dll")	// Leave out the . to catch Microsoft.CodeAnalysis.dll too
+				.Select(p => new AssemblyCatalog(Assembly.LoadFile(p)))
+				.Concat(new[] { new AssemblyCatalog(Assembly.Load("Microsoft.VisualStudio.LanguageServices")) });
+		}
+
 		public static readonly CompositionContainer Container =
 			new CompositionContainer(new AggregateCatalog(GetCatalogs()));
 		static Mef() {

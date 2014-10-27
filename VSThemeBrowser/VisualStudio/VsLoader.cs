@@ -62,14 +62,17 @@ namespace VSThemeBrowser.VisualStudio {
 				throw new InvalidOperationException("VsLoader cannot be initialized twice");
 			VsVersion = vsVersion;
 			TryLoadInteropAssembly(GetVersionPath(vsVersion));
-			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-        }
+			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve_VS;
+
+			if (RoslynAssemblyPath != null)
+				AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve_Roslyn;
+		}
 
 		///<summary>The version of Visual Studio that will be loaded.  This cannot be changed, because the CLR caches assembly loads.</summary>
 		public static Version VsVersion { get; private set; }
 
 		static readonly Regex versionMatcher = new Regex(@"(?<=\.)\d+\.0$");
-		static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args) {
+		static Assembly CurrentDomain_AssemblyResolve_VS(object sender, ResolveEventArgs args) {
 			if (!args.Name.StartsWith("Microsoft.VisualStudio"))
 				return null;
 
@@ -97,6 +100,29 @@ namespace VSThemeBrowser.VisualStudio {
 			if (!File.Exists(dllPath))
 				return null;
 			return Assembly.LoadFile(dllPath);
+		}
+
+		public static string RoslynAssemblyPath {
+			get {
+				// TODO: Use Roslyn Preview in Dev12
+				if (VsVersion.Major == 14)
+					return Path.Combine(GetVersionPath(VsVersion), "PrivateAssemblies");
+				return null;	// TODO: Predict GAC / versioning for Dev15
+			}
+		}
+		static readonly string[] RoslynAssemblyPrefixes = {
+			"Microsoft.CodeAnalysis",
+			"System.Reflection.Metadata",
+			"Microsoft.VisualStudio.LanguageServices",
+			"Esent.Interop"
+		};
+		static Assembly CurrentDomain_AssemblyResolve_Roslyn(object sender, ResolveEventArgs args) {
+			if (!RoslynAssemblyPrefixes.Any(args.Name.StartsWith))
+				return null;
+
+			Debug.WriteLine("Redirecting load of " + args.Name + ",\tfrom " + (args.RequestingAssembly == null ? "(unknown)" : args.RequestingAssembly.FullName));
+
+			return Assembly.LoadFile(Path.Combine(RoslynAssemblyPath, new AssemblyName(args.Name).Name + ".dll"));
 		}
 
 		/// <summary>
