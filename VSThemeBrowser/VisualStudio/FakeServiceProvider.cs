@@ -50,6 +50,12 @@ namespace VSThemeBrowser.VisualStudio {
 				}
 			};
 
+			if (VsLoader.RoslynAssemblyPath != null) {
+
+				// Key is SVsLog, in a private PIA
+				sp.serviceInstances.Add(new Guid("2508FDF0-EF80-4366-878E-C9F024B8D981"), RoslynSqmLoader.TryGetSqmService());
+			}
+
 			ServiceProviderRegistration.CreateFromSetSite(sp);
 
 			// The designer loads Microsoft.VisualStudio.Shell.XX.0,
@@ -64,6 +70,54 @@ namespace VSThemeBrowser.VisualStudio {
 					.Invoke(null, new[] { sp });
 			}
 		}
+		static class RoslynSqmLoader {
+			//static readonly Type queryServiceDelegateType = Type.GetType("Microsoft.VisualStudio.Shell.Interop.SqmServiceProvider+QueryServiceDelegate, Microsoft.CodeAnalysis.Desktop");
+			private delegate bool QueryServiceDelegate([In]ref Guid rsid, [In]ref Guid riid, [Out][MarshalAs(UnmanagedType.IUnknown)]out object vssqm);
+			private static Lazy<QueryServiceDelegate> queryService = new Lazy<QueryServiceDelegate>(TryGetSqmServiceDelegate, true);
+
+			[DllImport("kernel32.dll")]
+			private static extern IntPtr GetProcAddress(IntPtr moduleHandle, String procName);
+
+			[DllImport("kernel32.dll", SetLastError = true)]
+			private static extern IntPtr LoadLibrary(String libPath);
+
+			// Copied from http://source.roslyn.codeplex.com/#Microsoft.CodeAnalysis.Desktop/SqmServiceProvider.cs
+			// Changed to load vssqmmulti.dll from VS directory
+			private static QueryServiceDelegate TryGetSqmServiceDelegate() {
+				try {
+					IntPtr vssqmdll = IntPtr.Zero;
+					string vssqmpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "MSBuild", VsLoader.VsVersion.ToString(2), "Bin");
+					if (Environment.Is64BitProcess) {
+						vssqmpath = Path.Combine(vssqmpath, @"sqmamd64\vssqmmulti.dll");
+					} else {
+						vssqmpath = Path.Combine(vssqmpath, @"sqmx86\vssqmmulti.dll");
+					}
+					vssqmdll = LoadLibrary(vssqmpath);
+					if (vssqmdll != IntPtr.Zero) {
+						IntPtr queryServicePtr = GetProcAddress(vssqmdll, "QueryService");
+						return (QueryServiceDelegate)Marshal.GetDelegateForFunctionPointer(queryServicePtr, typeof(QueryServiceDelegate));
+					}
+				} catch (Exception e) {
+					Debug.Assert(false, string.Format("Could not get dll entry point: {0}", e.ToString()));
+				}
+				return null;
+			}
+			public static object TryGetSqmService() {
+				object result = null;
+				Guid rsid = new Guid("2508FDF0-EF80-4366-878E-C9F024B8D981");
+				Guid riid = new Guid("B17A7D4A-C1A3-45A2-B916-826C3ABA067E");
+				if (queryService.Value != null) {
+					try {
+						queryService.Value(ref rsid, ref riid, out result);
+					} catch (Exception e) {
+						Debug.Assert(false, string.Format("Could not get SQM service or have SQM related errors: {0}", e.ToString()));
+						return null;
+					}
+				}
+				return result;
+			}
+		}
+
 
 		readonly Dictionary<Guid, object> serviceInstances = new Dictionary<Guid, object>();
 
