@@ -59,7 +59,8 @@ namespace VSThemeBrowser.VisualStudio {
 				return new ComposablePartCatalog[0];
 			return Directory.EnumerateFiles(VsLoader.RoslynAssemblyPath, "Microsoft.CodeAnalysis*.dll")	// Leave out the . to catch Microsoft.CodeAnalysis.dll too
 				.Select(p => new AssemblyCatalog(Assembly.LoadFile(p)))
-				.Concat(new[] { new AssemblyCatalog(Assembly.Load("Microsoft.VisualStudio.LanguageServices")) });
+				.Concat(new[] { "Microsoft.VisualStudio.LanguageServices", "Microsoft.VisualStudio.LanguageServices.Implementation" }
+						.Select(c => new AssemblyCatalog(Assembly.Load(c))));
 		}
 
 		public static readonly CompositionContainer Container =
