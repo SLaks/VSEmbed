@@ -11,6 +11,7 @@ using System.Windows.Media;
 using Microsoft.Internal.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using VSThemeBrowser.Controls;
 
 namespace VSThemeBrowser.VisualStudio {
@@ -22,7 +23,7 @@ namespace VSThemeBrowser.VisualStudio {
 		dynamic currentTheme;
 		readonly dynamic service;
 		public ThemeColorsDictionary() {
-			if (ServiceProvider.GlobalProvider.GetService(new Guid("FD57C398-FDE3-42c2-A358-660F269CBE43")) != null)
+			if (ServiceProvider.GlobalProvider.GetService(typeof(SVsFrameworkMultiTargeting)) != null)
 				return;	// Do nothing when hosted in VS
 						//AssemblyResolverHack.AddHandler();
 			FakeServiceProvider.Initialize();
