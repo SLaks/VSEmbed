@@ -16,6 +16,7 @@ using System.Windows.Controls.Primitives;
 using Microsoft.Internal.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Feedback.Interop;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
@@ -47,6 +48,7 @@ namespace VSThemeBrowser.VisualStudio {
 
 					// Used by Roslyn (really!)
 					{ typeof(SComponentModel).GUID, new MefComponentModel() },
+					{ new Guid("0BB1FA06-C83E-4EAA-99AF-0B67B2D8F90B"), new VsFeedbackProfile() }
 				}
 			};
 
@@ -369,6 +371,10 @@ namespace VSThemeBrowser.VisualStudio {
 
 			public void _VtblGap1_3() { }
 		}
+
+		class VsFeedbackProfile : IVsFeedbackProfile {
+			public bool IsMicrosoftInternal { get { return true; } }	// My usage does not reflect anything remotely normal
+		}
 	}
 
 	class MefComponentModel : IComponentModel {
@@ -420,7 +426,17 @@ namespace VSThemeBrowser.VisualStudio {
 		}
 	}
 }
-
+namespace Microsoft.VisualStudio.Feedback.Interop {
+	[CompilerGenerated, Guid("26E7ECA7-4DB3-49AD-B478-33FCF05F3995"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), TypeIdentifier]
+	[ComImport]
+	public interface IVsFeedbackProfile {
+		[DispId(1610678272)]
+		bool IsMicrosoftInternal {
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+	}
+}
 namespace Microsoft.Internal.VisualStudio.Shell.Interop {
 	[CompilerGenerated, Guid("D73DC67C-3E91-4073-9A5E-5D09AA74529B"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), TypeIdentifier]
 	[ComImport]
