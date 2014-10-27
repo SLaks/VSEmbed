@@ -63,8 +63,9 @@ namespace VSThemeBrowser.VisualStudio {
 						.Select(c => new AssemblyCatalog(Assembly.Load(c))));
 		}
 
-		public static readonly CompositionContainer Container =
-			new CompositionContainer(new AggregateCatalog(GetCatalogs()));
+		public static readonly ComposablePartCatalog Catalog = new AggregateCatalog(GetCatalogs());
+		public static readonly CompositionContainer Container = new CompositionContainer(Catalog);
+
 		static Mef() {
 			// Copied from Microsoft.VisualStudio.ComponentModelHost.ComponentModel.DefaultCompositionContainer
 			Container.ComposeExportedValue<SVsServiceProvider>(
