@@ -33,7 +33,8 @@ namespace VSThemeBrowser.VisualStudio {
 				VsLoader.Initialize(new Version(12, 0, 0, 0));
 			}
 
-			var esm = ExternalSettingsManager.CreateForApplication(Path.Combine(VsLoader.GetVersionPath(VsLoader.VsVersion), "devenv.exe"), "Exp");	// FindVsVersions().LastOrDefault().ToString()));
+			var hive = "Exp";
+			var esm = ExternalSettingsManager.CreateForApplication(Path.Combine(VsLoader.GetVersionPath(VsLoader.VsVersion), "devenv.exe"), hive);
 			var sp = new FakeServiceProvider {
 				serviceInstances =
 				{
@@ -47,6 +48,7 @@ namespace VSThemeBrowser.VisualStudio {
 					{ typeof(IVsMonitorSelection).GUID, new DummyVsMonitorSelection() },
 
 					// Used by Roslyn (really!)
+					{ typeof(SLocalRegistry).GUID, new FakeLocalRegistry(VsLoader.VsVersion, hive) },
 					{ typeof(SComponentModel).GUID, new MefComponentModel() },
 					{ new Guid("0BB1FA06-C83E-4EAA-99AF-0B67B2D8F90B"), new VsFeedbackProfile() }
 				}
@@ -60,6 +62,8 @@ namespace VSThemeBrowser.VisualStudio {
 
 				uint sessionHandle;
 				sqm.BeginSession(775u, false, out sessionHandle);
+				var gsg = Guid.NewGuid();
+				sqm.SetGlobalSessionGuid(ref gsg);
 			}
 
 			ServiceProviderRegistration.CreateFromSetSite(sp);
@@ -147,6 +151,44 @@ namespace VSThemeBrowser.VisualStudio {
 					Marshal.Release(unk);
 			}
 			return VSConstants.S_OK;
+		}
+
+		class FakeLocalRegistry : ILocalRegistry4 {
+			readonly string version;
+			public FakeLocalRegistry(Version version, string hive) {
+				this.version = version.ToString(2) + hive;
+			}
+			public int GetLocalRegistryRootEx(uint dwRegType, out uint pdwRegRootHandle, out string pbstrRoot) {
+				var type = (__VsLocalRegistryType)dwRegType;
+				pdwRegRootHandle = unchecked((uint)__VsLocalRegistryRootHandle.RegHandle_CurrentUser);
+				switch (type) {
+					case __VsLocalRegistryType.RegType_UserSettings:
+						pbstrRoot = @"HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\" + version;
+						return 0;
+
+					case __VsLocalRegistryType.RegType_Configuration:
+						pbstrRoot = @"HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\" + version + "_Config";
+						return 0;
+					case __VsLocalRegistryType.RegType_PrivateConfig:
+					case __VsLocalRegistryType.RegType_SessionSettings:
+					case __VsLocalRegistryType.RegType_NewUserSettings:
+					default:
+						pbstrRoot = null;
+						return VSConstants.E_NOTIMPL;
+				}
+			}
+
+			public int RegisterClassObject(ref Guid rclsid, out uint pdwCookie) {
+				throw new NotImplementedException();
+			}
+
+			public int RegisterInterface(ref Guid riid) {
+				throw new NotImplementedException();
+			}
+
+			public int RevokeClassObject(uint dwCookie) {
+				throw new NotImplementedException();
+			}
 		}
 
 		class SettingsWrapper : IVsSettingsManager, IDisposable {
