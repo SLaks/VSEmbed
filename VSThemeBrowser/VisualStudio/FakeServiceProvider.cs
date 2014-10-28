@@ -57,7 +57,8 @@ namespace VSThemeBrowser.VisualStudio {
 
 			if (VsLoader.RoslynAssemblyPath != null) {
 				// Key is SVsLog, in a private PIA
-				sp.serviceInstances.Add(new Guid("2508FDF0-EF80-4366-878E-C9F024B8D981"), new VeryFakeSqm());
+				var targetInterface = Type.GetType("Microsoft.VisualStudio.Shell.Interop.IVsSqmMulti, Microsoft.VisualStudio.LanguageServices");
+                sp.serviceInstances.Add(new Guid("2508FDF0-EF80-4366-878E-C9F024B8D981"), new InterfaceShimProxy(targetInterface, new VeryFakeSqm()).GetTransparentProxy());
 			}
 
 			ServiceProviderRegistration.CreateFromSetSite(sp);

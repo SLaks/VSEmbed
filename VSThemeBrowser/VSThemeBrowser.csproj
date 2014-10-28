@@ -118,6 +118,7 @@
     <Compile Include="Controls\ConditionalResourceDictionary.cs" />
     <Compile Include="Controls\TextViewHost.cs" />
     <Compile Include="VisualStudio\Mef.cs" />
+    <Compile Include="VisualStudio\InterfaceShimProxy.cs" />
     <Compile Include="VisualStudio\ResourceKeys.cs" />
     <Compile Include="VisualStudio\ThemeColorsDictionary.cs.cs" />
     <Compile Include="VisualStudio\FakeServiceProvider.cs" />
