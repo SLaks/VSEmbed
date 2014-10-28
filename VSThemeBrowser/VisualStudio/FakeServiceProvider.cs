@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using Microsoft.Internal.VisualStudio.Shell.Interop;
@@ -55,15 +56,8 @@ namespace VSThemeBrowser.VisualStudio {
 			};
 
 			if (VsLoader.RoslynAssemblyPath != null) {
-
-				var sqm = RoslynSqmLoader.TryGetSqmService();
 				// Key is SVsLog, in a private PIA
-				sp.serviceInstances.Add(new Guid("2508FDF0-EF80-4366-878E-C9F024B8D981"), sqm);
-
-				uint sessionHandle;
-				sqm.BeginSession(775u, false, out sessionHandle);
-				var gsg = Guid.NewGuid();
-				sqm.SetGlobalSessionGuid(ref gsg);
+				sp.serviceInstances.Add(new Guid("2508FDF0-EF80-4366-878E-C9F024B8D981"), new VeryFakeSqm());
 			}
 
 			ServiceProviderRegistration.CreateFromSetSite(sp);
@@ -78,53 +72,6 @@ namespace VSThemeBrowser.VisualStudio {
 					continue;
 				type.GetMethod("CreateFromSetSite", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static)
 					.Invoke(null, new[] { sp });
-			}
-		}
-		static class RoslynSqmLoader {
-			//static readonly Type queryServiceDelegateType = Type.GetType("Microsoft.VisualStudio.Shell.Interop.SqmServiceProvider+QueryServiceDelegate, Microsoft.CodeAnalysis.Desktop");
-			private delegate bool QueryServiceDelegate([In]ref Guid rsid, [In]ref Guid riid, [Out]out IVsSqmMulti vssqm);
-			private static Lazy<QueryServiceDelegate> queryService = new Lazy<QueryServiceDelegate>(TryGetSqmServiceDelegate, true);
-
-			[DllImport("kernel32.dll")]
-			private static extern IntPtr GetProcAddress(IntPtr moduleHandle, String procName);
-
-			[DllImport("kernel32.dll", SetLastError = true)]
-			private static extern IntPtr LoadLibrary(String libPath);
-
-			// Copied from http://source.roslyn.codeplex.com/#Microsoft.CodeAnalysis.Desktop/SqmServiceProvider.cs
-			// Changed to load vssqmmulti.dll from VS directory
-			private static QueryServiceDelegate TryGetSqmServiceDelegate() {
-				try {
-					IntPtr vssqmdll = IntPtr.Zero;
-					string vssqmpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "MSBuild", VsLoader.VsVersion.ToString(2), "Bin");
-					if (Environment.Is64BitProcess) {
-						vssqmpath = Path.Combine(vssqmpath, @"sqmamd64\vssqmmulti.dll");
-					} else {
-						vssqmpath = Path.Combine(vssqmpath, @"sqmx86\vssqmmulti.dll");
-					}
-					vssqmdll = LoadLibrary(vssqmpath);
-					if (vssqmdll != IntPtr.Zero) {
-						IntPtr queryServicePtr = GetProcAddress(vssqmdll, "QueryService");
-						return (QueryServiceDelegate)Marshal.GetDelegateForFunctionPointer(queryServicePtr, typeof(QueryServiceDelegate));
-					}
-				} catch (Exception e) {
-					Debug.Assert(false, string.Format("Could not get dll entry point: {0}", e.ToString()));
-				}
-				return null;
-			}
-			public static IVsSqmMulti TryGetSqmService() {
-				IVsSqmMulti result = null;
-				Guid rsid = new Guid("2508FDF0-EF80-4366-878E-C9F024B8D981");
-				Guid riid = new Guid("B17A7D4A-C1A3-45A2-B916-826C3ABA067E");
-				if (queryService.Value != null) {
-					try {
-						queryService.Value(ref rsid, ref riid, out result);
-					} catch (Exception e) {
-						Debug.Assert(false, string.Format("Could not get SQM service or have SQM related errors: {0}", e.ToString()));
-						return null;
-					}
-				}
-				return result;
 			}
 		}
 
@@ -419,7 +366,101 @@ namespace VSThemeBrowser.VisualStudio {
 		}
 
 		class VsFeedbackProfile : IVsFeedbackProfile {
-			public bool IsMicrosoftInternal { get { return true; } }	// My usage does not reflect anything remotely normal
+			public bool IsMicrosoftInternal { get { return false; } }
+		}
+		class VeryFakeSqm : IVsSqmMulti {
+			public void AccumulateDatapointTimer([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID) { }
+
+			public void AddArrayToStream([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID, [In, MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U4, SizeParamIndex = 2)]uint[] data, [In, MarshalAs(UnmanagedType.I4)]int count) { }
+
+			public void AddItemToStream([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID, [In, MarshalAs(UnmanagedType.U4)]uint value) { }
+
+			public void AddTimerToDatapointAverage([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID) { }
+
+			public void AddToDatapointAverage([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID, [In, MarshalAs(UnmanagedType.U4)]uint value) { }
+
+			public void AddToStreamDWord([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID, [In, MarshalAs(UnmanagedType.U4)]uint cTuple, [In, MarshalAs(UnmanagedType.U4)]uint value) { }
+
+			public void AddToStreamString([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID, [In, MarshalAs(UnmanagedType.U4)]uint cTuple, [In, MarshalAs(UnmanagedType.BStr)]string strValue) { }
+
+			public void BeginSession([In, MarshalAs(UnmanagedType.U4)]uint sessionType, [In, MarshalAs(UnmanagedType.VariantBool)]bool alwaysSend, [MarshalAs(UnmanagedType.U4), Out]out uint sessionHandle) {
+				sessionHandle = 0;
+			}
+
+			public void ClearFlags([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint flags) { }
+
+			public void EndAllSessionsAndAbortUploads() { }
+
+			public void EndSession([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle) { }
+
+			public void Get64BitHashOfString([In, MarshalAs(UnmanagedType.BStr)]string hashString, [MarshalAs(UnmanagedType.U8), Out]out ulong resultantHash) {
+				throw new NotImplementedException();
+			}
+
+			public void GetFlags([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [MarshalAs(UnmanagedType.U4), Out]out uint flags) {
+				throw new NotImplementedException();
+			}
+
+			public Guid GetGlobalSessionGuid() {
+				return Guid.NewGuid();
+			}
+
+			[return: MarshalAs(UnmanagedType.U4)]
+			public int GetGlobalSessionHandle() {
+				throw new NotImplementedException();
+			}
+
+			public void GetHashOfGuid([In]ref Guid hashGuid, [MarshalAs(UnmanagedType.U4), Out]out uint resultantHash) {
+				throw new NotImplementedException();
+			}
+
+			public void GetHashOfString([In, MarshalAs(UnmanagedType.BStr)]string hashString, [MarshalAs(UnmanagedType.U4), Out]out uint resultantHash) {
+				throw new NotImplementedException();
+			}
+
+			[return: MarshalAs(UnmanagedType.VariantBool)]
+			public bool GetOptInStatus() {
+				throw new NotImplementedException();
+			}
+
+			[return: MarshalAs(UnmanagedType.U4)]
+			public int GetSessionHandleByIdentifier([In]ref Guid sessionIdentifier) {
+				throw new NotImplementedException();
+			}
+
+			public void GetSessionStartTime([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [Out]out System.Runtime.InteropServices.ComTypes.FILETIME time) {
+				throw new NotImplementedException();
+			}
+
+			public void IncrementDatapoint([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID, [In, MarshalAs(UnmanagedType.U4)]uint value) { }
+
+			public void RecordCmdData([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In]ref Guid pguidCmdGroup, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID, [In, MarshalAs(UnmanagedType.U4)]uint value) { }
+
+			public void RecordDatapointTimer([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID) { }
+
+			public void RegisterSessionHandle([In]ref Guid sessionIdentifier, [In, MarshalAs(UnmanagedType.U4)]uint dwSessionHandle) { }
+
+			public void SetBoolDatapoint([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID, [In, MarshalAs(UnmanagedType.U4)]uint fValue) { }
+
+			public void SetDatapoint([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID, [In, MarshalAs(UnmanagedType.U4)]uint value) { }
+
+			public void SetDatapointBits([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID, [In, MarshalAs(UnmanagedType.U4)]uint value) { }
+
+			public void SetDatapointIfMax([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID, [In, MarshalAs(UnmanagedType.U4)]uint value) { }
+
+			public void SetDatapointIfMin([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID, [In, MarshalAs(UnmanagedType.U4)]uint value) { }
+
+			public void SetFlags([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint flags) { }
+
+			public void SetGlobalSessionGuid([In]ref Guid pguidSessionGuid) { }
+
+			public void SetProperty([In, MarshalAs(UnmanagedType.U4)]uint propid, [In]ref Guid varKey, [In]object varValue) { }
+
+			public void SetStringDatapoint([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID, [In, MarshalAs(UnmanagedType.BStr)]string strValue) { }
+
+			public void StartDatapointTimer([In, MarshalAs(UnmanagedType.U4)]uint sessionHandle, [In, MarshalAs(UnmanagedType.U4)]uint dataPointID) { }
+
+			public void UnloadSessions() { }
 		}
 	}
 
@@ -485,11 +526,9 @@ namespace Microsoft.VisualStudio.Feedback.Interop {
 }
 namespace Microsoft.VisualStudio.Shell.Interop {
 	// Copied from http://source.roslyn.codeplex.com/Microsoft.CodeAnalysis.Desktop/IVsSQM.cs
-	[ComImport()]
-	[ComVisible(false)]
-	[Guid("B17A7D4A-C1A3-45A2-B916-826C3ABA067E")]
-	[InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
-	internal interface IVsSqmMulti {
+	[ComVisible(false), Guid("B17A7D4A-C1A3-45A2-B916-826C3ABA067E"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), TypeIdentifier]
+	[ComImport]
+	public interface IVsSqmMulti {
 		[return: MarshalAs(UnmanagedType.VariantBool)]
 		bool GetOptInStatus();
 		void UnloadSessions(
