@@ -92,6 +92,8 @@ namespace VSThemeBrowser.VisualStudio {
 
 			// Replace the old dictionary as a single operation to avoid extra lookups
 			MergedDictionaries[0] = newDictionary;
+			// Whenever a theme is loaded, update UIShell to load from this instance.
+			FakeServiceProvider.Instance.UIShell.Theme = this;
 		}
 
 		#region AddSolidColorKeys

@@ -13,16 +13,20 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 using Microsoft.Internal.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Settings;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
 using ServiceProviderRegistration = Microsoft.VisualStudio.Shell.ServiceProvider;
 
 namespace VSThemeBrowser.VisualStudio {
 	class FakeServiceProvider : Microsoft.VisualStudio.OLE.Interop.IServiceProvider {
+		public static FakeServiceProvider Instance { get; private set; }
+
 		[SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "These objects become global and must not be disposed yet")]
 		public static void Initialize() {
 			if (ServiceProviderRegistration.GlobalProvider.GetService(typeof(SVsSettingsManager)) != null)
@@ -34,6 +38,7 @@ namespace VSThemeBrowser.VisualStudio {
 
 			var esm = ExternalSettingsManager.CreateForApplication(Path.Combine(VsLoader.GetVersionPath(VsLoader.VsVersion), "devenv.exe"), "Exp");	// FindVsVersions().LastOrDefault().ToString()));
 			var sp = new FakeServiceProvider {
+				UIShell = new MyVsUIShell(),
 				serviceInstances =
 				{
 					// Used by ServiceProvider
@@ -54,7 +59,10 @@ namespace VSThemeBrowser.VisualStudio {
 				}
 			};
 
+			sp.serviceInstances.Add(typeof(SVsUIShell).GUID, sp.UIShell);
+
 			ServiceProviderRegistration.CreateFromSetSite(sp);
+			Instance = sp;
 
 			// The designer loads Microsoft.VisualStudio.Shell.XX.0,
 			// which we cannot reference directly (to avoid breaking
@@ -68,6 +76,8 @@ namespace VSThemeBrowser.VisualStudio {
 					.Invoke(null, new[] { sp });
 			}
 		}
+
+		public MyVsUIShell UIShell { get; private set; }
 
 		readonly Dictionary<Guid, object> serviceInstances = new Dictionary<Guid, object>();
 
@@ -328,7 +338,7 @@ namespace VSThemeBrowser.VisualStudio {
 
 			public int CheckCacheable(ref Guid rguidCategory, out int pfCacheable) {
 				pfCacheable = 0;
-                return 0;
+				return 0;
 			}
 
 			public int ClearAllCaches() {
@@ -348,7 +358,7 @@ namespace VSThemeBrowser.VisualStudio {
 			public int GetDialogFont(UIDLGLOGFONT[] pLOGFONT) {
 				pLOGFONT[0].lfFaceName = System.Drawing.SystemFonts.CaptionFont.Name.Select(c => (ushort)c).ToArray();
 				return 0;
-            }
+			}
 
 			public int GetUILibraryFileName(string lpstrPath, string lpstrDllName, out string pbstrOut) {
 				throw new NotImplementedException();
@@ -369,6 +379,43 @@ namespace VSThemeBrowser.VisualStudio {
 			public int MungeDialogFont(uint dwSize, byte[] pDlgTemplate, out IntPtr ppDlgTemplateOut) {
 				throw new NotImplementedException();
 			}
+		}
+	}
+
+	class MyVsUIShell : IVsUIShell5 {
+		///<summary>Gets or sets the theme dictionary to load colors from.</summary>
+		public ThemeColorsDictionary Theme { get; set; }
+		public uint GetThemedColor(ref Guid colorCategory, string colorName, uint colorType) {
+			var color = (Color)Theme[new ThemeResourceKey(
+				colorCategory, 
+				colorName, 
+				colorType == (uint)__THEMEDCOLORTYPE.TCT_Foreground ? ThemeResourceKeyType.ForegroundColor : ThemeResourceKeyType.BackgroundColor
+			)];
+			return BitConverter.ToUInt32(new[] { color.R, color.G, color.B, color.A }, 0);
+		}
+		public IntPtr CreateThemedImageList(IntPtr hImageList, uint crBackground) {
+			throw new NotImplementedException();
+		}
+
+		public IVsEnumGuids EnumKeyBindingScopes() {
+			throw new NotImplementedException();
+		}
+
+		public string GetKeyBindingScope(ref Guid keyBindingScope) {
+			throw new NotImplementedException();
+		}
+
+		public void GetOpenFileNameViaDlgEx2(VSOPENFILENAMEW[] openFileName, string HelpTopic, string openButtonLabel) {
+			throw new NotImplementedException();
+		}
+
+
+		public void ThemeDIBits(uint dwBitmapLength, byte[] pBitmap, uint dwPixelWidth, uint dwPixelHeight, bool fIsTopDownBitmap, uint crBackground) {
+			throw new NotImplementedException();
+		}
+
+		public bool ThemeWindow(IntPtr hwnd) {
+			throw new NotImplementedException();
 		}
 	}
 
