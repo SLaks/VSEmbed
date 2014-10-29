@@ -45,6 +45,10 @@ namespace VSThemeBrowser.VisualStudio {
 					// Used by KnownUIContexts
 					{ typeof(IVsMonitorSelection).GUID, new DummyVsMonitorSelection() },
 
+					// Used by ShimCodeLensPresenterStyle
+					{ typeof(SUIHostLocale).GUID, new FakeUIHostLocale() },
+					{ typeof(SVsFontAndColorCacheManager).GUID, new FakeFontAndColorCacheManager() },
+
 					// Used by Roslyn (really!)
 					{ typeof(SComponentModel).GUID, new MefComponentModel() },
 				}
@@ -314,6 +318,57 @@ namespace VSThemeBrowser.VisualStudio {
 			}
 
 			public void _VtblGap1_3() { }
+		}
+
+		class FakeFontAndColorCacheManager : IVsFontAndColorCacheManager {
+			public int CheckCache(ref Guid rguidCategory, out int pfHasData) {
+				pfHasData = 0;
+				return 0;
+			}
+
+			public int CheckCacheable(ref Guid rguidCategory, out int pfCacheable) {
+				pfCacheable = 0;
+                return 0;
+			}
+
+			public int ClearAllCaches() {
+				return 0;
+			}
+
+			public int ClearCache(ref Guid rguidCategory) {
+				return 0;
+			}
+
+			public int RefreshCache(ref Guid rguidCategory) {
+				return 0;
+			}
+		}
+
+		class FakeUIHostLocale : IUIHostLocale2 {
+			public int GetDialogFont(UIDLGLOGFONT[] pLOGFONT) {
+				pLOGFONT[0].lfFaceName = System.Drawing.SystemFonts.CaptionFont.Name.Select(c => (ushort)c).ToArray();
+				return 0;
+            }
+
+			public int GetUILibraryFileName(string lpstrPath, string lpstrDllName, out string pbstrOut) {
+				throw new NotImplementedException();
+			}
+
+			public int GetUILocale(out uint plcid) {
+				throw new NotImplementedException();
+			}
+
+			public int LoadDialog(uint hMod, uint dwDlgResId, out IntPtr ppDlgTemplate) {
+				throw new NotImplementedException();
+			}
+
+			public int LoadUILibrary(string lpstrPath, string lpstrDllName, uint dwExFlags, out uint phinstOut) {
+				throw new NotImplementedException();
+			}
+
+			public int MungeDialogFont(uint dwSize, byte[] pDlgTemplate, out IntPtr ppDlgTemplateOut) {
+				throw new NotImplementedException();
+			}
 		}
 	}
 
