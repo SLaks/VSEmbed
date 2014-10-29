@@ -386,11 +386,11 @@ namespace VSThemeBrowser.VisualStudio {
 		///<summary>Gets or sets the theme dictionary to load colors from.</summary>
 		public ThemeColorsDictionary Theme { get; set; }
 		public uint GetThemedColor(ref Guid colorCategory, string colorName, uint colorType) {
-			var color = (Color)Theme[new ThemeResourceKey(
-				colorCategory, 
-				colorName, 
+			var color = Theme[new ThemeResourceKey(
+				colorCategory,
+				colorName,
 				colorType == (uint)__THEMEDCOLORTYPE.TCT_Foreground ? ThemeResourceKeyType.ForegroundColor : ThemeResourceKeyType.BackgroundColor
-			)];
+			)] as Color? ?? Colors.Pink;
 			return BitConverter.ToUInt32(new[] { color.R, color.G, color.B, color.A }, 0);
 		}
 		public IntPtr CreateThemedImageList(IntPtr hImageList, uint crBackground) {
