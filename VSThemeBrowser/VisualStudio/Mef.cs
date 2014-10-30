@@ -65,7 +65,10 @@ namespace VSThemeBrowser.VisualStudio {
 
 			return Directory.EnumerateFiles(VsLoader.RoslynAssemblyPath, "Microsoft.CodeAnalysis*.dll")	// Leave out the . to catch Microsoft.CodeAnalysis.dll too
 				.Select(p => new AssemblyCatalog(Assembly.LoadFile(p)))
-				.Concat<ComposablePartCatalog>(new[] { new TypeCatalog(waitIndicator) });
+				.Concat(new ComposablePartCatalog[] {
+					new AssemblyCatalog(Assembly.Load("RoslynEditorHost")),
+					new TypeCatalog(waitIndicator)
+				});
 		}
 
 		public static readonly ComposablePartCatalog Catalog = new AggregateCatalog(GetCatalogs());

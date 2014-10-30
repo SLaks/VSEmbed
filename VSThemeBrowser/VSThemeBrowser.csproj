@@ -175,6 +175,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RoslynEditorHost\RoslynEditorHost.csproj">
+      <Project>{102cb436-a268-4084-9d56-a2131763cc28}</Project>
+      <Name>RoslynEditorHost</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
