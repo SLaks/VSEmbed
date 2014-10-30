@@ -122,7 +122,15 @@ namespace VSThemeBrowser.VisualStudio {
 
 			Debug.WriteLine("Redirecting load of " + args.Name + ",\tfrom " + (args.RequestingAssembly == null ? "(unknown)" : args.RequestingAssembly.FullName));
 
-			return Assembly.LoadFile(Path.Combine(RoslynAssemblyPath, new AssemblyName(args.Name).Name + ".dll"));
+			var name = new AssemblyName(args.Name);
+			var dllPath = Path.Combine(RoslynAssemblyPath, name.Name + ".dll");
+			if (File.Exists(dllPath))
+				return Assembly.LoadFile(dllPath);
+			else if (name.Name.EndsWith(".resources"))
+				return LoadResourceDll(name, RoslynAssemblyPath, name.CultureInfo)
+					?? LoadResourceDll(name, RoslynAssemblyPath, name.CultureInfo.Parent);
+			else
+				return null;
 		}
 
 		/// <summary>
