@@ -70,16 +70,17 @@ namespace VSThemeBrowser.VisualStudio {
 			if (VsLoader.RoslynAssemblyPath == null)
 				return new ComposablePartCatalog[0];
 
-			// IWaitIndicator is internal, so I have no choice but to use the existing
-			// implementation. The rest of Microsoft.VisualStudio.LanguageServices.dll
-			// exports lots of VS interop types that I don't want.
-			var waitIndicator = Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.Utilities.VisualStudioWaitIndicator, Microsoft.VisualStudio.LanguageServices");
-
 			return Directory.EnumerateFiles(VsLoader.RoslynAssemblyPath, "Microsoft.CodeAnalysis*.dll")	// Leave out the . to catch Microsoft.CodeAnalysis.dll too
 				.Select(p => GetFilteredCatalog(Assembly.LoadFile(p)))
 				.Concat(new ComposablePartCatalog[] {
 					GetFilteredCatalog(Assembly.Load("RoslynEditorHost")),
-					new TypeCatalog(waitIndicator)
+					new TypeCatalog(
+						// IWaitIndicator is internal, so I have no choice but to use the existing
+						// implementation. The rest of Microsoft.VisualStudio.LanguageServices.dll
+						// exports lots of VS interop types that I don't want.
+						Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.Utilities.VisualStudioWaitIndicator, "
+								   + "Microsoft.VisualStudio.LanguageServices")
+					)
 				});
 		}
 
