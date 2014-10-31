@@ -6,6 +6,7 @@ using System.ComponentModel.Composition.Hosting;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -34,6 +35,11 @@ namespace RoslynEditorHost {
 				var workspace = new SimpleWorkspace(MefHostServices.Create(componentModel.DefaultExportProvider));
 
 				var project = workspace.AddProject("Sample Project", contentTypeLanguages[buffer.ContentType.DisplayName]);
+				workspace.TryApplyChanges(workspace.CurrentSolution.AddMetadataReferences(project.Id, new[] {
+					new MetadataFileReference(typeof(object).Assembly.Location, MetadataReferenceProperties.Assembly),
+					new MetadataFileReference(typeof(Uri).Assembly.Location, MetadataReferenceProperties.Assembly),
+					new MetadataFileReference(typeof(Enumerable).Assembly.Location, MetadataReferenceProperties.Assembly)
+				}));
 				workspace.CreateDocument(project.Id, buffer.AsTextContainer());
 			}
 		}

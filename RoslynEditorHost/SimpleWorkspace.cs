@@ -26,5 +26,9 @@ namespace RoslynEditorHost {
 			OnDocumentOpened(id, container);
 			return CurrentSolution.GetDocument(id);
 		}
+
+		protected override void AddMetadataReference(ProjectId projectId, MetadataReference metadataReference) {
+			OnMetadataReferenceAdded(projectId, metadataReference);
+		}
 	}
 }
