@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Text.Storage;
@@ -50,10 +51,21 @@ namespace VSThemeBrowser.VisualStudio {
 		// The version is added by my AssemblyResolve handler.
 		const string FullNameSuffix = ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL";
 		static IEnumerable<ComposablePartCatalog> GetCatalogs() {
-			return EditorComponents.Select(c => new AssemblyCatalog(Assembly.Load(c + FullNameSuffix)))
+			return EditorComponents.Select(c => GetFilteredCatalog(Assembly.Load(c + FullNameSuffix)))
 					.Concat(GetRoslynCatalogs())
-					.Concat(new[] { new AssemblyCatalog(typeof(Mef).Assembly) });
+					.Concat(new[] { GetFilteredCatalog(typeof(Mef).Assembly) });
 		}
+
+		static readonly string[] excludedTypes = {
+			// This uses IVsUIShell, which I haven't implemented, to show dialog boxes.
+			// It also causes strange and fatal AccessViolations.
+			"Microsoft.VisualStudio.Editor.Implementation.ExtensionErrorHandler"
+		};
+		///<summary>Creates a <see cref="ComposablePartCatalog"/> from the types in an assembly, excluding types that cause problems.</summary>
+		static ComposablePartCatalog GetFilteredCatalog(Assembly assembly) {
+			return new TypeCatalog(assembly.GetTypes().Where(t => !excludedTypes.Contains(t.FullName)));
+		}
+
 		static IEnumerable<ComposablePartCatalog> GetRoslynCatalogs() {
 			if (VsLoader.RoslynAssemblyPath == null)
 				return new ComposablePartCatalog[0];
@@ -64,9 +76,9 @@ namespace VSThemeBrowser.VisualStudio {
 			var waitIndicator = Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.Utilities.VisualStudioWaitIndicator, Microsoft.VisualStudio.LanguageServices");
 
 			return Directory.EnumerateFiles(VsLoader.RoslynAssemblyPath, "Microsoft.CodeAnalysis*.dll")	// Leave out the . to catch Microsoft.CodeAnalysis.dll too
-				.Select(p => new AssemblyCatalog(Assembly.LoadFile(p)))
+				.Select(p => GetFilteredCatalog(Assembly.LoadFile(p)))
 				.Concat(new ComposablePartCatalog[] {
-					new AssemblyCatalog(Assembly.Load("RoslynEditorHost")),
+					GetFilteredCatalog(Assembly.Load("RoslynEditorHost")),
 					new TypeCatalog(waitIndicator)
 				});
 		}
@@ -81,6 +93,13 @@ namespace VSThemeBrowser.VisualStudio {
 
 			// Needed because VsUndoHistoryRegistry tries to create IOleUndoManager from ILocalRegistry, which I presumably cannot do.
 			Container.ComposeExportedValue((ITextUndoHistoryRegistry)EditorUtils.EditorUtilsFactory.CreateBasicUndoHistoryRegistry());
+		}
+
+		[Export(typeof(IExtensionErrorHandler))]
+		class SimpleErrorReporter : IExtensionErrorHandler {
+			public void HandleError(object sender, Exception exception) {
+				MessageBox.Show(exception.ToString(), "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
 		}
 
 		// Microsoft.VisualStudio.Editor.Implementation.DataStorage uses COM services
