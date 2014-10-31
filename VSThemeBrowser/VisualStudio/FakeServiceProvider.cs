@@ -56,6 +56,8 @@ namespace VSThemeBrowser.VisualStudio {
 
 					// Used by Roslyn (really!)
 					{ typeof(SComponentModel).GUID, new MefComponentModel() },
+					// Used by VisualStudioWaitIndicator
+					{ typeof(SVsThreadedWaitDialogFactory).GUID, new MyWaitDialogFactory() },
 				}
 			};
 
@@ -430,6 +432,60 @@ namespace VSThemeBrowser.VisualStudio {
 		public IEnumerable<T> GetExtensions<T>() where T : class { return DefaultExportProvider.GetExportedValues<T>(); }
 		public T GetService<T>() where T : class { return DefaultExportProvider.GetExportedValue<T>(); }
 	}
+
+	class MyWaitDialogFactory : IVsThreadedWaitDialogFactory {
+		public int CreateInstance(out IVsThreadedWaitDialog2 ppIVsThreadedWaitDialog) {
+			ppIVsThreadedWaitDialog = new WaitDialog();
+			return 0;
+		}
+		class WaitDialog : IVsThreadedWaitDialog3 {
+			// TODO: Actually show some UI
+			public void EndWaitDialog(out int pfCanceled) {
+				pfCanceled = 0;
+			}
+
+			public void HasCanceled(out bool pfCanceled) {
+				pfCanceled = false;
+			}
+
+			public void StartWaitDialog(string szWaitCaption, string szWaitMessage, string szProgressText, object varStatusBmpAnim, string szStatusBarText, int iDelayToShowDialog, bool fIsCancelable, bool fShowMarqueeProgress) { }
+
+			public void StartWaitDialogWithCallback(string szWaitCaption, string szWaitMessage, string szProgressText, object varStatusBmpAnim, string szStatusBarText, bool fIsCancelable, int iDelayToShowDialog, bool fShowProgress, int iTotalSteps, int iCurrentStep, IVsThreadedWaitDialogCallback pCallback) { }
+
+			public void StartWaitDialogWithPercentageProgress(string szWaitCaption, string szWaitMessage, string szProgressText, object varStatusBmpAnim, string szStatusBarText, bool fIsCancelable, int iDelayToShowDialog, int iTotalSteps, int iCurrentStep) {
+			}
+
+			public void UpdateProgress(string szUpdatedWaitMessage, string szProgressText, string szStatusBarText, int iCurrentStep, int iTotalSteps, bool fDisableCancel, out bool pfCanceled) {
+				pfCanceled = false;
+			}
+
+			int IVsThreadedWaitDialog2.EndWaitDialog(out int pfCanceled) {
+				EndWaitDialog(out pfCanceled);
+				return 0;
+			}
+
+			int IVsThreadedWaitDialog2.HasCanceled(out bool pfCanceled) {
+				HasCanceled(out pfCanceled);
+				return 0;
+			}
+
+			int IVsThreadedWaitDialog2.StartWaitDialog(string szWaitCaption, string szWaitMessage, string szProgressText, object varStatusBmpAnim, string szStatusBarText, int iDelayToShowDialog, bool fIsCancelable, bool fShowMarqueeProgress) {
+				StartWaitDialog(szWaitCaption, szWaitMessage, szProgressText, varStatusBmpAnim, szStatusBarText, iDelayToShowDialog, fIsCancelable, fShowMarqueeProgress);
+				return 0;
+			}
+
+			int IVsThreadedWaitDialog2.StartWaitDialogWithPercentageProgress(string szWaitCaption, string szWaitMessage, string szProgressText, object varStatusBmpAnim, string szStatusBarText, bool fIsCancelable, int iDelayToShowDialog, int iTotalSteps, int iCurrentStep) {
+				StartWaitDialogWithPercentageProgress(szWaitCaption, szWaitMessage, szProgressText, varStatusBmpAnim, szStatusBarText, fIsCancelable, iDelayToShowDialog, iTotalSteps, iCurrentStep);
+				return 0;
+			}
+
+			int IVsThreadedWaitDialog2.UpdateProgress(string szUpdatedWaitMessage, string szProgressText, string szStatusBarText, int iCurrentStep, int iTotalSteps, bool fDisableCancel, out bool pfCanceled) {
+				UpdateProgress(szUpdatedWaitMessage, szProgressText, szStatusBarText, iTotalSteps, iCurrentStep, fDisableCancel, out pfCanceled);
+				return 0;
+			}
+		}
+	}
+
 	class DummyVsMonitorSelection : IVsMonitorSelection {
 		public int AdviseSelectionEvents(IVsSelectionEvents pSink, out uint pdwCookie) {
 			pdwCookie = 0;
