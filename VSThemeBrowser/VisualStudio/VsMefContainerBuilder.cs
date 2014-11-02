@@ -122,6 +122,9 @@ namespace VSThemeBrowser.VisualStudio {
 			container.ComposeExportedValue((ITextUndoHistoryRegistry)EditorUtils.EditorUtilsFactory.CreateBasicUndoHistoryRegistry());
 
 			VsServiceProvider.Instance.SetMefContainer(container);
+
+			// VS doesn't do this, but it's useful for my Roslyn adapter code.
+			container.ComposeExportedValue(VsServiceProvider.Instance.ComponentModel);
 		}
 	}
 }
