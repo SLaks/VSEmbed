@@ -13,7 +13,7 @@ namespace RoslynEditorHost {
 	class SimpleWorkspace : Workspace {
 		static readonly Type IWorkCoordinatorRegistrationService = Type.GetType("Microsoft.CodeAnalysis.SolutionCrawler.IWorkCoordinatorRegistrationService, Microsoft.CodeAnalysis.Features");
 
-		public SimpleWorkspace(HostServices host) : base(host, "SimpleWorkspace") {
+		public SimpleWorkspace(HostServices host) : base(host, "Host") {
 			var wcrService = typeof(HostWorkspaceServices)
 				.GetMethod("GetService")
 				.MakeGenericMethod(IWorkCoordinatorRegistrationService)
