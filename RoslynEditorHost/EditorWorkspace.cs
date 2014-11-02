@@ -10,11 +10,11 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 
 namespace RoslynEditorHost {
-	class SimpleWorkspace : Workspace {
+	class EditorWorkspace : Workspace {
 		static readonly Type IWorkCoordinatorRegistrationService = Type.GetType("Microsoft.CodeAnalysis.SolutionCrawler.IWorkCoordinatorRegistrationService, Microsoft.CodeAnalysis.Features");
 
 		readonly Dictionary<DocumentId, ITextBuffer> documentBuffers = new Dictionary<DocumentId, ITextBuffer>();
-		public SimpleWorkspace(HostServices host) : base(host, "Host") {
+		public EditorWorkspace(HostServices host) : base(host, "Host") {
 			var wcrService = typeof(HostWorkspaceServices)
 				.GetMethod("GetService")
 				.MakeGenericMethod(IWorkCoordinatorRegistrationService)

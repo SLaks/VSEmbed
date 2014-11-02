@@ -16,7 +16,7 @@ using VSThemeBrowser.Controls;
 
 #pragma warning disable 0436	// Tell the non-Roslyn compiler to ignore conflicts with inaccessible NoPIA types
 namespace VSThemeBrowser.VisualStudio {
-	public class ThemeColorsDictionary : ConditionalResourceDictionary {
+	public class VsThemeDictionary : ConditionalResourceDictionary {
 
 		// We must access everything from these classes using dynamic due to NoPIA conflicts.
 		// The compiler gives some errors since we do not have the right PIA, and the runtime
@@ -25,11 +25,11 @@ namespace VSThemeBrowser.VisualStudio {
 		static readonly Assembly WindowManagement = typeof(Microsoft.VisualStudio.Platform.WindowManagement.WindowFrame).Assembly;
 		dynamic currentTheme;
 		readonly dynamic service;
-		public ThemeColorsDictionary() {
+		public VsThemeDictionary() {
 			if (ServiceProvider.GlobalProvider.GetService(typeof(SVsFrameworkMultiTargeting)) != null)
 				return;	// Do nothing when hosted in VS
 
-			FakeServiceProvider.Initialize();
+			VsServiceProvider.Initialize();
 			service = Activator.CreateInstance(WindowManagement.GetType("Microsoft.VisualStudio.Platform.WindowManagement.ColorThemeService"));
 
 			// Add an empty dictionary for the loader to replace.
@@ -95,7 +95,7 @@ namespace VSThemeBrowser.VisualStudio {
 			// Replace the old dictionary as a single operation to avoid extra lookups
 			MergedDictionaries[0] = newDictionary;
 			// Whenever a theme is loaded, update UIShell to load from this instance.
-			FakeServiceProvider.Instance.UIShell.Theme = this;
+			VsServiceProvider.Instance.UIShell.Theme = this;
 		}
 
 		#region AddSolidColorKeys
@@ -168,7 +168,7 @@ namespace VSThemeBrowser.VisualStudio {
 				.MakeGenericMethod(privateType, typeof(TResult))
 				.Invoke(null, new[] { method });
 		}
-		static readonly MethodInfo MakeFunc1Method = typeof(ThemeColorsDictionary).GetMethod("MakeFunc1", BindingFlags.Static | BindingFlags.NonPublic);
+		static readonly MethodInfo MakeFunc1Method = typeof(VsThemeDictionary).GetMethod("MakeFunc1", BindingFlags.Static | BindingFlags.NonPublic);
 		static Func<object, TResult> MakeFunc1<TPrivate, TResult>(MethodInfo method) {
 			var typedDelegate = (Func<TPrivate, TResult>)Delegate.CreateDelegate(typeof(Func<TPrivate, TResult>), method);
 			return o => typedDelegate((TPrivate)o);
@@ -179,7 +179,7 @@ namespace VSThemeBrowser.VisualStudio {
 				.MakeGenericMethod(privateType, typeof(T2), typeof(TResult))
 				.Invoke(null, new[] { method });
 		}
-		static readonly MethodInfo MakeFunc2Method = typeof(ThemeColorsDictionary).GetMethod("MakeFunc2", BindingFlags.Static | BindingFlags.NonPublic);
+		static readonly MethodInfo MakeFunc2Method = typeof(VsThemeDictionary).GetMethod("MakeFunc2", BindingFlags.Static | BindingFlags.NonPublic);
 		static Func<object, T2, TResult> MakeFunc2<TPrivate, T2, TResult>(MethodInfo method) {
 			var typedDelegate = (Func<TPrivate, T2, TResult>)Delegate.CreateDelegate(typeof(Func<TPrivate, T2, TResult>), method);
 			return (o1, o2) => typedDelegate((TPrivate)o1, o2);

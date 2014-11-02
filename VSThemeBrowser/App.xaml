@@ -7,7 +7,7 @@
 	<Application.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<vs:ThemeColorsDictionary ThemeIndex="0"></vs:ThemeColorsDictionary>
+				<vs:VsThemeDictionary ThemeIndex="1"></vs:VsThemeDictionary>
 			</ResourceDictionary.MergedDictionaries>
 			<GeometryGroup FillRule="EvenOdd" x:Key="VectorIcon">
 				<EllipseGeometry Center="1, 1" RadiusX="1" RadiusY="1" />

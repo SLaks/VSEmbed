@@ -55,7 +55,7 @@ namespace RoslynEditorHost {
 				if (buffer.GetWorkspace() != null)
 					continue;
 				var componentModel = (IComponentModel)ExportProvider.GetService(typeof(SComponentModel));
-				var workspace = new SimpleWorkspace(MefHostServices.Create(componentModel.DefaultExportProvider));
+				var workspace = new EditorWorkspace(MefHostServices.Create(componentModel.DefaultExportProvider));
 
 				var project = workspace.AddProject("Sample Project", contentTypeLanguages[buffer.ContentType.DisplayName]);
 				workspace.TryApplyChanges(workspace.CurrentSolution.AddMetadataReferences(project.Id, new[] {

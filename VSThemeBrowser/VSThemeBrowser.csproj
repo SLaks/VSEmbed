@@ -117,10 +117,10 @@
     </ApplicationDefinition>
     <Compile Include="Controls\ConditionalResourceDictionary.cs" />
     <Compile Include="Controls\TextViewHost.cs" />
-    <Compile Include="VisualStudio\Mef.cs" />
-    <Compile Include="VisualStudio\ResourceKeys.cs" />
-    <Compile Include="VisualStudio\ThemeColorsDictionary.cs.cs" />
-    <Compile Include="VisualStudio\FakeServiceProvider.cs" />
+    <Compile Include="VisualStudio\VsMefContainerBuilder.cs" />
+    <Compile Include="VisualStudio\VsResourceKeys.cs" />
+    <Compile Include="VisualStudio\VsThemeDictionary.cs" />
+    <Compile Include="VisualStudio\VsServiceProvider.cs" />
     <Compile Include="VisualStudio\VsLoader.cs" />
     <Page Include="Controls\VsResizeGrip.xaml">
       <SubType>Designer</SubType>

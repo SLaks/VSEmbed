@@ -22,7 +22,7 @@ using VSThemeBrowser.Controls;
 namespace VSThemeBrowser.VisualStudio {
 	///<summary>Creates the MEF composition container used by the editor services.</summary>
 	/// <remarks>Stolen, with much love and gratitude, from @JaredPar's EditorUtils.</remarks>
-	public static class Mef {
+	public static class VsMefContainerBuilder {
 		private static readonly string[] EditorComponents = {
 			// Core editor components
 			"Microsoft.VisualStudio.Platform.VSEditor",
@@ -53,7 +53,7 @@ namespace VSThemeBrowser.VisualStudio {
 		static IEnumerable<ComposablePartCatalog> GetCatalogs() {
 			return EditorComponents.Select(c => GetFilteredCatalog(Assembly.Load(c + FullNameSuffix)))
 					.Concat(GetRoslynCatalogs())
-					.Concat(new[] { GetFilteredCatalog(typeof(Mef).Assembly) });
+					.Concat(new[] { GetFilteredCatalog(typeof(VsMefContainerBuilder).Assembly) });
 		}
 
 		static readonly string[] excludedTypes = {
@@ -94,7 +94,7 @@ namespace VSThemeBrowser.VisualStudio {
 		public static readonly ComposablePartCatalog Catalog = new AggregateCatalog(GetCatalogs());
 		public static readonly CompositionContainer Container = new CompositionContainer(Catalog);
 
-		static Mef() {
+		static VsMefContainerBuilder() {
 			// Copied from Microsoft.VisualStudio.ComponentModelHost.ComponentModel.DefaultCompositionContainer
 			Container.ComposeExportedValue<SVsServiceProvider>(
 				new VsServiceProviderWrapper(ServiceProvider.GlobalProvider));

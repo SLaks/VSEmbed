@@ -24,8 +24,8 @@ using Microsoft.Win32;
 using ServiceProviderRegistration = Microsoft.VisualStudio.Shell.ServiceProvider;
 
 namespace VSThemeBrowser.VisualStudio {
-	class FakeServiceProvider : Microsoft.VisualStudio.OLE.Interop.IServiceProvider {
-		public static FakeServiceProvider Instance { get; private set; }
+	class VsServiceProvider : Microsoft.VisualStudio.OLE.Interop.IServiceProvider {
+		public static VsServiceProvider Instance { get; private set; }
 
 		[SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "These objects become global and must not be disposed yet")]
 		public static void Initialize() {
@@ -33,11 +33,11 @@ namespace VSThemeBrowser.VisualStudio {
 				return;
 
 			if (VsLoader.VsVersion == null) {		// If the App() ctor didn't set this, we're in the designer
-				VsLoader.Initialize(new Version(12, 0, 0, 0));
+				VsLoader.Initialize(new Version(11, 0, 0, 0));
 			}
 
 			var esm = ExternalSettingsManager.CreateForApplication(Path.Combine(VsLoader.GetVersionPath(VsLoader.VsVersion), "devenv.exe"), "Exp");	// FindVsVersions().LastOrDefault().ToString()));
-			var sp = new FakeServiceProvider {
+			var sp = new VsServiceProvider {
 				UIShell = new MyVsUIShell(),
 				serviceInstances =
 				{
@@ -388,7 +388,7 @@ namespace VSThemeBrowser.VisualStudio {
 
 	class MyVsUIShell : IVsUIShell5 {
 		///<summary>Gets or sets the theme dictionary to load colors from.</summary>
-		public ThemeColorsDictionary Theme { get; set; }
+		public VsThemeDictionary Theme { get; set; }
 		public uint GetThemedColor(ref Guid colorCategory, string colorName, uint colorType) {
 			var color = Theme[new ThemeResourceKey(
 				colorCategory,
@@ -424,10 +424,10 @@ namespace VSThemeBrowser.VisualStudio {
 	}
 
 	class MefComponentModel : IComponentModel {
-		public ComposablePartCatalog DefaultCatalog { get { return Mef.Catalog; } }
+		public ComposablePartCatalog DefaultCatalog { get { return VsMefContainerBuilder.Catalog; } }
 
-		public ICompositionService DefaultCompositionService { get { return Mef.Container; } }
-		public ExportProvider DefaultExportProvider { get { return Mef.Container; } }
+		public ICompositionService DefaultCompositionService { get { return VsMefContainerBuilder.Container; } }
+		public ExportProvider DefaultExportProvider { get { return VsMefContainerBuilder.Container; } }
 
 		public ComposablePartCatalog GetCatalog(string catalogName) { return DefaultCatalog; }
 

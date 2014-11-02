@@ -12,7 +12,7 @@ namespace VSThemeBrowser.VisualStudio {
 	/// class contains resource keys that will return the VS style or my custom styles
 	/// depending on the loaded VS version.
 	///</remarks>
-	public static class ResourceKeys {
+	public static class VsResourceKeys {
 		public static bool HasDefaultStyles { get { return VsLoader.VsVersion.Major >= 14; } }
 
 		public static string ComboBoxStyleKey {
