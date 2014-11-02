@@ -116,26 +116,22 @@ namespace VSThemeBrowser.Controls {
 
 		static Func<bool> WithTrue(Action method) { return () => { method(); return true; }; }
 		private void AddExtendableCommand(Key key, Action<bool> method) {
-			AddCommand(key, () => method(false));
-			AddShiftCommand(key, () => method(true));
+			AddCommand(key, WithTrue(() => method(false)));
+			AddShiftCommand(key, WithTrue(() => method(true)));
 		}
 		private void AddControlExtendableCommand(Key key, Action<bool> method) {
-			AddControlCommand(key, () => method(false));
-			AddControlShiftCommand(key, () => method(true));
+			AddControlCommand(key, WithTrue(() => method(false)));
+			AddControlShiftCommand(key, WithTrue(() => method(true)));
 		}
-		private void AddCommand(Key key, Action method) { AddCommand(key, WithTrue(method)); }
 		private void AddCommand(Key key, Func<bool> method) {
 			AddCommand(ModifierKeys.None, key, method);
 		}
-		private void AddShiftCommand(Key key, Action method) { AddShiftCommand(key, WithTrue(method)); }
 		private void AddShiftCommand(Key key, Func<bool> method) {
 			AddCommand(ModifierKeys.Shift, key, method);
 		}
-		private void AddControlCommand(Key key, Action method) { AddControlCommand(key, WithTrue(method)); }
 		private void AddControlCommand(Key key, Func<bool> method) {
 			AddCommand(ModifierKeys.Control, key, method);
 		}
-		private void AddControlShiftCommand(Key key, Action method) { AddControlShiftCommand(key, WithTrue(method)); }
 		private void AddControlShiftCommand(Key key, Func<bool> method) {
 			AddCommand(ModifierKeys.Control | ModifierKeys.Shift, key, method);
 		}
