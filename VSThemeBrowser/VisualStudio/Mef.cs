@@ -116,8 +116,16 @@ namespace VSThemeBrowser.VisualStudio {
 		// implement this at all unless I want to allow user customization.
 		sealed class SimpleDataStorage : IDataStorage {
 			public bool TryGetItemValue(string itemKey, out ResourceDictionary itemValue) {
-				itemValue = null;
-				return false;
+				switch (itemKey) {
+					// This is used by CollapsedAdornmentProvider, and has no default value.
+					// However, MEF doesn't use my DataStorageService, so this doesn't work.
+					case "Collapsible Text (Collapsed)":
+						itemValue = new ResourceDictionary { { "Foreground", Brushes.DarkSlateBlue } };
+						return true;
+					default:
+						itemValue = null;
+						return false;
+				}
 			}
 		}
 		[Export(typeof(IDataStorageService))]
