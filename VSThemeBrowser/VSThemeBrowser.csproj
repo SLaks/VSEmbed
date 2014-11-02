@@ -117,6 +117,9 @@
     </ApplicationDefinition>
     <Compile Include="Controls\ConditionalResourceDictionary.cs" />
     <Compile Include="Controls\TextViewHost.cs" />
+    <Compile Include="VisualStudio\Services\SettingsManagerWrapper.cs" />
+    <Compile Include="VisualStudio\Services\Simple Services.cs" />
+    <Compile Include="VisualStudio\Services\Stub Services.cs" />
     <Compile Include="VisualStudio\VsMefContainerBuilder.cs" />
     <Compile Include="VisualStudio\VsResourceKeys.cs" />
     <Compile Include="VisualStudio\VsThemeDictionary.cs" />
