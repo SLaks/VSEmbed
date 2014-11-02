@@ -316,7 +316,9 @@ namespace VSThemeBrowser.VisualStudio {
 			}
 		}
 
+#pragma warning disable 0436	// Tell the non-Roslyn compiler to ignore conflicts with inaccessible NoPIA types
 		class DummyWindowManager : IVsWindowManager2 {
+#pragma warning restore 0436
 			[return: MarshalAs(UnmanagedType.IUnknown)]
 			public object GetResourceKeyReferenceType([In, MarshalAs(UnmanagedType.IUnknown)]object requestedResource) {
 				Type left = requestedResource as Type;

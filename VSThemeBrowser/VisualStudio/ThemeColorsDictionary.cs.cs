@@ -14,21 +14,23 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using VSThemeBrowser.Controls;
 
+#pragma warning disable 0436	// Tell the non-Roslyn compiler to ignore conflicts with inaccessible NoPIA types
 namespace VSThemeBrowser.VisualStudio {
 	public class ThemeColorsDictionary : ConditionalResourceDictionary {
 
 		// We must access everything from these classes using dynamic due to NoPIA conflicts.
 		// The compiler gives some errors since we do not have the right PIA, and the runtime
-		// gives more errors because NoPIA doesn't unify for managed implementations.
+		// gives more errors because NoPIA doesn't unify for managed implementations. Many of
+		// these errors do not happen when compiled with Roslyn.
+		static readonly Assembly WindowManagement = typeof(Microsoft.VisualStudio.Platform.WindowManagement.WindowFrame).Assembly;
 		dynamic currentTheme;
 		readonly dynamic service;
 		public ThemeColorsDictionary() {
 			if (ServiceProvider.GlobalProvider.GetService(typeof(SVsFrameworkMultiTargeting)) != null)
 				return;	// Do nothing when hosted in VS
-						//AssemblyResolverHack.AddHandler();
+
 			FakeServiceProvider.Initialize();
-			service = new Microsoft.VisualStudio.Platform.WindowManagement.ColorThemeService();
-			//service = Activator.CreateInstance(Type.GetType("Microsoft.VisualStudio.Platform.WindowManagement.ColorThemeService, Microsoft.VisualStudio.Platform.WindowManagement"));
+			service = Activator.CreateInstance(WindowManagement.GetType("Microsoft.VisualStudio.Platform.WindowManagement.ColorThemeService"));
 
 			// Add an empty dictionary for the loader to replace.
 			MergedDictionaries.Add(new ResourceDictionary());
@@ -148,7 +150,6 @@ namespace VSThemeBrowser.VisualStudio {
 
 
 		// All of these types are internal.
-		static readonly Assembly WindowManagement = typeof(Microsoft.VisualStudio.Platform.WindowManagement.ColorThemeService).Assembly;
 		static readonly Type ResourceSynchronizer = WindowManagement.GetType("Microsoft.VisualStudio.Platform.WindowManagement.ResourceSynchronizer");
 
 		// This method doesn't use the instance at all, and adds values directly, so I can use it as-is.
