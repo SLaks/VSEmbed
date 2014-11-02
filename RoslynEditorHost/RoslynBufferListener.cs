@@ -45,8 +45,8 @@ namespace RoslynEditorHost {
 		}
 
 		static readonly Dictionary<string, string> contentTypeLanguages = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
-			{ "CSharp", "C#" },
-			{ "Basic", "Visual Basic" }
+			{ "CSharp", LanguageNames.CSharp },
+			{ "Basic", LanguageNames.VisualBasic }
 		};
 		public void SubjectBuffersConnected(IWpfTextView textView, ConnectionReason reason, Collection<ITextBuffer> subjectBuffers) {
 			foreach (var buffer in subjectBuffers) {
