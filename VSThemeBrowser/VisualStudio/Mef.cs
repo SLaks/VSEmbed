@@ -40,7 +40,7 @@ namespace VSThemeBrowser.VisualStudio {
 			// Include this DLL to get more EditorOptions values and the core editor
 			"Microsoft.VisualStudio.Text.UI.Wpf",
 
-			// SLaks: Needed for VsUndoHistoryRegistry (which doesn't actually work), VsWpfKeyboardTrackingService, & probably others
+			// SLaks: Needed for VisualStudioWaitIndicator & probably others
 			"Microsoft.VisualStudio.Editor.Implementation",
 
 			// SLaks: Needed for IVsHierarchyItemManager, used by peek providers
@@ -59,7 +59,14 @@ namespace VSThemeBrowser.VisualStudio {
 		static readonly string[] excludedTypes = {
 			// This uses IVsUIShell, which I haven't implemented, to show dialog boxes.
 			// It also causes strange and fatal AccessViolations.
-			"Microsoft.VisualStudio.Editor.Implementation.ExtensionErrorHandler"
+			"Microsoft.VisualStudio.Editor.Implementation.ExtensionErrorHandler",
+
+			// This uses IOleComponentManager, which I don't know how to implement.
+			"Microsoft.VisualStudio.Editor.Implementation.Intellisense.VsWpfKeyboardTrackingService",
+
+			// This uses IWpfKeyboardTrackingService, and I don't want Code Lens anyway (yet?)
+			"Microsoft.VisualStudio.Language.Intellisense.Implementation.CodeLensAdornmentCache",
+			"Microsoft.VisualStudio.Language.Intellisense.Implementation.CodeLensInterLineAdornmentTaggerProvider",
 		};
 		///<summary>Creates a <see cref="ComposablePartCatalog"/> from the types in an assembly, excluding types that cause problems.</summary>
 		static ComposablePartCatalog GetFilteredCatalog(Assembly assembly) {
