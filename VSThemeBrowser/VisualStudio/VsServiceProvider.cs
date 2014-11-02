@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using VSThemeBrowser.VisualStudio.Services;
+using OLE = Microsoft.VisualStudio.OLE.Interop;
 using Shell = Microsoft.VisualStudio.Shell;
 
 namespace VSThemeBrowser.VisualStudio {
@@ -25,7 +26,7 @@ namespace VSThemeBrowser.VisualStudio {
 	/// are never actually called.
 	/// This must be initialized before theme dictionaries or editor services are used
 	///</remarks>
-	public class VsServiceProvider : Microsoft.VisualStudio.OLE.Interop.IServiceProvider {
+	public class VsServiceProvider : OLE.IServiceProvider, SVsServiceProvider {
 		public static VsServiceProvider Instance { get; private set; }
 
 		///<summary>Creates the global service provider and populates it with the services we need.</summary>
@@ -108,7 +109,7 @@ namespace VSThemeBrowser.VisualStudio {
 			serviceInstances[serviceGuid] = instance;
 		}
 
-		public int QueryService([ComAliasName("Microsoft.VisualStudio.OLE.Interop.REFGUID")]ref Guid guidService, [ComAliasName("Microsoft.VisualStudio.OLE.Interop.REFIID")]ref Guid riid, out IntPtr ppvObject) {
+		int OLE.IServiceProvider.QueryService([ComAliasName("Microsoft.VisualStudio.OLE.Interop.REFGUID")]ref Guid guidService, [ComAliasName("Microsoft.VisualStudio.OLE.Interop.REFIID")]ref Guid riid, out IntPtr ppvObject) {
 			object result;
 			if (!serviceInstances.TryGetValue(guidService, out result)) {
 				ppvObject = IntPtr.Zero;
@@ -128,6 +129,12 @@ namespace VSThemeBrowser.VisualStudio {
 					Marshal.Release(unk);
 			}
 			return VSConstants.S_OK;
+		}
+
+		public object GetService(Type serviceType) {
+			object result;
+			serviceInstances.TryGetValue(serviceType.GUID, out result);
+			return result;
 		}
 	}
 }

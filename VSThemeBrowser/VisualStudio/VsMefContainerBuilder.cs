@@ -114,9 +114,9 @@ namespace VSThemeBrowser.VisualStudio {
 		/// Editor factories will not work before this method is called.
 		///</summary>
 		public static void InitialzeContainer(CompositionContainer container) {
-			// Copied from Microsoft.VisualStudio.ComponentModelHost.ComponentModel.DefaultCompositionContainer
-			container.ComposeExportedValue<SVsServiceProvider>(
-				new VsServiceProviderWrapper(ServiceProvider.GlobalProvider));
+			// Based on Microsoft.VisualStudio.ComponentModelHost.ComponentModel.DefaultCompositionContainer.
+			// By implementing SVsServiceProvider myself, I skip an unnecessary call to GetIUnknownForObject.
+			container.ComposeExportedValue<SVsServiceProvider>(VsServiceProvider.Instance);
 
 			// Needed because VsUndoHistoryRegistry tries to create IOleUndoManager from ILocalRegistry, which I presumably cannot do.
 			container.ComposeExportedValue((ITextUndoHistoryRegistry)EditorUtils.EditorUtilsFactory.CreateBasicUndoHistoryRegistry());
