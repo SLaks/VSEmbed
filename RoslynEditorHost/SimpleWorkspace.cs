@@ -11,7 +11,16 @@ using Microsoft.VisualStudio.Text;
 
 namespace RoslynEditorHost {
 	class SimpleWorkspace : Workspace {
-		public SimpleWorkspace(HostServices host) : base(host, "SimpleWorkspace") { }
+		static readonly Type IWorkCoordinatorRegistrationService = Type.GetType("Microsoft.CodeAnalysis.SolutionCrawler.IWorkCoordinatorRegistrationService, Microsoft.CodeAnalysis.Features");
+
+		public SimpleWorkspace(HostServices host) : base(host, "SimpleWorkspace") {
+			var wcrService = typeof(HostWorkspaceServices)
+				.GetMethod("GetService")
+				.MakeGenericMethod(IWorkCoordinatorRegistrationService)
+				.Invoke(Services, null);
+
+			IWorkCoordinatorRegistrationService.GetMethod("Register").Invoke(wcrService, new[] { this });
+		}
 		public Project AddProject(string name, string language) {
 			ProjectInfo projectInfo = ProjectInfo.Create(ProjectId.CreateNewId(null), VersionStamp.Create(), name, name, language);
 			OnProjectAdded(projectInfo);
