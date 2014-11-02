@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Host;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.VisualStudio.Text;
 
 namespace RoslynEditorHost {
 	class SimpleWorkspace : Workspace {
@@ -15,15 +17,16 @@ namespace RoslynEditorHost {
 			OnProjectAdded(projectInfo);
 			return CurrentSolution.GetProject(projectInfo.Id);
 		}
-		public Document CreateDocument(ProjectId projectId, SourceTextContainer container) {
+		public Document CreateDocument(ProjectId projectId, ITextBuffer buffer) {
 			var id = DocumentId.CreateNewId(projectId);
 
 			var docInfo = DocumentInfo.Create(id, "Sample Document",
-				loader: TextLoader.From(container, VersionStamp.Create()),
+				loader: TextLoader.From(buffer.AsTextContainer(), VersionStamp.Create()),
 				sourceCodeKind: SourceCodeKind.Script
 			);
 			OnDocumentAdded(docInfo);
-			OnDocumentOpened(id, container);
+			OnDocumentOpened(id, buffer.AsTextContainer());
+			buffer.Changed += delegate { OnDocumentContextUpdated(id); };
 			return CurrentSolution.GetDocument(id);
 		}
 

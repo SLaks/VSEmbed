@@ -63,7 +63,7 @@ namespace RoslynEditorHost {
 					new MetadataFileReference(typeof(Uri).Assembly.Location, MetadataReferenceProperties.Assembly),
 					new MetadataFileReference(typeof(Enumerable).Assembly.Location, MetadataReferenceProperties.Assembly)
 				}));
-				workspace.CreateDocument(project.Id, buffer.AsTextContainer());
+				workspace.CreateDocument(project.Id, buffer);
 			}
 		}
 
