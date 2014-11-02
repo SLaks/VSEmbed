@@ -10,11 +10,14 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 
 namespace RoslynEditorHost {
-	class EditorWorkspace : Workspace {
+	///<summary>A Roslyn Workspace that contains documents linked to ITextBuffers.</summary>
+	public class EditorWorkspace : Workspace {
+		// TODO: Add an optional parameter to pass changes through to an existing MSBuildWorkspace
+
 		static readonly Type IWorkCoordinatorRegistrationService = Type.GetType("Microsoft.CodeAnalysis.SolutionCrawler.IWorkCoordinatorRegistrationService, Microsoft.CodeAnalysis.Features");
 
 		readonly Dictionary<DocumentId, ITextBuffer> documentBuffers = new Dictionary<DocumentId, ITextBuffer>();
-		public EditorWorkspace(HostServices host) : base(host, "Host") {
+		public EditorWorkspace(HostServices host) : base(host, WorkspaceKind.Host) {
 			var wcrService = typeof(HostWorkspaceServices)
 				.GetMethod("GetService")
 				.MakeGenericMethod(IWorkCoordinatorRegistrationService)
@@ -27,6 +30,8 @@ namespace RoslynEditorHost {
 			OnProjectAdded(projectInfo);
 			return CurrentSolution.GetProject(projectInfo.Id);
 		}
+
+		///<summary>Creates a new document linked to an existing text buffer.</summary>
 		public Document CreateDocument(ProjectId projectId, ITextBuffer buffer) {
 			var id = DocumentId.CreateNewId(projectId);
 			documentBuffers.Add(id, buffer);
