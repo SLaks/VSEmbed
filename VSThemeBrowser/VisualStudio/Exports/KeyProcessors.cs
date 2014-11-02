@@ -11,14 +11,55 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace VSThemeBrowser.VisualStudio.Exports {
 	// Loosely based on WebMatrix's DefaultKeyProcessor
-	class SimpleKeyProcessor : KeyProcessor {
+	///<summary>A base class for a KeyProcessor that handles shortcut keys.</summary>
+	///<remarks>Derived classes should call Add*Command() in their constructors to build the key map.</remarks>
+	public abstract class BaseShortcutKeyProcessor : KeyProcessor {
+		readonly Dictionary<Tuple<ModifierKeys, Key>, Func<bool>> shortcuts = new Dictionary<Tuple<ModifierKeys, Key>, Func<bool>>();
+
+		protected static Func<bool> WithTrue(Action method) { return () => { method(); return true; }; }
+		protected void AddExtendableCommand(Key key, Action<bool> method) {
+			AddCommand(key, WithTrue(() => method(false)));
+			AddShiftCommand(key, WithTrue(() => method(true)));
+		}
+		protected void AddControlExtendableCommand(Key key, Action<bool> method) {
+			AddControlCommand(key, WithTrue(() => method(false)));
+			AddControlShiftCommand(key, WithTrue(() => method(true)));
+		}
+		protected void AddCommand(Key key, Func<bool> method) {
+			AddCommand(ModifierKeys.None, key, method);
+		}
+		protected void AddShiftCommand(Key key, Func<bool> method) {
+			AddCommand(ModifierKeys.Shift, key, method);
+		}
+		protected void AddControlCommand(Key key, Func<bool> method) {
+			AddCommand(ModifierKeys.Control, key, method);
+		}
+		protected void AddControlShiftCommand(Key key, Func<bool> method) {
+			AddCommand(ModifierKeys.Control | ModifierKeys.Shift, key, method);
+		}
+		protected void AddAltShiftCommand(Key key, Func<bool> method) {
+			AddCommand(ModifierKeys.Alt | ModifierKeys.Shift, key, method);
+		}
+		protected void AddCommand(ModifierKeys modifiers, Key key, Func<bool> method) {
+			shortcuts.Add(new Tuple<ModifierKeys, Key>(modifiers, key), method);
+		}
+
+		public override void KeyDown(KeyEventArgs args) {
+			base.KeyDown(args);
+			if (args.Handled) return;
+			Func<bool> method;
+			args.Handled = shortcuts.TryGetValue(Tuple.Create(args.KeyboardDevice.Modifiers, args.Key), out method)
+				&& method();
+		}
+	}
+
+	class StandardKeyProcessor : BaseShortcutKeyProcessor {
 		readonly IWpfTextView textView;
 		readonly IEditorOperations editorOperations;
 		readonly ITextUndoHistory undoHistory;
 
-		readonly Dictionary<Tuple<ModifierKeys, Key>, Func<bool>> shortcuts = new Dictionary<Tuple<ModifierKeys, Key>, Func<bool>>();
 		#region Shortcuts
-		private void AddShortcuts() {
+		void AddShortcuts() {
 			// TODO: Add MoveSelectedLinesUp/Down (in IEditorOperations2, which doesn't exist in v11)
 			AddExtendableCommand(Key.Right, editorOperations.MoveToNextCharacter);
 			AddExtendableCommand(Key.Left, editorOperations.MoveToPreviousCharacter);
@@ -85,59 +126,25 @@ namespace VSThemeBrowser.VisualStudio.Exports {
 			AddControlCommand(Key.Y, redo);
 			AddControlShiftCommand(Key.Z, redo);
 		}
-
-		static Func<bool> WithTrue(Action method) { return () => { method(); return true; }; }
-		private void AddExtendableCommand(Key key, Action<bool> method) {
-			AddCommand(key, WithTrue(() => method(false)));
-			AddShiftCommand(key, WithTrue(() => method(true)));
-		}
-		private void AddControlExtendableCommand(Key key, Action<bool> method) {
-			AddControlCommand(key, WithTrue(() => method(false)));
-			AddControlShiftCommand(key, WithTrue(() => method(true)));
-		}
-		private void AddCommand(Key key, Func<bool> method) {
-			AddCommand(ModifierKeys.None, key, method);
-		}
-		private void AddShiftCommand(Key key, Func<bool> method) {
-			AddCommand(ModifierKeys.Shift, key, method);
-		}
-		private void AddControlCommand(Key key, Func<bool> method) {
-			AddCommand(ModifierKeys.Control, key, method);
-		}
-		private void AddControlShiftCommand(Key key, Func<bool> method) {
-			AddCommand(ModifierKeys.Control | ModifierKeys.Shift, key, method);
-		}
-		private void AddAltShiftCommand(Key key, Func<bool> method) {
-			AddCommand(ModifierKeys.Alt | ModifierKeys.Shift, key, method);
-		}
-		private void AddCommand(ModifierKeys modifiers, Key key, Func<bool> method) {
-			shortcuts.Add(new Tuple<ModifierKeys, Key>(modifiers, key), method);
-		}
 		#endregion
 
-
-		public SimpleKeyProcessor(IWpfTextView textView, IEditorOperations editorOperations, ITextUndoHistory undoHistory) {
+		public StandardKeyProcessor(IWpfTextView textView, IEditorOperations editorOperations, ITextUndoHistory undoHistory) {
 			this.textView = textView;
 			this.editorOperations = editorOperations;
 			this.undoHistory = undoHistory;
 			AddShortcuts();
 		}
 
-		public override void KeyDown(KeyEventArgs args) {
-			base.KeyDown(args);
-			Func<bool> method;
-			args.Handled = shortcuts.TryGetValue(Tuple.Create(args.KeyboardDevice.Modifiers, args.Key), out method)
-				&& method();
-			// TODO: Handle Alt+Arrows to enter box selection
-		}
+		// TODO: Handle Alt+Arrows to enter box selection
 
+
+		// Copied directly from WebMatrix's DefaultKeyProcessor
 		public override void TextInput(TextCompositionEventArgs args) {
 			if (args.Text.Length > 0)
 				args.Handled = editorOperations.InsertText(args.Text);
 			if (args.Handled)
 				textView.Caret.EnsureVisible();
 		}
-
 
 		public override void TextInputStart(TextCompositionEventArgs args) {
 			if (args.TextComposition is ImeTextComposition) {
@@ -150,7 +157,7 @@ namespace VSThemeBrowser.VisualStudio.Exports {
 			else
 				args.Handled = false;
 		}
-		private void HandleProvisionalImeInput(TextCompositionEventArgs args) {
+		void HandleProvisionalImeInput(TextCompositionEventArgs args) {
 			if (args.Text.Length == 0)
 				return;
 			args.Handled = editorOperations.InsertProvisionalText(args.Text);
@@ -162,14 +169,15 @@ namespace VSThemeBrowser.VisualStudio.Exports {
 	[Export(typeof(IKeyProcessorProvider))]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	[ContentType("text")]
-	[Name("Default KeyProcessor")]
-	sealed class SimpleKeyProcessorProvider : IKeyProcessorProvider {
+	[Name("Standard KeyProcessor")]
+	sealed class StandardKeyProcessorProvider : IKeyProcessorProvider {
 		[Import]
 		public IEditorOperationsFactoryService EditorOperationsFactory { get; set; }
 		[Import]
 		public ITextUndoHistoryRegistry UndoHistoryRegistry { get; set; }
+
 		public KeyProcessor GetAssociatedProcessor(IWpfTextView wpfTextView) {
-			return new SimpleKeyProcessor(wpfTextView, EditorOperationsFactory.GetEditorOperations(wpfTextView), UndoHistoryRegistry.GetHistory(wpfTextView.TextBuffer));
+			return new StandardKeyProcessor(wpfTextView, EditorOperationsFactory.GetEditorOperations(wpfTextView), UndoHistoryRegistry.GetHistory(wpfTextView.TextBuffer));
 		}
 	}
 }
