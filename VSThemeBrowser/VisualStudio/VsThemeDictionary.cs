@@ -56,7 +56,7 @@ namespace VSThemeBrowser.VisualStudio {
 			set {
 				designerOnly = value;
 				if (value) {
-					if (IsDesignMode)
+					if (VsLoader.IsDesignMode)
 						LoadTheme(new Random().Next(Themes.Count));
 					else
 						MergedDictionaries[0].Clear();
@@ -69,19 +69,15 @@ namespace VSThemeBrowser.VisualStudio {
 			get { return Themes[ThemeIndex]; }
 			set { ThemeIndex = value.Index; }
 		}
+
 		int themeIndex;
 		public int ThemeIndex {
 			get { return themeIndex; }
 			set { themeIndex = value; LoadTheme(value); }
 		}
 
-
-		private bool IsDesignMode {
-			get { return (bool)DesignerProperties.IsInDesignModeProperty.GetMetadata(typeof(DependencyObject)).DefaultValue; }
-		}
-
 		public void LoadTheme(int index) {
-			if (service == null || (DesignerOnly && IsDesignMode))
+			if (service == null || (DesignerOnly && VsLoader.IsDesignMode))
 				return;
 			var newDictionary = new ResourceDictionary();
 

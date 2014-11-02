@@ -61,9 +61,7 @@ namespace VSThemeBrowser.VisualStudio {
 					{ typeof(SUIHostLocale).GUID, new SystemUIHostLocale() },
 					{ typeof(SVsFontAndColorCacheManager).GUID, new StubVsFontAndColorCacheManager() },
 
-					// Used by Roslyn (really!)
-					{ typeof(SComponentModel).GUID, new MefComponentModel() },
-					// Used by VisualStudioWaitIndicator
+					// Used by Roslyn's VisualStudioWaitIndicator
 					{ typeof(SVsThreadedWaitDialogFactory).GUID, new BaseWaitDialogFactory() },
 				}
 			};
@@ -84,6 +82,19 @@ namespace VSThemeBrowser.VisualStudio {
 				type.GetMethod("CreateFromSetSite", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static)
 					.Invoke(null, new[] { sp });
 			}
+		}
+
+		///<summary>Gets the MEF IComponentModel installed in this ServiceProvider, if any.</summary>
+		public IComponentModel ComponentModel { get; private set; }
+
+		///<summary>Registers a MEF container in this ServiceProvider.</summary>
+		///<remarks>
+		/// This is used to provide the IComponentModel service, which is used by many parts of Roslyn and the editor.
+		/// It's also used by our TextViewHost wrapper control to access the MEF container.
+		///</remarks>
+		public void SetMefContainer(CompositionContainer container) {
+			ComponentModel = new MefComponentModel(container);
+			AddService(typeof(SComponentModel), ComponentModel);
 		}
 
 		public ThemedVsUIShell UIShell { get; private set; }
@@ -118,17 +129,5 @@ namespace VSThemeBrowser.VisualStudio {
 			}
 			return VSConstants.S_OK;
 		}
-	}
-
-	class MefComponentModel : IComponentModel {
-		public ComposablePartCatalog DefaultCatalog { get { return VsMefContainerBuilder.Catalog; } }
-
-		public ICompositionService DefaultCompositionService { get { return VsMefContainerBuilder.Container; } }
-		public ExportProvider DefaultExportProvider { get { return VsMefContainerBuilder.Container; } }
-
-		public ComposablePartCatalog GetCatalog(string catalogName) { return DefaultCatalog; }
-
-		public IEnumerable<T> GetExtensions<T>() where T : class { return DefaultExportProvider.GetExportedValues<T>(); }
-		public T GetService<T>() where T : class { return DefaultExportProvider.GetExportedValue<T>(); }
 	}
 }

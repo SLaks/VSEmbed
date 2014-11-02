@@ -14,6 +14,7 @@ namespace VSThemeBrowser {
 		public App() {
 			VisualStudio.VsLoader.Load(new Version(14, 0, 0, 0));
 			VisualStudio.VsServiceProvider.Initialize();
+			VisualStudio.VsMefContainerBuilder.CreateDefaultContainer();
 		}
 		protected override void OnStartup(StartupEventArgs e) {
 			base.OnStartup(e);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -8,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 using Microsoft.Win32;
 
 namespace VSThemeBrowser.VisualStudio {
@@ -56,6 +58,12 @@ namespace VSThemeBrowser.VisualStudio {
 				Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\" + sku + @"\" + version.ToString(2), "InstallDir", null) as string
 			).FirstOrDefault(p => p != null);
 		}
+
+		///<summary>Indicates whether the code is running within the VS designer.</summary>
+		public static bool IsDesignMode {
+			get { return (bool)DesignerProperties.IsInDesignModeProperty.GetMetadata(typeof(DependencyObject)).DefaultValue; }
+		}
+
 
 		///<summary>Initializes the assembly loader with the latest installed version of Visual Studio.</summary>
 		public static void LoadLatest() {

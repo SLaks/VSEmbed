@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
+using System.ComponentModel.Composition.Primitives;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -7,11 +11,13 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using Microsoft.Internal.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
 namespace VSThemeBrowser.VisualStudio.Services {
 	// This file contains services that are more than stubs, but are not very complicated.
+
 	///<summary>An IVsUIShell that loads colors from an active VsThemeDictionary.</summary>
 	public class ThemedVsUIShell : IVsUIShell5 {
 		///<summary>Gets or sets the theme dictionary to load colors from.</summary>
@@ -102,6 +108,23 @@ namespace VSThemeBrowser.VisualStudio.Services {
 				return 0;
 			}
 		}
+	}
+
+	class MefComponentModel : IComponentModel {
+		public MefComponentModel(CompositionContainer container) {
+			DefaultCompositionService = container;
+			DefaultExportProvider = container;
+		}
+
+		public ComposablePartCatalog DefaultCatalog { get { throw new NotImplementedException(); } }
+
+		public ICompositionService DefaultCompositionService { get; private set; }
+		public ExportProvider DefaultExportProvider { get; private set; }
+
+		public ComposablePartCatalog GetCatalog(string catalogName) { throw new NotImplementedException(); }
+
+		public IEnumerable<T> GetExtensions<T>() where T : class { return DefaultExportProvider.GetExportedValues<T>(); }
+		public T GetService<T>() where T : class { return DefaultExportProvider.GetExportedValue<T>(); }
 	}
 
 	class SystemUIHostLocale : IUIHostLocale2 {
