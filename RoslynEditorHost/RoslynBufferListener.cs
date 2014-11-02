@@ -48,7 +48,9 @@ namespace RoslynEditorHost {
 			{ "CSharp", LanguageNames.CSharp },
 			{ "Basic", LanguageNames.VisualBasic }
 		};
-		public void SubjectBuffersConnected(IWpfTextView textView, ConnectionReason reason, Collection<ITextBuffer> subjectBuffers) {
+		public async void SubjectBuffersConnected(IWpfTextView textView, ConnectionReason reason, Collection<ITextBuffer> subjectBuffers) {
+			// Give the code that created the buffer a chance to attach its own workspace
+			await Task.Yield();
 			foreach (var buffer in subjectBuffers) {
 				if (buffer.GetWorkspace() != null)
 					continue;
