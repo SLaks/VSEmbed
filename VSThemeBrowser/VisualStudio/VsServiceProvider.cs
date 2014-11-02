@@ -33,10 +33,10 @@ namespace VSThemeBrowser.VisualStudio {
 				return;
 
 			if (VsLoader.VsVersion == null) {		// If the App() ctor didn't set this, we're in the designer
-				VsLoader.Initialize(new Version(11, 0, 0, 0));
+				VsLoader.Load(new Version(11, 0, 0, 0));
 			}
 
-			var esm = ExternalSettingsManager.CreateForApplication(Path.Combine(VsLoader.GetVersionPath(VsLoader.VsVersion), "devenv.exe"), "Exp");	// FindVsVersions().LastOrDefault().ToString()));
+			var esm = ExternalSettingsManager.CreateForApplication(Path.Combine(VsLoader.InstallationDirectory, "devenv.exe"));
 			var sp = new VsServiceProvider {
 				UIShell = new MyVsUIShell(),
 				serviceInstances =
@@ -70,7 +70,7 @@ namespace VSThemeBrowser.VisualStudio {
 			// which we cannot reference directly (to avoid breaking
 			// older versions). Therefore, I set the global property
 			// for every available version using Reflection instead.
-			foreach (var vsVersion in VsLoader.FindVsVersions().Where(v => v.Major >= 10)) {
+			foreach (var vsVersion in VsLoader.FindAllVersions().Where(v => v.Major >= 10)) {
 				var type = Type.GetType("Microsoft.VisualStudio.Shell.ServiceProvider, Microsoft.VisualStudio.Shell." + vsVersion.ToString(2));
 				if (type == null)
 					continue;

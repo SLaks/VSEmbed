@@ -11,8 +11,11 @@ using System.Threading.Tasks;
 using Microsoft.Win32;
 
 namespace VSThemeBrowser.VisualStudio {
-	static class VsLoader {
-		public static IEnumerable<Version> FindVsVersions() {
+	///<summary>Sets up assembly redirection to load Visual Studio assemblies.</summary>
+	///<remarks>This class must be initialized before anything else is JITted.</remarks>
+	public static class VsLoader {
+		///<summary>Finds all installed Visual Studio versions.</summary>
+		public static IEnumerable<Version> FindAllVersions() {
 			// Grab every version of every SKU, sorted by SKU priority
 			// Then, filter out duplicate versions in later SKUs only.
 			return SkuKeyNames
@@ -47,29 +50,39 @@ namespace VSThemeBrowser.VisualStudio {
 			"VBExpress",	// Visual Basic Express
 		};
 
-		public static string GetVersionPath(Version version) {
+		///<summary>Gets the installation directory for the specified version.</summary>
+		private static string GetInstallationDirectory(Version version) {
 			return SkuKeyNames.Select(sku =>
 				Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\" + sku + @"\" + version.ToString(2), "InstallDir", null) as string
 			).FirstOrDefault(p => p != null);
 		}
 
-		public static void InitializeLatest() {
-			Initialize(FindVsVersions().Last());
+		///<summary>Initializes the assembly loader with the latest installed version of Visual Studio.</summary>
+		public static void LoadLatest() {
+			Load(FindAllVersions().Last());
 		}
 
-		public static void Initialize(Version vsVersion) {
+		///<summary>Initializes the assembly loader with the specified version of Visual Studio.</summary>
+		public static void Load(Version vsVersion) {
 			if (VsVersion != null)
 				throw new InvalidOperationException("VsLoader cannot be initialized twice");
+			if (string.IsNullOrEmpty(GetInstallationDirectory(vsVersion)) || !Directory.Exists(GetInstallationDirectory(vsVersion)))
+				throw new ArgumentException("Cannot locate Visual Studio v" + vsVersion);
+
 			VsVersion = vsVersion;
-			TryLoadInteropAssembly(GetVersionPath(vsVersion));
+			InstallationDirectory = GetInstallationDirectory(VsVersion);
+			TryLoadInteropAssembly(InstallationDirectory);
 			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve_VS;
 
 			if (RoslynAssemblyPath != null)
 				AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve_Roslyn;
 		}
 
-		///<summary>The version of Visual Studio that will be loaded.  This cannot be changed, because the CLR caches assembly loads.</summary>
+		///<summary>Gets the version of Visual Studio that will be loaded.  This cannot be changed, because the CLR caches assembly loads.</summary>
 		public static Version VsVersion { get; private set; }
+
+		///<summary>Gets the installation directory for the loaded VS version.</summary>
+		public static string InstallationDirectory { get; private set; }
 
 		static readonly Regex versionMatcher = new Regex(@"(?<=\.)\d+\.0$");
 		static Assembly CurrentDomain_AssemblyResolve_VS(object sender, ResolveEventArgs args) {
@@ -88,11 +101,10 @@ namespace VSThemeBrowser.VisualStudio {
 			try {
 				return Assembly.Load(name);
 			} catch (FileNotFoundException) {
-				var directory = GetVersionPath(VsVersion);
 				if (name.Name.EndsWith(".resources"))
-					return LoadResourceDll(name, directory, name.CultureInfo)
-						?? LoadResourceDll(name, directory, name.CultureInfo.Parent);
-				return Assembly.LoadFile(Path.Combine(directory, name.Name + ".dll"));
+					return LoadResourceDll(name, InstallationDirectory, name.CultureInfo)
+						?? LoadResourceDll(name, InstallationDirectory, name.CultureInfo.Parent);
+				return Assembly.LoadFile(Path.Combine(InstallationDirectory, name.Name + ".dll"));
 			}
 		}
 		static Assembly LoadResourceDll(AssemblyName name, string baseDirectory, CultureInfo culture) {
@@ -102,11 +114,12 @@ namespace VSThemeBrowser.VisualStudio {
 			return Assembly.LoadFile(dllPath);
 		}
 
+		///<summary>Gets the directory containing Roslyn assemblies, or null if this VS version does not contain Roslyn.</summary>
 		public static string RoslynAssemblyPath {
 			get {
-				// TODO: Use Roslyn Preview in Dev12
+				// TODO: Use Roslyn Preview in Dev12?
 				if (VsVersion.Major == 14)
-					return Path.Combine(GetVersionPath(VsVersion), "PrivateAssemblies");
+					return Path.Combine(InstallationDirectory, "PrivateAssemblies");
 				return null;	// TODO: Predict GAC / versioning for Dev15
 			}
 		}
@@ -159,7 +172,7 @@ namespace VSThemeBrowser.VisualStudio {
 				};
 
 				return true;
-			} catch (Exception) {
+			} catch {
 				return false;
 			}
 		}

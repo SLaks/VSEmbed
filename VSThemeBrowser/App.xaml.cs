@@ -12,7 +12,7 @@ namespace VSThemeBrowser {
 	/// </summary>
 	public partial class App : Application {
 		public App() {
-			VisualStudio.VsLoader.Initialize(new Version(14, 0, 0, 0));
+			VisualStudio.VsLoader.Load(new Version(14, 0, 0, 0));
 			VisualStudio.VsServiceProvider.Initialize();
 		}
 		protected override void OnStartup(StartupEventArgs e) {
