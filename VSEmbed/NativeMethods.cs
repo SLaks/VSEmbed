@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VSThemeBrowser {
+namespace VSEmbed {
 	static class NativeMethods {
 		// Microsoft.VisualStudio.PlatformUI.NativeMethods
 		[DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]

@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
 
-namespace VSThemeBrowser.VisualStudio.Exports {
+namespace VSEmbed.Exports {
 	// Loosely based on WebMatrix's DefaultKeyProcessor
 	///<summary>A base class for a KeyProcessor that handles shortcut keys.</summary>
 	///<remarks>Derived classes should call Add*Command() in their constructors to build the key map.</remarks>

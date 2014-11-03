@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VSThemeBrowser.VisualStudio {
+namespace VSEmbed {
 	///<summary>Contains resource keys for resources that change based on Visual Studio versions.</summary>
 	///<remarks>
 	/// Dev14 has standard styles for basic controls, keyed as VsComboBoxStyleKey etc.

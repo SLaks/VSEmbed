@@ -1,13 +1,12 @@
 ﻿<Application x:Class="VSThemeBrowser.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:VSThemeBrowser"
-             xmlns:vs="clr-namespace:VSThemeBrowser.VisualStudio"
+             xmlns:vsembed="clr-namespace:VSEmbed;assembly=VSEmbed"
              StartupUri="MainWindow.xaml">
 	<Application.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<vs:VsThemeDictionary ThemeIndex="1"></vs:VsThemeDictionary>
+				<vsembed:VsThemeDictionary ThemeIndex="1" />
 			</ResourceDictionary.MergedDictionaries>
 			<GeometryGroup FillRule="EvenOdd" x:Key="VectorIcon">
 				<EllipseGeometry Center="1, 1" RadiusX="1" RadiusY="1" />

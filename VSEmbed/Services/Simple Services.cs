@@ -16,7 +16,7 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace VSThemeBrowser.VisualStudio.Services {
+namespace VSEmbed.Services {
 	// This file contains services that are more than stubs, but are not very complicated.
 
 	///<summary>An IVsUIShell that loads colors from an active VsThemeDictionary.</summary>
@@ -169,7 +169,7 @@ namespace VSThemeBrowser.VisualStudio.Services {
 
 	class SystemUIHostLocale : IUIHostLocale2 {
 		public int GetDialogFont(UIDLGLOGFONT[] pLOGFONT) {
-			pLOGFONT[0].lfFaceName = System.Drawing.SystemFonts.CaptionFont.Name.Select(c => (ushort)c).ToArray();
+			pLOGFONT[0].lfFaceName = SystemFonts.CaptionFontFamily.Source.Select(c => (ushort)c).ToArray();
 			return 0;
 		}
 

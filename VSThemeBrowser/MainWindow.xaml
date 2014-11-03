@@ -10,9 +10,8 @@
 		xmlns:wsc="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.11.0"
 		xmlns:bmicc="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.UI.Internal"
 		xmlns:wcp="clr-namespace:Microsoft.VisualStudio.PlatformUI.Shell.Controls;assembly=Microsoft.VisualStudio.Shell.ViewManager"
-		xmlns:controls="clr-namespace:VSThemeBrowser.Controls"
-        xmlns:local="clr-namespace:VSThemeBrowser"
-        xmlns:localvs="clr-namespace:VSThemeBrowser.VisualStudio"
+		xmlns:vscontrols="clr-namespace:VSEmbed.Controls;assembly=VSEmbed"
+        xmlns:vsembed="clr-namespace:VSEmbed;assembly=VSEmbed"
         mc:Ignorable="d"
         Title="EditorTestApp" Height="350" Width="525">
 	<vsc:CustomChromeWindow.Resources>
@@ -20,7 +19,7 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="/Microsoft.VisualStudio.Shell.UI.Internal;component/Themes/Generic.xaml" />
 				<ResourceDictionary Source="/Microsoft.VisualStudio.Platform.WindowManagement;component/Themes/Resources.xaml" />
-				<ResourceDictionary Source="VisualStudio/ComboBoxStyles.xaml" />
+				<ResourceDictionary Source="/VSEmbed;component/Controls/ComboBoxStyles.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 
 			<!-- TODO: Create themed styles for Dev12. -->
@@ -32,9 +31,9 @@
 			</Style>
 
 			<!-- Create default styles that inherit the standard styles (Dev14) or my styles (older versions) -->
-			<Style BasedOn="{StaticResource {x:Static localvs:VsResourceKeys.ButtonStyleKey}}"   x:Key="{x:Type Button}"   TargetType="Button"   />
-			<Style BasedOn="{StaticResource {x:Static localvs:VsResourceKeys.CheckBoxStyleKey}}" x:Key="{x:Type CheckBox}" TargetType="CheckBox" />
-			<Style BasedOn="{StaticResource {x:Static localvs:VsResourceKeys.ComboBoxStyleKey}}" x:Key="{x:Type ComboBox}" TargetType="ComboBox" />
+			<Style BasedOn="{StaticResource {x:Static vsembed:VsResourceKeys.ButtonStyleKey}}"   x:Key="{x:Type Button}"   TargetType="Button"   />
+			<Style BasedOn="{StaticResource {x:Static vsembed:VsResourceKeys.CheckBoxStyleKey}}" x:Key="{x:Type CheckBox}" TargetType="CheckBox" />
+			<Style BasedOn="{StaticResource {x:Static vsembed:VsResourceKeys.ComboBoxStyleKey}}" x:Key="{x:Type ComboBox}" TargetType="ComboBox" />
 		</ResourceDictionary>
 	</vsc:CustomChromeWindow.Resources>
 
@@ -91,7 +90,7 @@
 					</DockPanel>-->
 					<bmicc:VsToolBarHostControl Content="{TemplateBinding ContentControl.Content}" Grid.Row="2" DataContext="{Binding ToolBarSet}" />
 					<DockPanel Name="StatusBarPanel" x:Uid="DockPanel_1" Grid.Row="3" MinHeight="22" Background="{DynamicResource {x:Static pui:EnvironmentColors.StatusBarDefaultBrushKey}}">
-						<controls:VsResizeGrip Name="ResizeGripControl" x:Uid="ResizeGripControl" DockPanel.Dock="Right" Padding="0" Cursor="SizeNWSE" VerticalAlignment="Bottom" />
+						<vscontrols:VsResizeGrip Name="ResizeGripControl" x:Uid="ResizeGripControl" DockPanel.Dock="Right" Padding="0" Cursor="SizeNWSE" VerticalAlignment="Bottom" />
 						<DockPanel />
 						<!--<bmicc:WorkerThreadStatusBarContainer Name="StatusBarContainer" TextElement.Foreground="{DynamicResource {x:Static pui:EnvironmentColors.StatusBarDefaultTextBrushKey}}" TextElement.FontSize="{DynamicResource VsFont.EnvironmentFontSize}" TextElement.FontFamily="{DynamicResource VsFont.EnvironmentFontFamily}" />-->
 					</DockPanel>
@@ -147,6 +146,6 @@
 		</ComboBox>
 		<Button DockPanel.Dock="Top">Button</Button>
 		<CheckBox DockPanel.Dock="Top">Checkbox</CheckBox>
-		<controls:TextViewHost Text="Hi, everyone!" ContentType="CSharp" />
+		<vscontrols:TextViewHost Text="Hi, everyone!" ContentType="CSharp" />
 	</DockPanel>
 </vsc:CustomChromeWindow>

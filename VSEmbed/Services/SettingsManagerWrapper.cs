@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace VSThemeBrowser.VisualStudio.Services {
+namespace VSEmbed.Services {
 	///<summary>Wraps the (half-)managed ExternalSettingsManager implementation in an IVsSettingsManager so that it can be consumed by code that expects the native interface.</summary>
 	class SettingsManagerWrapper : IVsSettingsManager, IDisposable {
 		readonly ExternalSettingsManager inner;

@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace VSThemeBrowser.VisualStudio.Services {
+namespace VSEmbed.Services {
 	// This file contains stub implementations of services that we don't actually implement.
 
 	class StubVsActivityLog : IVsActivityLog {

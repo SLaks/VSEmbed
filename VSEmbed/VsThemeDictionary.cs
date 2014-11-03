@@ -12,10 +12,9 @@ using Microsoft.Internal.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using VSThemeBrowser.Controls;
 
 #pragma warning disable 0436	// Tell the non-Roslyn compiler to ignore conflicts with inaccessible NoPIA types
-namespace VSThemeBrowser.VisualStudio {
+namespace VSEmbed {
 	public class VsThemeDictionary : ResourceDictionary {
 
 		// We must access everything from these classes using dynamic due to NoPIA conflicts.
@@ -197,10 +196,8 @@ namespace VSThemeBrowser.VisualStudio {
 		#region AddFonts
 		// Copied from ResourceSynchronizer and modified to not use VS native font utilities
 		void AddFonts(ResourceDictionary newDictionary) {
-			var dialogFont = System.Drawing.SystemFonts.CaptionFont;
-
-			newDictionary.Add("VsFont.EnvironmentFontFamily", new FontFamily(dialogFont.Name));
-			newDictionary.Add("VsFont.EnvironmentFontSize", (double)dialogFont.Size);
+			newDictionary.Add("VsFont.EnvironmentFontFamily", SystemFonts.CaptionFontFamily);
+			newDictionary.Add("VsFont.EnvironmentFontSize", SystemFonts.CaptionFontSize);
 			AddCaptionFonts(newDictionary);
 		}
 

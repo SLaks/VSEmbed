@@ -14,9 +14,8 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Text.Storage;
 using Microsoft.VisualStudio.Utilities;
-using VSThemeBrowser.Controls;
 
-namespace VSThemeBrowser.VisualStudio {
+namespace VSEmbed {
 	///<summary>Creates the MEF composition container used by the editor services.</summary>
 	/// <remarks>Stolen, with much love and gratitude, from @JaredPar's EditorUtils.</remarks>
 	public static class VsMefContainerBuilder {

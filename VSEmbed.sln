@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSThemeBrowser", "VSThemeBr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSEmbed.Roslyn", "VSEmbed.Roslyn\VSEmbed.Roslyn.csproj", "{102CB436-A268-4084-9D56-A2131763CC28}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSEmbed", "VSEmbed\VSEmbed.csproj", "{93BBEB44-6849-423E-A5C1-440558661B5C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{102CB436-A268-4084-9D56-A2131763CC28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{102CB436-A268-4084-9D56-A2131763CC28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{102CB436-A268-4084-9D56-A2131763CC28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93BBEB44-6849-423E-A5C1-440558661B5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93BBEB44-6849-423E-A5C1-440558661B5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93BBEB44-6849-423E-A5C1-440558661B5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93BBEB44-6849-423E-A5C1-440558661B5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

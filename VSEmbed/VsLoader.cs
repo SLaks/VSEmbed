@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Win32;
 
-namespace VSThemeBrowser.VisualStudio {
+namespace VSEmbed {
 	///<summary>Sets up assembly redirection to load Visual Studio assemblies.</summary>
 	///<remarks>This class must be initialized before anything else is JITted.</remarks>
 	public static class VsLoader {

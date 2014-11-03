@@ -9,7 +9,7 @@ using System.Windows.Media;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Storage;
 
-namespace VSThemeBrowser.VisualStudio.Exports {
+namespace VSEmbed.Exports {
 	// This file contains trivially simply MEF exports
 
 	[Export(typeof(IExtensionErrorHandler))]

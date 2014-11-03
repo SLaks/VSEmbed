@@ -13,11 +13,11 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using VSThemeBrowser.VisualStudio.Services;
+using VSEmbed.Services;
 using OLE = Microsoft.VisualStudio.OLE.Interop;
 using Shell = Microsoft.VisualStudio.Shell;
 
-namespace VSThemeBrowser.VisualStudio {
+namespace VSEmbed {
 	///<summary>An out-of-process implementation of Visual Studio's singleton OLE ServiceProvider.</summary>
 	///<remarks>
 	/// Visual Studio services use this class, both through MEF SVsServiceProvider and

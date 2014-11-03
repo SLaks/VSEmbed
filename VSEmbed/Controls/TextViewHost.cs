@@ -9,9 +9,8 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
-using VSThemeBrowser.VisualStudio;
 
-namespace VSThemeBrowser.Controls {
+namespace VSEmbed.Controls {
 	public class TextViewHost : ContentPresenter {
 		public IWpfTextView TextView { get; private set; }
 		public TextViewHost() {

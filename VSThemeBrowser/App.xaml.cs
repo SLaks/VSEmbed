@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using VSEmbed;
 
 namespace VSThemeBrowser {
 	/// <summary>
@@ -12,9 +13,9 @@ namespace VSThemeBrowser {
 	/// </summary>
 	public partial class App : Application {
 		public App() {
-			VisualStudio.VsLoader.Load(new Version(14, 0, 0, 0));
-			VisualStudio.VsServiceProvider.Initialize();
-			VisualStudio.VsMefContainerBuilder.CreateDefaultContainer();
+			VsLoader.Load(new Version(14, 0, 0, 0));
+			VsServiceProvider.Initialize();
+			VsMefContainerBuilder.CreateDefaultContainer();
 		}
 		protected override void OnStartup(StartupEventArgs e) {
 			base.OnStartup(e);
