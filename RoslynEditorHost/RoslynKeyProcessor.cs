@@ -92,6 +92,30 @@ namespace RoslynEditorHost {
 			method(wpfTextView.TextBuffer, wpfTextView.TextBuffer.ContentType, () => handled = false);
 			args.Handled = handled;
 		}
+
+		// ExecuteTypeCharacter() takes a COM variant pointer.
+		// Instead of messing with Marshal and variants, I use
+		// more Reflection to bypass that method and call into
+		// the ICommandHandlerService directly.
+		static readonly PropertyInfo currentHandlersProperty = oleCommandTargetType.GetProperty("CurrentHandlers", BindingFlags.NonPublic | BindingFlags.Instance);
+		static readonly Type TypeCharCommandArgs = Type.GetType("Microsoft.CodeAnalysis.Editor.Commands.TypeCharCommandArgs, Microsoft.CodeAnalysis.EditorFeatures");
+		static readonly MethodInfo executeMethod = currentHandlersProperty.PropertyType.GetMethod("Execute").MakeGenericMethod(TypeCharCommandArgs);
+		public override void TextInput(TextCompositionEventArgs args) {
+			base.TextInput(args);
+
+			foreach (var ch in args.Text) {
+				var commandArgs = Activator.CreateInstance(TypeCharCommandArgs, wpfTextView, wpfTextView.TextBuffer, ch);
+
+				// If an exception is thrown, don't set args.Handled
+				var handled = true;
+				Action nextTarget = () => handled = false;
+				var currentHandlers = currentHandlersProperty.GetValue(innerCommandTarget);
+				executeMethod.Invoke(currentHandlers, new object[] { wpfTextView.TextBuffer.ContentType, commandArgs, nextTarget });
+				if (handled)
+					args.Handled = true;
+			}
+		}
+
 		#region Shortcuts
 		void AddShortcuts() {
 			#region Cursor Movement
@@ -154,7 +178,7 @@ namespace RoslynEditorHost {
 		public RoslynKeyProcessorProvider(SVsServiceProvider sp) {
 			// This is necessary for icons in IntelliSense
 			new VsImageService(sp).InitializeLibrary();
-        }
+		}
 
 		[Import]
 		public IComponentModel ComponentModel { get; set; }

@@ -54,5 +54,22 @@ namespace RoslynEditorHost {
 			var buffer = documentBuffers[id];
 			buffer.Replace(new Span(0, buffer.CurrentSnapshot.Length), text.ToString());
 		}
+
+		public override bool CanApplyChange(ApplyChangesKind feature) {
+			switch (feature) {
+				case ApplyChangesKind.AddMetadataReference:
+				case ApplyChangesKind.RemoveMetadataReference:
+				case ApplyChangesKind.ChangeDocument:
+					return true;
+				case ApplyChangesKind.AddProject:
+				case ApplyChangesKind.RemoveProject:
+				case ApplyChangesKind.AddProjectReference:
+				case ApplyChangesKind.RemoveProjectReference:
+				case ApplyChangesKind.AddDocument:
+				case ApplyChangesKind.RemoveDocument:
+				default:
+					return false;
+			}
+		}
 	}
 }
