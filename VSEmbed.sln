@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.22013.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSThemeBrowser", "VSThemeBrowser\VSThemeBrowser.csproj", "{E50D3C83-0E7C-41C3-8B2D-35F84017E220}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSEmbed.DemoApp", "VSEmbed.DemoApp\VSEmbed.DemoApp.csproj", "{E50D3C83-0E7C-41C3-8B2D-35F84017E220}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSEmbed.Roslyn", "VSEmbed.Roslyn\VSEmbed.Roslyn.csproj", "{102CB436-A268-4084-9D56-A2131763CC28}"
 EndProject

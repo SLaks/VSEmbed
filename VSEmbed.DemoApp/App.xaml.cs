@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using VSEmbed;
 
-namespace VSThemeBrowser {
+namespace VSEmbed.DemoApp {
 	/// <summary>
 	/// Interaction logic for App.xaml
 	/// </summary>

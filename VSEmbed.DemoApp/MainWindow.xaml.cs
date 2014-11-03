@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 using Microsoft.VisualStudio.PlatformUI.Shell;
 using Microsoft.VisualStudio.PlatformUI.Shell.Controls;
 
-namespace VSThemeBrowser {
+namespace VSEmbed.DemoApp {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
