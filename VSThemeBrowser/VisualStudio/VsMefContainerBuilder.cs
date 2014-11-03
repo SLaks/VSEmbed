@@ -32,6 +32,9 @@ namespace VSThemeBrowser.VisualStudio {
 			// This uses IWpfKeyboardTrackingService, and I don't want Code Lens anyway (yet?)
 			"Microsoft.VisualStudio.Language.Intellisense.Implementation.CodeLensAdornmentCache",
 			"Microsoft.VisualStudio.Language.Intellisense.Implementation.CodeLensInterLineAdornmentTaggerProvider",
+
+			// This uses COM services to try to read user settings, and I can't make that work.  I replace it with my own simple implementation.
+			"Microsoft.VisualStudio.Editor.Implementation.DataStorageService",
 		};
 		///<summary>Prevents an exported type from being included in the created MEF container.</summary>
 		///<remarks>Call this method if an exported type doesn't work outside Visual Studio.</remarks>

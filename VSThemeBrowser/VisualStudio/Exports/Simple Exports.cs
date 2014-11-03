@@ -24,12 +24,19 @@ namespace VSThemeBrowser.VisualStudio.Exports {
 	// editor reads MEF-exported defaults in EditorFormatMap, so I do not need to
 	// implement this at all unless I want to allow user customization.
 	sealed class SimpleDataStorage : IDataStorage {
+		readonly ResourceDictionary plainTextValue;
+		public SimpleDataStorage(ResourceDictionary plainTextValue) {
+			this.plainTextValue = plainTextValue;
+		}
+
 		public bool TryGetItemValue(string itemKey, out ResourceDictionary itemValue) {
 			switch (itemKey) {
-				// This is used by CollapsedAdornmentProvider, and has no default value.
-				// However, MEF doesn't use my DataStorageService, so this doesn't work.
+				case "Plain Text":
+					itemValue = plainTextValue;
+					return plainTextValue != null;
 				case "Collapsible Text (Collapsed)":
-					itemValue = new ResourceDictionary { { "Foreground", Brushes.DarkSlateBlue } };
+					// This is used by CollapsedAdornmentProvider, and has no default value.
+					itemValue = new ResourceDictionary { { "Foreground", Brushes.Black } };
 					return true;
 				default:
 					itemValue = null;
@@ -37,10 +44,24 @@ namespace VSThemeBrowser.VisualStudio.Exports {
 			}
 		}
 	}
+
 	[Export(typeof(IDataStorageService))]
 	sealed class DataStorageService : IDataStorageService {
-		readonly IDataStorage instance = new SimpleDataStorage();
-		public IDataStorage GetDataStorage(string storageKey) { return instance; }
-	}
+		readonly IDataStorage defaultInstance = new SimpleDataStorage(null);
+		readonly IDataStorage messageInstance = new SimpleDataStorage(new ResourceDictionary {
+			{ "Typeface", new Typeface(SystemFonts.MessageFontFamily, SystemFonts.MessageFontStyle, SystemFonts.MessageFontWeight, FontStretches.Normal) },
+			{ "FontRenderingSize", SystemFonts.MessageFontSize }
+		});
 
+		public IDataStorage GetDataStorage(string storageKey) {
+			switch (storageKey) {
+				// Don't use a fixed-width font for tooltips & IntelliSense
+				case "tooltip":
+				case "completion":
+					return messageInstance;
+				default:
+					return defaultInstance;
+			}
+		}
+	}
 }
