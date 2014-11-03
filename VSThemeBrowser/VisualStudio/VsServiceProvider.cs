@@ -64,6 +64,9 @@ namespace VSThemeBrowser.VisualStudio {
 
 					// Used by Roslyn's VisualStudioWaitIndicator
 					{ typeof(SVsThreadedWaitDialogFactory).GUID, new BaseWaitDialogFactory() },
+
+					// Used by Dev14's VsImageLoader, which is needed for Roslyn IntelliSense
+					{ typeof(SVsAppId).GUID, new SimpleVsAppId() },
 				}
 			};
 

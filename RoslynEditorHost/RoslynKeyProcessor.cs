@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Services;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
@@ -134,6 +136,7 @@ namespace RoslynEditorHost {
 			//AddControlCommand(Key.T, "ExecuteRedo");
 			//AddControlShiftCommand(Key.Z, "ExecuteRedo");
 
+			// TODO: Export IDocumentNavigationService to allow rename & F12
 			// TODO: Invoke peek & light bulbs from IntellisenseCommandFilter
 			// TODO: ExecuteTypeCharacter
 			// TODO: ExecuteCommentBlock, ExecuteFormatSelection, ExecuteFormatDocument, ExecuteInsertSnippet, ExecuteInsertComment, ExecuteSurroundWith
@@ -147,6 +150,12 @@ namespace RoslynEditorHost {
 	[Order(Before = "Standard KeyProcessor")]
 	[Name("Roslyn KeyProcessor")]
 	sealed class RoslynKeyProcessorProvider : IKeyProcessorProvider {
+		[ImportingConstructor]
+		public RoslynKeyProcessorProvider(SVsServiceProvider sp) {
+			// This is necessary for icons in IntelliSense
+			new VsImageService(sp).InitializeLibrary();
+        }
+
 		[Import]
 		public IComponentModel ComponentModel { get; set; }
 		public KeyProcessor GetAssociatedProcessor(IWpfTextView wpfTextView) {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -107,6 +108,45 @@ namespace VSThemeBrowser.VisualStudio.Services {
 				UpdateProgress(szUpdatedWaitMessage, szProgressText, szStatusBarText, iTotalSteps, iCurrentStep, fDisableCancel, out pfCanceled);
 				return 0;
 			}
+		}
+	}
+
+	class SimpleVsAppId : IVsAppId {
+		public int GetGuidProperty(int propid, out Guid guid) {
+			throw new NotImplementedException();
+		}
+
+		public int GetProperty(int propid, out object pvar) {
+			switch ((VSAPropID)propid) {
+				// These values are used by VsImageService.InitializeLibrary
+				case VSAPropID.LocalAppDataDir:		// This is used to cache images
+					pvar = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "VSEmbed", VsLoader.VsVersion.ToString(2));
+					return 0;
+				case VSAPropID.ConfigurationTimestampUtc:
+					// The cache will be deleted if its modification time is less than this value.
+					// Let it last for thirty days.
+					pvar = DateTime.UtcNow.AddDays(-30);
+					return 0;
+				default:
+					pvar = null;
+					return 0;
+			}
+		}
+
+		public int Initialize() {
+			return 0;
+		}
+
+		public int SetGuidProperty(int propid, ref Guid rguid) {
+			return 0;
+		}
+
+		public int SetProperty(int propid, object var) {
+			return 0;
+		}
+
+		public int SetSite(Microsoft.VisualStudio.OLE.Interop.IServiceProvider pSP) {
+			return 0;
 		}
 	}
 
