@@ -16,7 +16,7 @@ using VSThemeBrowser.Controls;
 
 #pragma warning disable 0436	// Tell the non-Roslyn compiler to ignore conflicts with inaccessible NoPIA types
 namespace VSThemeBrowser.VisualStudio {
-	public class VsThemeDictionary : ConditionalResourceDictionary {
+	public class VsThemeDictionary : ResourceDictionary {
 
 		// We must access everything from these classes using dynamic due to NoPIA conflicts.
 		// The compiler gives some errors since we do not have the right PIA, and the runtime

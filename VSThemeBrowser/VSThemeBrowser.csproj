@@ -115,7 +115,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Controls\ConditionalResourceDictionary.cs" />
     <Compile Include="Controls\TextViewHost.cs" />
     <Compile Include="VisualStudio\Exports\Simple Exports.cs" />
     <Compile Include="VisualStudio\Exports\KeyProcessors.cs" />
