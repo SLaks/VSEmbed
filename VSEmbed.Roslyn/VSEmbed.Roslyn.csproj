@@ -7,8 +7,8 @@
     <ProjectGuid>{102CB436-A268-4084-9D56-A2131763CC28}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RoslynEditorHost</RootNamespace>
-    <AssemblyName>RoslynEditorHost</AssemblyName>
+    <RootNamespace>VSEmbed.Roslyn</RootNamespace>
+    <AssemblyName>VSEmbed.Roslyn</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ReferencePath>$(ReferencePath);$(MSBuildThisFileDirectory)..\References\v14.0</ReferencePath>

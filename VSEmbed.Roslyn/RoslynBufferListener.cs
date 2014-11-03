@@ -18,7 +18,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
-namespace RoslynEditorHost {
+namespace VSEmbed.Roslyn {
 	[Export(typeof(IWpfTextViewConnectionListener))]
 	[ContentType("Roslyn Languages")]
 	[TextViewRole(PredefinedTextViewRoles.Editable)]

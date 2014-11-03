@@ -15,7 +15,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
 
-namespace RoslynEditorHost {
+namespace VSEmbed.Roslyn {
 
 	// The Roslyn commanding system is built around ICommandHandlerService, which intercepts and
 	// handles every command.  Unfortunately, the entire system is internal.  I steal the entry-

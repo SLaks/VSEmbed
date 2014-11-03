@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.Host;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 
-namespace RoslynEditorHost {
+namespace VSEmbed.Roslyn {
 	///<summary>A Roslyn Workspace that contains documents linked to ITextBuffers.</summary>
 	public class EditorWorkspace : Workspace {
 		// TODO: Add an optional parameter to pass changes through to an existing MSBuildWorkspace

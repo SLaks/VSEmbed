@@ -78,7 +78,7 @@ namespace VSThemeBrowser.VisualStudio {
 			return Directory.EnumerateFiles(VsLoader.RoslynAssemblyPath, "Microsoft.CodeAnalysis*.dll")	// Leave out the . to catch Microsoft.CodeAnalysis.dll too
 				.Select(p => GetFilteredCatalog(Assembly.LoadFile(p)))
 				.Concat(new ComposablePartCatalog[] {
-					GetFilteredCatalog(Assembly.Load("RoslynEditorHost")),
+					GetFilteredCatalog(Assembly.Load("VSEmbed.Roslyn")),
 					new TypeCatalog(
 						// IWaitIndicator is internal, so I have no choice but to use the existing
 						// implementation. The rest of Microsoft.VisualStudio.LanguageServices.dll

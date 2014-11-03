@@ -181,9 +181,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RoslynEditorHost\RoslynEditorHost.csproj">
+    <ProjectReference Include="..\VSEmbed.Roslyn\VSEmbed.Roslyn.csproj">
       <Project>{102cb436-a268-4084-9d56-a2131763cc28}</Project>
-      <Name>RoslynEditorHost</Name>
+      <Name>VSEmbed.Roslyn</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
