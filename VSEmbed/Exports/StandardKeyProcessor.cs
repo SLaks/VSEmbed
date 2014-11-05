@@ -82,8 +82,8 @@ namespace VSEmbed.Exports {
 			AddControlExtendableCommand(Key.PageUp, editorOperations.MoveToTopOfView);
 			AddControlExtendableCommand(Key.PageDown, editorOperations.MoveToBottomOfView);
 
-			AddControlCommand(Key.U, editorOperations.MakeUppercase);
-			AddControlShiftCommand(Key.U, editorOperations.MakeLowercase);
+			AddControlCommand(Key.U, editorOperations.MakeLowercase);
+			AddControlShiftCommand(Key.U, editorOperations.MakeUppercase);
 
 			AddCommand(Key.Back, editorOperations.Backspace);
 			AddCommand(Key.Delete, editorOperations.Delete);
