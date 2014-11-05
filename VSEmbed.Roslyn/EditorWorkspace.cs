@@ -51,8 +51,18 @@ namespace VSEmbed.Roslyn {
 		}
 		protected override void ChangedDocumentText(DocumentId id, SourceText text) {
 			OnDocumentTextChanged(id, text, PreservationMode.PreserveValue);
-			var buffer = documentBuffers[id];
-			buffer.Replace(new Span(0, buffer.CurrentSnapshot.Length), text.ToString());
+			UpdateText(text, documentBuffers[id], EditOptions.DefaultMinimalChange);
+		}
+
+		// Stolen from Microsoft.VisualStudio.LanguageServices.Implementation.ProjectSystem.DocumentProvider.StandardTextDocument
+		private static void UpdateText(SourceText newText, ITextBuffer buffer, EditOptions options) {
+			using (ITextEdit textEdit = buffer.CreateEdit(options, null, null)) {
+				SourceText oldText = buffer.CurrentSnapshot.AsText();
+				foreach (TextChange current in newText.GetTextChanges(oldText)) {
+					textEdit.Replace(current.Span.Start, current.Span.Length, current.NewText);
+				}
+				textEdit.Apply();
+			}
 		}
 
 		public override bool CanApplyChange(ApplyChangesKind feature) {
