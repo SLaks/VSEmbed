@@ -85,7 +85,7 @@ namespace VSEmbed.Roslyn {
 		public override void KeyDown(KeyEventArgs args, ITextBuffer targetBuffer, Action next) {
 			CommandExecutor method;
 			if (shortcuts.TryGetValue(Tuple.Create(args.KeyboardDevice.Modifiers, args.Key), out method))
-				method(wpfTextView.TextBuffer, wpfTextView.TextBuffer.ContentType, next);
+				method(targetBuffer, targetBuffer.ContentType, next);
 			else
 				next();
 		}
@@ -105,10 +105,10 @@ namespace VSEmbed.Roslyn {
 			}
 			if (args.Text.Length > 1)
 				throw new InvalidOperationException("I cannot properly forward multi-character text input");
-			var commandArgs = Activator.CreateInstance(TypeCharCommandArgs, wpfTextView, wpfTextView.TextBuffer, args.Text[0]);
+			var commandArgs = Activator.CreateInstance(TypeCharCommandArgs, wpfTextView, targetBuffer, args.Text[0]);
 
 			var currentHandlers = currentHandlersProperty.GetValue(innerCommandTarget);
-			executeMethod.Invoke(currentHandlers, new object[] { wpfTextView.TextBuffer.ContentType, commandArgs, next });
+			executeMethod.Invoke(currentHandlers, new object[] { targetBuffer.ContentType, commandArgs, next });
 		}
 
 		#region Shortcuts
