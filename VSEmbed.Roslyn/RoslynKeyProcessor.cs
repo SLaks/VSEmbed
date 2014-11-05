@@ -13,6 +13,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
+using VSEmbed.Editor;
 
 
 namespace VSEmbed.Roslyn {
@@ -21,7 +22,7 @@ namespace VSEmbed.Roslyn {
 	// handles every command.  Unfortunately, the entire system is internal.  I steal the entry-
 	// points from AbstractOleCommandTarget and invoke them directly using Reflection. Note that
 	// this is rather brittle.
-	class RoslynKeyProcessor : KeyProcessor {
+	class RoslynKeyProcessor : ChainedKeyProcessor {
 		// This delegate matches the signature of the Execute*() methods in AbstractOleCommandTarget
 		delegate void CommandExecutor(ITextBuffer subjectBuffer, IContentType contentType, Action executeNextCommandTarget);
 		readonly IWpfTextView wpfTextView;
@@ -81,16 +82,12 @@ namespace VSEmbed.Roslyn {
 			shortcuts.Add(new Tuple<ModifierKeys, Key>(modifiers, key), method);
 		}
 
-		public override void KeyDown(KeyEventArgs args) {
-			base.KeyDown(args);
-			if (args.Handled) return;
+		public override void KeyDown(KeyEventArgs args, ITextBuffer targetBuffer, Action next) {
 			CommandExecutor method;
-			if (!shortcuts.TryGetValue(Tuple.Create(args.KeyboardDevice.Modifiers, args.Key), out method))
-				return;
-			// If an exception is thrown, don't set args.Handled
-			var handled = true;
-			method(wpfTextView.TextBuffer, wpfTextView.TextBuffer.ContentType, () => handled = false);
-			args.Handled = handled;
+			if (shortcuts.TryGetValue(Tuple.Create(args.KeyboardDevice.Modifiers, args.Key), out method))
+				method(wpfTextView.TextBuffer, wpfTextView.TextBuffer.ContentType, next);
+			else
+				next();
 		}
 
 		// ExecuteTypeCharacter() takes a COM variant pointer.
@@ -100,20 +97,18 @@ namespace VSEmbed.Roslyn {
 		static readonly PropertyInfo currentHandlersProperty = oleCommandTargetType.GetProperty("CurrentHandlers", BindingFlags.NonPublic | BindingFlags.Instance);
 		static readonly Type TypeCharCommandArgs = Type.GetType("Microsoft.CodeAnalysis.Editor.Commands.TypeCharCommandArgs, Microsoft.CodeAnalysis.EditorFeatures");
 		static readonly MethodInfo executeMethod = currentHandlersProperty.PropertyType.GetMethod("Execute").MakeGenericMethod(TypeCharCommandArgs);
-		public override void TextInput(TextCompositionEventArgs args) {
-			base.TextInput(args);
 
-			foreach (var ch in args.Text) {
-				var commandArgs = Activator.CreateInstance(TypeCharCommandArgs, wpfTextView, wpfTextView.TextBuffer, ch);
-
-				// If an exception is thrown, don't set args.Handled
-				var handled = true;
-				Action nextTarget = () => handled = false;
-				var currentHandlers = currentHandlersProperty.GetValue(innerCommandTarget);
-				executeMethod.Invoke(currentHandlers, new object[] { wpfTextView.TextBuffer.ContentType, commandArgs, nextTarget });
-				if (handled)
-					args.Handled = true;
+		public override void TextInput(TextCompositionEventArgs args, ITextBuffer targetBuffer, Action next) {
+			if (args.Text.Length == 0) {
+				next();
+				return;
 			}
+			if (args.Text.Length > 1)
+				throw new InvalidOperationException("I cannot properly forward multi-character text input");
+			var commandArgs = Activator.CreateInstance(TypeCharCommandArgs, wpfTextView, wpfTextView.TextBuffer, args.Text[0]);
+
+			var currentHandlers = currentHandlersProperty.GetValue(innerCommandTarget);
+			executeMethod.Invoke(currentHandlers, new object[] { wpfTextView.TextBuffer.ContentType, commandArgs, next });
 		}
 
 		#region Shortcuts
@@ -168,12 +163,12 @@ namespace VSEmbed.Roslyn {
 		#endregion
 	}
 
-	[Export(typeof(IKeyProcessorProvider))]
+	[Export(typeof(IChainedKeyProcessorProvider))]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	[ContentType("text")]
 	[Order(Before = "Standard KeyProcessor")]
 	[Name("Roslyn KeyProcessor")]
-	sealed class RoslynKeyProcessorProvider : IKeyProcessorProvider {
+	sealed class RoslynKeyProcessorProvider : IChainedKeyProcessorProvider {
 		[ImportingConstructor]
 		public RoslynKeyProcessorProvider(SVsServiceProvider sp) {
 			// This is necessary for icons in IntelliSense
@@ -182,7 +177,7 @@ namespace VSEmbed.Roslyn {
 
 		[Import]
 		public IComponentModel ComponentModel { get; set; }
-		public KeyProcessor GetAssociatedProcessor(IWpfTextView wpfTextView) {
+		public ChainedKeyProcessor GetProcessor(IWpfTextView wpfTextView) {
 			return new RoslynKeyProcessor(wpfTextView, ComponentModel);
 		}
 	}

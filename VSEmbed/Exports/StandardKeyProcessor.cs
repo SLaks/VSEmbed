@@ -5,15 +5,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
+using VSEmbed.Editor;
 
 namespace VSEmbed.Exports {
 	// Loosely based on WebMatrix's DefaultKeyProcessor
 	///<summary>A base class for a KeyProcessor that handles shortcut keys.</summary>
 	///<remarks>Derived classes should call Add*Command() in their constructors to build the key map.</remarks>
-	public abstract class BaseShortcutKeyProcessor : KeyProcessor {
+	public abstract class BaseShortcutKeyProcessor : ChainedKeyProcessor {
 		readonly Dictionary<Tuple<ModifierKeys, Key>, Func<bool>> shortcuts = new Dictionary<Tuple<ModifierKeys, Key>, Func<bool>>();
 
 		protected static Func<bool> WithTrue(Action method) { return () => { method(); return true; }; }
@@ -44,12 +46,11 @@ namespace VSEmbed.Exports {
 			shortcuts.Add(new Tuple<ModifierKeys, Key>(modifiers, key), method);
 		}
 
-		public override void KeyDown(KeyEventArgs args) {
-			base.KeyDown(args);
-			if (args.Handled) return;
+		public override void KeyDown(KeyEventArgs args, ITextBuffer targetBuffer, Action next) {
 			Func<bool> method;
-			args.Handled = shortcuts.TryGetValue(Tuple.Create(args.KeyboardDevice.Modifiers, args.Key), out method)
-				&& method();
+			if (!shortcuts.TryGetValue(Tuple.Create(args.KeyboardDevice.Modifiers, args.Key), out method)
+			 || !method())
+				next();
 		}
 	}
 
@@ -139,44 +140,41 @@ namespace VSEmbed.Exports {
 
 
 		// Copied directly from WebMatrix's DefaultKeyProcessor
-		public override void TextInput(TextCompositionEventArgs args) {
-			if (args.Text.Length > 0)
-				args.Handled = editorOperations.InsertText(args.Text);
-			if (args.Handled)
+		public override void TextInput(TextCompositionEventArgs args, ITextBuffer targetBuffer, Action next) {
+			if (args.Text.Length > 0 && editorOperations.InsertText(args.Text))
 				textView.Caret.EnsureVisible();
+			else
+				next();
 		}
 
-		public override void TextInputStart(TextCompositionEventArgs args) {
-			if (args.TextComposition is ImeTextComposition) {
-				HandleProvisionalImeInput(args);
-			}
+		public override void TextInputStart(TextCompositionEventArgs args, ITextBuffer targetBuffer, Action next) {
+			if (!(args.TextComposition is ImeTextComposition) || !HandleProvisionalImeInput(args))
+				next();
 		}
-		public override void TextInputUpdate(TextCompositionEventArgs args) {
-			if (args.TextComposition is ImeTextComposition)
-				HandleProvisionalImeInput(args);
-			else
-				args.Handled = false;
+		public override void TextInputUpdate(TextCompositionEventArgs args, ITextBuffer targetBuffer, Action next) {
+			if (!(args.TextComposition is ImeTextComposition) || !HandleProvisionalImeInput(args))
+				next();
 		}
-		void HandleProvisionalImeInput(TextCompositionEventArgs args) {
-			if (args.Text.Length == 0)
-				return;
-			args.Handled = editorOperations.InsertProvisionalText(args.Text);
-			if (args.Handled)
-				textView.Caret.EnsureVisible();
+		bool HandleProvisionalImeInput(TextCompositionEventArgs args) {
+			if (args.Text.Length == 0 || !editorOperations.InsertProvisionalText(args.Text))
+				return false;
+			textView.Caret.EnsureVisible();
+			return true;
 		}
 	}
 
-	[Export(typeof(IKeyProcessorProvider))]
-	[TextViewRole(PredefinedTextViewRoles.Interactive)]
+
+	[Export(typeof(IChainedKeyProcessorProvider))]
 	[ContentType("text")]
+	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	[Name("Standard KeyProcessor")]
-	sealed class StandardKeyProcessorProvider : IKeyProcessorProvider {
+	sealed class StandardKeyProcessorProvider : IChainedKeyProcessorProvider {
 		[Import]
 		public IEditorOperationsFactoryService EditorOperationsFactory { get; set; }
 		[Import]
 		public ITextUndoHistoryRegistry UndoHistoryRegistry { get; set; }
 
-		public KeyProcessor GetAssociatedProcessor(IWpfTextView wpfTextView) {
+		public ChainedKeyProcessor GetProcessor(IWpfTextView wpfTextView) {
 			return new StandardKeyProcessor(wpfTextView, EditorOperationsFactory.GetEditorOperations(wpfTextView), UndoHistoryRegistry.GetHistory(wpfTextView.TextBuffer));
 		}
 	}
