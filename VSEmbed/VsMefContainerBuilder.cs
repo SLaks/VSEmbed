@@ -83,6 +83,10 @@ namespace VSEmbed {
 						// implementation. The rest of Microsoft.VisualStudio.LanguageServices.dll
 						// exports lots of VS interop types that I don't want.
 						Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.Utilities.VisualStudioWaitIndicator, "
+								   + "Microsoft.VisualStudio.LanguageServices"),
+						// Provides error messages in quick fix previews.  This is in the VS layer
+						// only because it uses VS icons, so I can use it as-is.
+						Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.CodeFixPreview.CodeFixPreviewService, "
 								   + "Microsoft.VisualStudio.LanguageServices")
 					)
 				});
