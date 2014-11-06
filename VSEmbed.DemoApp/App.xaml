@@ -7,6 +7,8 @@
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
 				<vsembed:VsThemeDictionary ThemeIndex="1" />
+				<!-- Needed for context menu styles, especially for light bulb previews -->
+				<ResourceDictionary Source="/Microsoft.VisualStudio.Editor.Implementation;component/Themes/Generic.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 			<GeometryGroup FillRule="EvenOdd" x:Key="VectorIcon">
 				<EllipseGeometry Center="1, 1" RadiusX="1" RadiusY="1" />
