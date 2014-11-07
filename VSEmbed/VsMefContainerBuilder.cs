@@ -25,6 +25,9 @@ namespace VSEmbed {
 			// It also causes strange and fatal AccessViolations.
 			"Microsoft.VisualStudio.Editor.Implementation.ExtensionErrorHandler",
 
+			// This uses IOleUndoManager, which I don't have.  I replace it with @JaredPar's implementation.
+			"Microsoft.VisualStudio.Editor.Implementation.Undo.VsUndoHistoryRegistry",
+
 			// This uses IOleComponentManager, which I don't know how to implement.
 			"Microsoft.VisualStudio.Editor.Implementation.Intellisense.VsWpfKeyboardTrackingService",
 
@@ -84,6 +87,9 @@ namespace VSEmbed {
 						// exports lots of VS interop types that I don't want.
 						Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.Utilities.VisualStudioWaitIndicator, "
 								   + "Microsoft.VisualStudio.LanguageServices"),
+						// Enables rename (but breaks F12).
+						Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.VisualStudioDocumentNavigationServiceFactory, "
+								   + "Microsoft.VisualStudio.LanguageServices"),
 						// Provides error messages in quick fix previews.  This is in the VS layer
 						// only because it uses VS icons, so I can use it as-is.
 						Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.CodeFixPreview.CodeFixPreviewService, "
@@ -123,9 +129,6 @@ namespace VSEmbed {
 			// Based on Microsoft.VisualStudio.ComponentModelHost.ComponentModel.DefaultCompositionContainer.
 			// By implementing SVsServiceProvider myself, I skip an unnecessary call to GetIUnknownForObject.
 			container.ComposeExportedValue<SVsServiceProvider>(VsServiceProvider.Instance);
-
-			// Needed because VsUndoHistoryRegistry tries to create IOleUndoManager from ILocalRegistry, which I presumably cannot do.
-			container.ComposeExportedValue((ITextUndoHistoryRegistry)EditorUtils.EditorUtilsFactory.CreateBasicUndoHistoryRegistry());
 
 			VsServiceProvider.Instance.SetMefContainer(container);
 
