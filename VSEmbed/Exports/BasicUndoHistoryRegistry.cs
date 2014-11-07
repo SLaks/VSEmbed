@@ -275,11 +275,8 @@ namespace VSEmbed.Exports {
 			remove { _undoRedoHappened -= value; }
 		}
 
-		/// <summary>
-		/// Easy to implement but not supported by Visual Studio
-		/// </summary>
 		IEnumerable<ITextUndoTransaction> ITextUndoHistory.UndoStack {
-			get { throw new NotSupportedException(); }
+			get { return UndoStack; }
 		}
 
 		event EventHandler<TextUndoTransactionCompletedEventArgs> ITextUndoHistory.UndoTransactionCompleted {

@@ -25,6 +25,8 @@ namespace VSEmbed.Roslyn {
 	class RoslynKeyProcessor : ChainedKeyProcessor {
 		// This delegate matches the signature of the Execute*() methods in AbstractOleCommandTarget
 		delegate void CommandExecutor(ITextBuffer subjectBuffer, IContentType contentType, Action executeNextCommandTarget);
+		// This delegate matches ExecuteUndo and ExecuteRedo
+		delegate void IntCommandExecutor(ITextBuffer subjectBuffer, IContentType contentType, Action executeNextCommandTarget, int count);
 		readonly IWpfTextView wpfTextView;
 		readonly object innerCommandTarget;
 
@@ -80,6 +82,10 @@ namespace VSEmbed.Roslyn {
 		protected void AddCommand(ModifierKeys modifiers, Key key, string methodName) {
 			var method = (CommandExecutor)Delegate.CreateDelegate(typeof(CommandExecutor), innerCommandTarget, methodName);
 			shortcuts.Add(new Tuple<ModifierKeys, Key>(modifiers, key), method);
+		}
+		protected void AddIntCommand(ModifierKeys modifiers, Key key, string methodName, int count) {
+			var method = (IntCommandExecutor)Delegate.CreateDelegate(typeof(IntCommandExecutor), innerCommandTarget, methodName);
+			shortcuts.Add(new Tuple<ModifierKeys, Key>(modifiers, key), (s, c, n) => method(s, c, n, count));
 		}
 
 		public override void KeyDown(KeyEventArgs args, ITextBuffer targetBuffer, Action next) {
@@ -150,14 +156,12 @@ namespace VSEmbed.Roslyn {
 
 			AddControlCommand(Key.V, "ExecutePaste");
 
-			// TODO: These also take an int, which should be 1
-			//AddControlCommand(Key.Z, "ExecuteUndo");
-			//AddControlCommand(Key.T, "ExecuteRedo");
-			//AddControlShiftCommand(Key.Z, "ExecuteRedo");
+			AddIntCommand(ModifierKeys.Control, Key.Z, "ExecuteUndo", 1);
+			AddIntCommand(ModifierKeys.Control, Key.Y, "ExecuteRedo", 1);
+			AddIntCommand(ModifierKeys.Control | ModifierKeys.Shift, Key.Z, "ExecuteRedo", 1);
 
-			// TODO: Export IDocumentNavigationService to allow rename & F12
+			// TODO: Export IDocumentNavigationService to allow F12
 			// TODO: Invoke peek & light bulbs from IntellisenseCommandFilter
-			// TODO: ExecuteTypeCharacter
 			// TODO: ExecuteCommentBlock, ExecuteFormatSelection, ExecuteFormatDocument, ExecuteInsertSnippet, ExecuteInsertComment, ExecuteSurroundWith
 		}
 		#endregion
