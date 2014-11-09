@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -110,6 +111,24 @@ namespace VSEmbed.Services {
 			}
 		}
 	}
+
+#pragma warning disable 0436	// Tell the non-Roslyn compiler to ignore conflicts with inaccessible NoPIA types
+	// This class can only be used if VS is set up after the UI thread is created.
+	public class SyncContextInvoker : IVsInvokerPrivate {
+		readonly SynchronizationContext syncContext;
+		public SyncContextInvoker(SynchronizationContext syncContext) { this.syncContext = syncContext; }
+
+		public int Invoke([In, MarshalAs(UnmanagedType.Interface)]IVsInvokablePrivate pInvokable) {
+			syncContext.Send(o => pInvokable.Invoke(), null);
+			return 0;
+		}
+	}
+	public class AppDispatcherInvoker : IVsInvokerPrivate {
+		public int Invoke([In, MarshalAs(UnmanagedType.Interface)]IVsInvokablePrivate pInvokable) {
+			return Application.Current.Dispatcher.Invoke(new Func<int>(pInvokable.Invoke));
+		}
+	}
+#pragma warning restore 0436
 
 	class SimpleVsAppId : IVsAppId {
 		public int GetGuidProperty(int propid, out Guid guid) {
@@ -221,5 +240,17 @@ namespace Microsoft.Internal.VisualStudio.Shell.Interop {
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		[return: MarshalAs(UnmanagedType.IUnknown)]
 		object GetResourceKeyReferenceType([MarshalAs(UnmanagedType.IUnknown)] [In] object requestedResource);
+	}
+	[CompilerGenerated, Guid("20705D94-A39B-4741-B5E1-041C5985EF61"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), TypeIdentifier]
+	[ComImport]
+	public interface IVsInvokerPrivate {
+		[MethodImpl(MethodImplOptions.PreserveSig | MethodImplOptions.InternalCall)]
+		int Invoke([MarshalAs(UnmanagedType.Interface)] [In] IVsInvokablePrivate pInvokable);
+	}
+	[CompilerGenerated, Guid("20E8B039-A51A-40C6-8F16-2A8BB99E046F"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), TypeIdentifier]
+	[ComImport]
+	public interface IVsInvokablePrivate {
+		[MethodImpl(MethodImplOptions.PreserveSig | MethodImplOptions.InternalCall)]
+		int Invoke();
 	}
 }

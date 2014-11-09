@@ -67,6 +67,9 @@ namespace VSEmbed {
 
 					// Used by Dev14's VsImageLoader, which is needed for Roslyn IntelliSense
 					{ typeof(SVsAppId).GUID, new SimpleVsAppId() },
+
+					// Used by DocumentPeekResult; service is SVsUIThreadInvokerPrivate
+					{ new Guid("72FD1033-2341-4249-8113-EF67745D84EA"), new AppDispatcherInvoker() },
 				}
 			};
 

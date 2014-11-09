@@ -25,18 +25,23 @@ namespace VSEmbed.Roslyn {
 		readonly ILightBulbBroker lightBulbBroker;
 		readonly ISuggestedActionCategoryRegistryService suggestedActionCategoryRegistryService;
 		readonly ISmartTagBroker smartTagBroker;
+		readonly IPeekBroker peekBroker;
 
-		public Dev14KeyProcessor(IWpfTextView wpfTextView, ILightBulbBroker lightBulbBroker, ISuggestedActionCategoryRegistryService suggestedActionCategoryRegistryService, ISmartTagBroker smartTagBroker) {
+		public Dev14KeyProcessor(IWpfTextView wpfTextView, ILightBulbBroker lightBulbBroker, ISuggestedActionCategoryRegistryService suggestedActionCategoryRegistryService, ISmartTagBroker smartTagBroker, IPeekBroker peekBroker) {
 			this.wpfTextView = wpfTextView;
 			this.lightBulbBroker = lightBulbBroker;
 			this.suggestedActionCategoryRegistryService = suggestedActionCategoryRegistryService;
 			this.smartTagBroker = smartTagBroker;
+			this.peekBroker = peekBroker;
 
 			AddShortcuts();
 		}
 
 		void AddShortcuts() {
 			AddControlCommand(Key.OemPeriod, TryShowSuggestedActions);
+
+			// Alt+regular keys doesn't trigger this at all
+			AddCommand(Key.F12, TryPeek);
 		}
 
 		bool TryShowSuggestedActions() {
@@ -60,6 +65,9 @@ namespace VSEmbed.Roslyn {
 			return true;
 		}
 
+		bool TryPeek() {
+			return peekBroker.TriggerPeekSession(wpfTextView, PredefinedPeekRelationships.Definitions.Name) != null;
+		}
 	}
 	[Export(typeof(IChainedKeyProcessorProvider))]
 	[ContentType("text")]
@@ -75,8 +83,11 @@ namespace VSEmbed.Roslyn {
 		[Import]
 		public ISuggestedActionCategoryRegistryService SuggestedActionCategoryRegistryService { get; set; }
 
+		[Import]
+		public IPeekBroker PeekBroker { get; set; }
+
 		public ChainedKeyProcessor GetProcessor(IWpfTextView wpfTextView) {
-			return new Dev14KeyProcessor(wpfTextView, LightBulbBroker, SuggestedActionCategoryRegistryService, SmartTagBroker);
+			return new Dev14KeyProcessor(wpfTextView, LightBulbBroker, SuggestedActionCategoryRegistryService, SmartTagBroker, PeekBroker);
 		}
 	}
 }
