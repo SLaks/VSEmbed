@@ -176,7 +176,12 @@ namespace VSEmbed.Roslyn {
 		[ImportingConstructor]
 		public RoslynKeyProcessorProvider(SVsServiceProvider sp) {
 			// This is necessary for icons in IntelliSense
-			new VsImageService(sp).InitializeLibrary();
+			var imageService = new VsImageService(sp);
+			imageService.InitializeLibrary();
+			// This is necessary for preview icons in CTP3, which doesn't
+			// have a singleton CrispImage.DefaultImageLibrary.  The GUID
+			// is from SVsImageService, which has a private PIA.
+			((VsServiceProvider)sp).AddService(new Guid("ACC9EB93-CAD8-41DE-80DA-BD35CC5112AE"), imageService);
 		}
 
 		[Import]
