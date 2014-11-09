@@ -70,6 +70,15 @@ namespace VSEmbed {
 
 					// Used by DocumentPeekResult; service is SVsUIThreadInvokerPrivate
 					{ new Guid("72FD1033-2341-4249-8113-EF67745D84EA"), new AppDispatcherInvoker() },
+
+					// Used by KeyBindingHelper
+					{ typeof(SDTE).GUID, new FakeDTE() },
+
+					// Used by DocumentPeekResultPresenter, via IVsHierarchyItemManager
+					{ typeof(SVsRunningDocumentTable).GUID, new StubVsRunningDocumentTable() },
+					{ typeof(SVsSolution).GUID, new StubVsSolultion() },
+
+					// Used by DocumentPeekResultPresenter, via DocumentOpeningService
 				}
 			};
 
