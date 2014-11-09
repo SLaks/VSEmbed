@@ -3,6 +3,7 @@ VSEmbed
 
 VSEmbed lets you embed the Visual Studio editor &amp; theme architecture in your own programs.
 
+![better screenshpt](https://pbs.twimg.com/media/B2CVhsmCAAAUPmg.png:large)
 ![screenshot](https://pbs.twimg.com/media/B1dX6NxCMAAv6iZ.png:large)
 
 #Usage
@@ -28,5 +29,9 @@ If you create a Roslyn-powered buffer and do not link it to a workspace, I have 
 #Caveats
  - The end-user must have a version (2012+) of Visual Studio (including Express editions) installed for this to run.
  - The Roslyn editor services will only work if Dev14 (any version) is installed.
-
-
+ - If Visual Studio 2012 assemblies are in the GAC, other versions will not load properly.
+ - Code snippets are not implemented.
+ - Peek does not work.
+  - To make Peek work, implement & export `IPeekResultPresenter` & `IPeekResultPresentation`, and create a WpfTextViewHost in `Create()`.  Note that peek only operates on file paths.
+- Rename with preview does not work.
+ - To make this work, implement `IVsPreviewChangesService` and add it to the ServiceProvider.
