@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -30,6 +32,28 @@ namespace VSEmbed.Roslyn {
 			OnProjectAdded(projectInfo);
 			return CurrentSolution.GetProject(projectInfo.Id);
 		}
+
+		static readonly string referenceAssemblyPath = Path.Combine(
+			Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+			@"Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5"
+		);
+
+
+		// TODO: Check for later Roslyn versions & use http://source.roslyn.codeplex.com/#Microsoft.CodeAnalysis.Workspaces.Desktop/Utilities/Documentation/FileBasedXmlDocumentationProvider.cs,13
+		static readonly Func<string, DocumentationProvider> CreateXmlDocumentationProvider =
+			(Func<string, DocumentationProvider>)Delegate.CreateDelegate(
+				typeof(Func<string, DocumentationProvider>),
+				typeof(Workspace).Assembly.GetType("Microsoft.CodeAnalysis.XmlDocumentationProvider")
+					.GetMethod("Create", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string) }, null)
+			);
+		public MetadataReference CreateFrameworkReference(string assemblyName) {
+			return new MetadataFileReference(
+				Path.Combine(referenceAssemblyPath, assemblyName + ".dll"),
+				MetadataReferenceProperties.Assembly,
+				CreateXmlDocumentationProvider(Path.Combine(referenceAssemblyPath, assemblyName + ".xml"))
+			);
+		}
+
 
 		///<summary>Creates a new document linked to an existing text buffer.</summary>
 		public Document CreateDocument(ProjectId projectId, ITextBuffer buffer) {

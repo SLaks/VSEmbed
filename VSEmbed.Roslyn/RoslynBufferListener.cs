@@ -58,11 +58,9 @@ namespace VSEmbed.Roslyn {
 				var workspace = new EditorWorkspace(MefHostServices.Create(componentModel.DefaultExportProvider));
 
 				var project = workspace.AddProject("Sample Project", contentTypeLanguages[buffer.ContentType.DisplayName]);
-				workspace.TryApplyChanges(workspace.CurrentSolution.AddMetadataReferences(project.Id, new[] {
-					new MetadataFileReference(typeof(object).Assembly.Location, MetadataReferenceProperties.Assembly),
-					new MetadataFileReference(typeof(Uri).Assembly.Location, MetadataReferenceProperties.Assembly),
-					new MetadataFileReference(typeof(Enumerable).Assembly.Location, MetadataReferenceProperties.Assembly)
-				}));
+				workspace.TryApplyChanges(workspace.CurrentSolution.AddMetadataReferences(project.Id,
+					new[] { "mscorlib", "System", "System.Core", "System.Xml.Linq" }.Select(workspace.CreateFrameworkReference)
+				));
 				workspace.CreateDocument(project.Id, buffer);
 			}
 		}
