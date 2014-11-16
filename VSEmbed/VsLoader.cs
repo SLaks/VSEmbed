@@ -135,7 +135,8 @@ namespace VSEmbed {
 			"Microsoft.CodeAnalysis",
 			"System.Reflection.Metadata",
 			"Microsoft.VisualStudio.LanguageServices",
-			"Esent.Interop"
+			"Esent.Interop",
+			"System.Composition.AttributedModel"		// New to VS2015 Preview
 		};
 		static Assembly CurrentDomain_AssemblyResolve_Roslyn(object sender, ResolveEventArgs args) {
 			if (!RoslynAssemblyPrefixes.Any(args.Name.StartsWith))

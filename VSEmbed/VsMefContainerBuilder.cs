@@ -81,7 +81,7 @@ namespace VSEmbed {
 				.Select(p => GetFilteredCatalog(Assembly.LoadFile(p)))
 				.Concat(new ComposablePartCatalog[] {
 					GetFilteredCatalog(Assembly.Load("VSEmbed.Roslyn")),
-					new TypeCatalog(
+					new TypeCatalog(new [] {
 						// IWaitIndicator is internal, so I have no choice but to use the existing
 						// implementation. The rest of Microsoft.VisualStudio.LanguageServices.dll
 						// exports lots of VS interop types that I don't want.
@@ -92,9 +92,10 @@ namespace VSEmbed {
 								   + "Microsoft.VisualStudio.LanguageServices"),
 						// Provides error messages in quick fix previews.  This is in the VS layer
 						// only because it uses VS icons, so I can use it as-is.
+						// Removed in VS2015 Preview
 						Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.CodeFixPreview.CodeFixPreviewService, "
 								   + "Microsoft.VisualStudio.LanguageServices")
-					)
+					}.Where(t => t !=null))
 				});
 		}
 		#endregion
