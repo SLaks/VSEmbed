@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.Primitives;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Media;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Composition;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
@@ -15,10 +16,13 @@ using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Text.Storage;
 using Microsoft.VisualStudio.Utilities;
 
+using MEFv1 = System.ComponentModel.Composition;
+using MEFv3 = Microsoft.VisualStudio.Composition;
+
 namespace VSEmbed {
-	///<summary>Creates the MEF composition container used by the editor services.</summary>
+	///<summary>Creates the MEF composition container used by the editor services.  This type is immutable</summary>
 	/// <remarks>Stolen, with much love and gratitude, from @JaredPar's EditorUtils.</remarks>
-	public static class VsMefContainerBuilder {
+	public abstract class VsMefContainerBuilder {
 		#region Export Exclusion
 		static readonly HashSet<string> excludedTypes = new HashSet<string> {
 			// This uses IVsUIShell, which I haven't implemented, to show dialog boxes.
@@ -41,12 +45,16 @@ namespace VSEmbed {
 		///<summary>Prevents an exported type from being included in the created MEF container.</summary>
 		///<remarks>Call this method if an exported type doesn't work outside Visual Studio.</remarks>
 		public static void ExcludeExport(string fullTypeName) { excludedTypes.Add(fullTypeName); }
-
-		///<summary>Creates a <see cref="ComposablePartCatalog"/> from the types in an assembly, excluding types that cause problems.</summary>
-		public static ComposablePartCatalog GetFilteredCatalog(Assembly assembly) {
-			return new TypeCatalog(assembly.GetTypes().Where(t => !excludedTypes.Contains(t.FullName)));
-		}
 		#endregion
+
+		///<summary>Creates a new builder, including a catalog with the types in a set of assemblies, excluding types that cause problems.</summary>
+		public virtual VsMefContainerBuilder WithFilteredCatalogs(params Assembly[] assemblies) { return WithFilteredCatalogs((IEnumerable<Assembly>)assemblies); }
+		///<summary>Creates a new builder, including a catalog with the types in a set of assemblies, excluding types that cause problems.</summary>
+		public virtual VsMefContainerBuilder WithFilteredCatalogs(IEnumerable<Assembly> assemblies) {
+			return WithCatalog(assemblies.SelectMany(a => a.GetTypes().Where(t => !excludedTypes.Contains(t.FullName))));
+		}
+		///<summary>Creates a new builder, including a catalog with the specified types.</summary>
+		public abstract VsMefContainerBuilder WithCatalog(IEnumerable<Type> types);
 
 		#region Catalog Setup
 		private static readonly string[] EditorComponents = {
@@ -73,68 +81,171 @@ namespace VSEmbed {
 			"Microsoft.VisualStudio.Shell.TreeNavigation.HierarchyProvider"
 		};
 
-		static IEnumerable<ComposablePartCatalog> GetRoslynCatalogs() {
+		///<summary>Creates a new builder, including catalogs for the Roslyn language services.</summary>
+		public VsMefContainerBuilder WithRoslynCatalogs() {
 			if (VsLoader.RoslynAssemblyPath == null)
-				return new ComposablePartCatalog[0];
+				return this;
 
-			return Directory.EnumerateFiles(VsLoader.RoslynAssemblyPath, "Microsoft.CodeAnalysis*.dll")	// Leave out the . to catch Microsoft.CodeAnalysis.dll too
-				.Select(p => GetFilteredCatalog(Assembly.LoadFile(p)))
-				.Concat(new ComposablePartCatalog[] {
-					GetFilteredCatalog(Assembly.Load("VSEmbed.Roslyn")),
-					new TypeCatalog(new [] {
-						// IWaitIndicator is internal, so I have no choice but to use the existing
-						// implementation. The rest of Microsoft.VisualStudio.LanguageServices.dll
-						// exports lots of VS interop types that I don't want.
-						Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.Utilities.VisualStudioWaitIndicator, "
-								   + "Microsoft.VisualStudio.LanguageServices"),
-						// Enables rename (but breaks F12).
-						Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.VisualStudioDocumentNavigationServiceFactory, "
-								   + "Microsoft.VisualStudio.LanguageServices"),
-						// Provides error messages in quick fix previews.  This is in the VS layer
-						// only because it uses VS icons, so I can use it as-is.
-						// Removed in VS2015 Preview
-						Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.CodeFixPreview.CodeFixPreviewService, "
-								   + "Microsoft.VisualStudio.LanguageServices")
-					}.Where(t => t !=null))
-				});
+			return WithFilteredCatalogs(
+				Directory.EnumerateFiles(VsLoader.RoslynAssemblyPath, "Microsoft.CodeAnalysis*.dll")	// Leave out the . to catch Microsoft.CodeAnalysis.dll too
+					.Select(Assembly.LoadFile))
+				.WithFilteredCatalogs(Assembly.Load("VSEmbed.Roslyn"))
+				.WithCatalog(new[] {
+				// Roslyn formatter bug: https://roslyn.codeplex.com/workitem/382
+				// IWaitIndicator is internal, so I have no choice but to use the existing
+				// implementation. The rest of Microsoft.VisualStudio.LanguageServices.dll
+				// exports lots of VS interop types that I don't want.
+				Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.Utilities.VisualStudioWaitIndicator, "
+						   + "Microsoft.VisualStudio.LanguageServices"),
+				// Enables rename (but breaks F12).
+				Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.VisualStudioDocumentNavigationServiceFactory, "
+						   + "Microsoft.VisualStudio.LanguageServices"),
+				// Provides error messages in quick fix previews.  This is in the VS layer
+				// only because it uses VS icons, so I can use it as-is.
+				// Removed in VS2015 Preview
+				Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.CodeFixPreview.CodeFixPreviewService, "
+						   + "Microsoft.VisualStudio.LanguageServices")
+				}.Where(t => t != null));
+
 		}
-		#endregion
 
 		// I need to specify a full name to load from the GAC.
 		// The version is added by my AssemblyResolve handler.
 		const string VsFullNameSuffix = ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL";
 
-		///<summary>Gets all available ComposablePartCatalogs for the editor, including Roslyn if available.</summary>
-		public static IEnumerable<ComposablePartCatalog> GetDefaultCatalogs() {
-			return EditorComponents.Select(c => GetFilteredCatalog(Assembly.Load(c + VsFullNameSuffix)))
-					.Concat(GetRoslynCatalogs())
-					.Concat(new[] { GetFilteredCatalog(typeof(VsMefContainerBuilder).Assembly) });
+		///<summary>Creates a new builder, including catalogs for the core editor services.</summary>
+		public VsMefContainerBuilder WithEditorCatalogs() {
+			return WithFilteredCatalogs(EditorComponents.Select(c => Assembly.Load(c + VsFullNameSuffix)))
+				  .WithFilteredCatalogs(typeof(VsMefContainerBuilder).Assembly);
+		}
+		#endregion
+
+		///<summary>Creates a builder prepopulated with the editor and Roslyn catalogs.</summary>
+		public static VsMefContainerBuilder CreateDefault() {
+			return Create().WithEditorCatalogs().WithRoslynCatalogs();
 		}
 
-		///<summary>Creates and installs a CompositionContainer with all of the default catalogs.</summary>
-		public static CompositionContainer CreateDefaultContainer(params ComposablePartCatalog[] additionalCatalogs) {
-			return CreateDefaultContainer((IEnumerable<ComposablePartCatalog>)additionalCatalogs);
+		///<summary>Creates an empty builder with no catalogs.</summary>
+		public static VsMefContainerBuilder Create() {
+			if (Type.GetType("Microsoft.VisualStudio.Composition.CompositionConfiguration, Microsoft.VisualStudio.Composition") != null)
+				return V3.Create();
+			else
+				return V1.Create();
 		}
-		///<summary>Creates and installs a CompositionContainer with all of the default catalogs.</summary>
-		public static CompositionContainer CreateDefaultContainer(IEnumerable<ComposablePartCatalog> additionalCatalogs) {
-			var container = new CompositionContainer(new AggregateCatalog(GetDefaultCatalogs().Concat(additionalCatalogs)));
-			InitialzeContainer(container);
-			return container;
+
+		class V1 : VsMefContainerBuilder {
+			readonly ImmutableList<MEFv1.Primitives.ComposablePartCatalog> catalogs;
+
+			public V1(ImmutableList<MEFv1.Primitives.ComposablePartCatalog> catalogs) {
+				this.catalogs = catalogs;
+			}
+
+			internal new static VsMefContainerBuilder Create() {
+				return new V1(ImmutableList<MEFv1.Primitives.ComposablePartCatalog>.Empty);
+			}
+
+			public override VsMefContainerBuilder WithCatalog(IEnumerable<Type> types) {
+				return new V1(catalogs.Add(new MEFv1.Hosting.TypeCatalog(types)));
+			}
+
+			protected override IComponentModel BuildCore() {
+				return new ComponentModel(new MEFv1.Hosting.CompositionContainer(new MEFv1.Hosting.AggregateCatalog(catalogs)));
+			}
+
+			protected override void ComposeExportedValue<T>(IComponentModel container, T value) {
+				((MEFv1.Hosting.CompositionContainer)container.DefaultCompositionService).ComposeExportedValue(value);
+			}
+
+			class ComponentModel : IComponentModel {
+				public ComponentModel(MEFv1.Hosting.CompositionContainer container) {
+					DefaultCompositionService = container;
+					DefaultExportProvider = container;
+				}
+
+
+				public MEFv1.ICompositionService DefaultCompositionService { get; private set; }
+				public MEFv1.Hosting.ExportProvider DefaultExportProvider { get; private set; }
+
+				public MEFv1.Primitives.ComposablePartCatalog DefaultCatalog { get { throw new NotSupportedException(); } }
+				public MEFv1.Primitives.ComposablePartCatalog GetCatalog(string catalogName) { throw new NotSupportedException(); }
+
+				public IEnumerable<T> GetExtensions<T>() where T : class { return DefaultExportProvider.GetExportedValues<T>(); }
+				public T GetService<T>() where T : class { return DefaultExportProvider.GetExportedValue<T>(); }
+			}
+		}
+
+		class V3 : VsMefContainerBuilder {
+			internal static new VsMefContainerBuilder Create() {
+				return new V3(MEFv3.ComposableCatalog.Create());
+			}
+			readonly MEFv3.ComposableCatalog catalog;
+			private V3(MEFv3.ComposableCatalog catalog) {
+				this.catalog = catalog;
+			}
+
+
+			static readonly MEFv3.PartDiscovery partDiscovery = MEFv3.PartDiscovery.Combine(
+				new MEFv3.AttributedPartDiscovery { IsNonPublicSupported = true },
+				new MEFv3.AttributedPartDiscoveryV1()
+			);
+			public override VsMefContainerBuilder WithCatalog(IEnumerable<Type> types) {
+				return new V3(catalog.WithParts(partDiscovery.CreatePartsAsync(types).GetAwaiter().GetResult()));
+			}
+
+			protected override IComponentModel BuildCore() {
+				var exportProvider = MEFv3.RuntimeComposition
+					.CreateRuntimeComposition(MEFv3.CompositionConfiguration.Create(catalog))
+					.CreateExportProviderFactory()
+					.CreateExportProvider();
+				return new ComponentModel(exportProvider);
+			}
+			protected override void ComposeExportedValue<T>(IComponentModel container, T value) {
+				// TODO
+			}
+			class ComponentModel : IComponentModel {
+				public readonly MEFv3.ExportProvider ExportProvider;
+
+				public ComponentModel(MEFv3.ExportProvider exportProvider) {
+					this.ExportProvider = exportProvider;
+				}
+
+
+				public MEFv1.ICompositionService DefaultCompositionService {
+					get { return ExportProvider.GetExport<MEFv1.ICompositionService>().Value; }
+				}
+
+				public MEFv1.Hosting.ExportProvider DefaultExportProvider {
+					get { return ExportProvider.AsExportProvider(); }
+				}
+
+				public MEFv1.Primitives.ComposablePartCatalog DefaultCatalog { get { throw new NotSupportedException(); } }
+				public MEFv1.Primitives.ComposablePartCatalog GetCatalog(string catalogName) { throw new NotSupportedException(); }
+
+				public IEnumerable<T> GetExtensions<T>() where T : class { return ExportProvider.GetExportedValues<T>(); }
+				public T GetService<T>() where T : class { return ExportProvider.GetExportedValue<T>(); }
+			}
 		}
 
 		///<summary>
-		/// Initializes an existing MEF container for use by the editor, and installs it into the global ServiceProvider.
+		/// Creates a MEF container from this builder instance, and installs it into the global ServiceProvider.
 		/// Editor factories will not work before this method is called.
 		///</summary>
-		public static void InitialzeContainer(CompositionContainer container) {
+		public IComponentModel Build() {
+			var container = BuildCore();
+
 			// Based on Microsoft.VisualStudio.ComponentModelHost.ComponentModel.DefaultCompositionContainer.
 			// By implementing SVsServiceProvider myself, I skip an unnecessary call to GetIUnknownForObject.
-			container.ComposeExportedValue<SVsServiceProvider>(VsServiceProvider.Instance);
-
-			VsServiceProvider.Instance.SetMefContainer(container);
+			ComposeExportedValue<SVsServiceProvider>(container, VsServiceProvider.Instance);
 
 			// VS doesn't do this, but it's useful for my Roslyn adapter code.
-			container.ComposeExportedValue(VsServiceProvider.Instance.ComponentModel);
+			ComposeExportedValue(container, container);
+			VsServiceProvider.Instance.SetMefContainer(container);
+			return container;
 		}
+
+		protected abstract IComponentModel BuildCore();
+
+		protected abstract void ComposeExportedValue<T>(IComponentModel container, T value);
+
 	}
 }

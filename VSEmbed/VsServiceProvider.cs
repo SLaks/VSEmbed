@@ -99,8 +99,8 @@ namespace VSEmbed {
 		/// This is used to provide the IComponentModel service, which is used by many parts of Roslyn and the editor.
 		/// It's also used by our TextViewHost wrapper control to access the MEF container.
 		///</remarks>
-		public void SetMefContainer(CompositionContainer container) {
-			ComponentModel = new MefComponentModel(container);
+		public void SetMefContainer(IComponentModel container) {
+			ComponentModel = container;
 			AddService(typeof(SComponentModel), ComponentModel);
 		}
 

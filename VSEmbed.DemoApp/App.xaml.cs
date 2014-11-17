@@ -15,7 +15,7 @@ namespace VSEmbed.DemoApp {
 		public App() {
 			VsLoader.Load(new Version(14, 0, 0, 0));
 			VsServiceProvider.Initialize();
-			VsMefContainerBuilder.CreateDefaultContainer();
+			VsMefContainerBuilder.CreateDefault().Build();
 		}
 		protected override void OnStartup(StartupEventArgs e) {
 			base.OnStartup(e);

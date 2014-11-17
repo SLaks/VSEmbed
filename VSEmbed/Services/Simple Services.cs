@@ -169,23 +169,6 @@ namespace VSEmbed.Services {
 		}
 	}
 
-	class MefComponentModel : IComponentModel {
-		public MefComponentModel(CompositionContainer container) {
-			DefaultCompositionService = container;
-			DefaultExportProvider = container;
-		}
-
-		public ComposablePartCatalog DefaultCatalog { get { throw new NotImplementedException(); } }
-
-		public ICompositionService DefaultCompositionService { get; private set; }
-		public ExportProvider DefaultExportProvider { get; private set; }
-
-		public ComposablePartCatalog GetCatalog(string catalogName) { throw new NotImplementedException(); }
-
-		public IEnumerable<T> GetExtensions<T>() where T : class { return DefaultExportProvider.GetExportedValues<T>(); }
-		public T GetService<T>() where T : class { return DefaultExportProvider.GetExportedValue<T>(); }
-	}
-
 	class SystemUIHostLocale : IUIHostLocale2 {
 		public int GetDialogFont(UIDLGLOGFONT[] pLOGFONT) {
 			pLOGFONT[0].lfFaceName = SystemFonts.CaptionFontFamily.Source.Select(c => (ushort)c).ToArray();
