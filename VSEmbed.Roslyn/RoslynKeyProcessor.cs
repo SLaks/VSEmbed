@@ -173,21 +173,26 @@ namespace VSEmbed.Roslyn {
 	[Order(Before = "Standard KeyProcessor")]
 	[Name("Roslyn KeyProcessor")]
 	sealed class RoslynKeyProcessorProvider : IChainedKeyProcessorProvider {
+		// I need to use the MEF container directly to import a private Roslyn interface.
+		readonly IComponentModel componentModel;
+
 		[ImportingConstructor]
 		public RoslynKeyProcessorProvider(SVsServiceProvider sp) {
 			// This is necessary for icons in IntelliSense
 			var imageService = new VsImageService(sp);
 			imageService.InitializeLibrary();
+
+			var mySP = (VsServiceProvider)sp;
+			componentModel = mySP.ComponentModel;
+
 			// This is necessary for preview icons in CTP3, which doesn't
 			// have a singleton CrispImage.DefaultImageLibrary.  The GUID
 			// is from SVsImageService, which has a private PIA.
-			((VsServiceProvider)sp).AddService(new Guid("ACC9EB93-CAD8-41DE-80DA-BD35CC5112AE"), imageService);
+			mySP.AddService(new Guid("ACC9EB93-CAD8-41DE-80DA-BD35CC5112AE"), imageService);
 		}
 
-		[Import]
-		public IComponentModel ComponentModel { get; set; }
 		public ChainedKeyProcessor GetProcessor(IWpfTextView wpfTextView) {
-			return new RoslynKeyProcessor(wpfTextView, ComponentModel);
+			return new RoslynKeyProcessor(wpfTextView, componentModel);
 		}
 	}
 }

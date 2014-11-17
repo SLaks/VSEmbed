@@ -27,6 +27,9 @@ namespace VSEmbed {
 	/// This must be initialized before theme dictionaries or editor services are used
 	///</remarks>
 	public class VsServiceProvider : OLE.IServiceProvider, SVsServiceProvider {
+		// Based on Microsoft.VisualStudio.ComponentModelHost.ComponentModel.DefaultCompositionContainer.
+		// By implementing SVsServiceProvider myself, I skip an unnecessary call to GetIUnknownForObject.
+		[Export(typeof(SVsServiceProvider))]
 		public static VsServiceProvider Instance { get; private set; }
 
 		///<summary>Creates the global service provider and populates it with the services we need.</summary>

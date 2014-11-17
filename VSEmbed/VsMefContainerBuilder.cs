@@ -41,6 +41,9 @@ namespace VSEmbed {
 
 			// This uses COM services to try to read user settings, and I can't make that work.  I replace it with my own simple implementation.
 			"Microsoft.VisualStudio.Editor.Implementation.DataStorageService",
+
+			// I export my own direct SVsServiceProvider
+			"Microsoft.VisualStudio.ComponentModelHost.VsComponentModelHostExporter"
 		};
 		///<summary>Prevents an exported type from being included in the created MEF container.</summary>
 		///<remarks>Call this method if an exported type doesn't work outside Visual Studio.</remarks>
@@ -152,10 +155,6 @@ namespace VSEmbed {
 				return new ComponentModel(new MEFv1.Hosting.CompositionContainer(new MEFv1.Hosting.AggregateCatalog(catalogs)));
 			}
 
-			protected override void ComposeExportedValue<T>(IComponentModel container, T value) {
-				((MEFv1.Hosting.CompositionContainer)container.DefaultCompositionService).ComposeExportedValue(value);
-			}
-
 			class ComponentModel : IComponentModel {
 				public ComponentModel(MEFv1.Hosting.CompositionContainer container) {
 					DefaultCompositionService = container;
@@ -199,9 +198,6 @@ namespace VSEmbed {
 					.CreateExportProvider();
 				return new ComponentModel(exportProvider);
 			}
-			protected override void ComposeExportedValue<T>(IComponentModel container, T value) {
-				// TODO
-			}
 			class ComponentModel : IComponentModel {
 				public readonly MEFv3.ExportProvider ExportProvider;
 
@@ -232,20 +228,11 @@ namespace VSEmbed {
 		///</summary>
 		public IComponentModel Build() {
 			var container = BuildCore();
-
-			// Based on Microsoft.VisualStudio.ComponentModelHost.ComponentModel.DefaultCompositionContainer.
-			// By implementing SVsServiceProvider myself, I skip an unnecessary call to GetIUnknownForObject.
-			ComposeExportedValue<SVsServiceProvider>(container, VsServiceProvider.Instance);
-
-			// VS doesn't do this, but it's useful for my Roslyn adapter code.
-			ComposeExportedValue(container, container);
 			VsServiceProvider.Instance.SetMefContainer(container);
 			return container;
 		}
 
 		protected abstract IComponentModel BuildCore();
-
-		protected abstract void ComposeExportedValue<T>(IComponentModel container, T value);
 
 	}
 }
