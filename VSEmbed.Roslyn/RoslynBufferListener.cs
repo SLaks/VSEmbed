@@ -25,23 +25,27 @@ namespace VSEmbed.Roslyn {
 	public class RoslynBufferListener : IWpfTextViewConnectionListener {
 		public SVsServiceProvider ExportProvider { get; private set; }
 
+		// VisualStudioWaitIndicator imports VisualStudioWorkspace explicitly, and its ctor tries to use SQM.
+		// Therefore, I hack together a barely-working instance and export it myself.
+		static readonly Type vswType = Type.GetType("Microsoft.VisualStudio.LanguageServices.RoslynVisualStudioWorkspace, "
+												  + "Microsoft.VisualStudio.LanguageServices.Implementation");
+		// I create an uninitialized instance and export it to MEF, then initialize it with the MEF container
+		// later, once I have access to the container. The VS code solves this by exporting a class that gets
+		// the ComponentModel from the ServiceProvider and passes it to its base ctor.
+		[Export]
+		static readonly VisualStudioWorkspace vsWorkspace =
+			(VisualStudioWorkspace)FormatterServices.GetSafeUninitializedObject(vswType);
+
 		[ImportingConstructor]
 		public RoslynBufferListener(SVsServiceProvider exportProvider) {
 			ExportProvider = exportProvider;
 			var componentModel = (IComponentModel)ExportProvider.GetService(typeof(SComponentModel));
-			var container = (CompositionContainer)componentModel.DefaultExportProvider;
-
-			// VisualStudioWaitIndicator imports VisualStudioWorkspace explicitly, and its ctor tries to use SQM.
-			// Therefore, I hack together a barely-working instance and export it myself. This only works because
-			// VisualStudioWaitIndicator fetches it from the ExportProvider instead of importing it normally.
-			var vswType = Type.GetType("Microsoft.VisualStudio.LanguageServices.RoslynVisualStudioWorkspace, "
-									 + "Microsoft.VisualStudio.LanguageServices.Implementation");
-			var vsWorkspace = (VisualStudioWorkspace)FormatterServices.GetSafeUninitializedObject(vswType);
 
 			// Initialize the base Workspace only (to set Services)
+			// The MefV1HostServices call breaks compatibility with
+			// older Dev14 CTPs; that could be fixed by reflection.
 			typeof(Workspace).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)[0]
-				.Invoke(vsWorkspace, new object[] { MefV1HostServices.Create(container), "FakeWorkspace" });
-			container.ComposeExportedValue<VisualStudioWorkspace>(vsWorkspace);
+				.Invoke(vsWorkspace, new object[] { MefV1HostServices.Create(componentModel.DefaultExportProvider), "FakeWorkspace" });
 		}
 
 		static readonly Dictionary<string, string> contentTypeLanguages = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
