@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Host;
+using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 
@@ -39,18 +40,13 @@ namespace VSEmbed.Roslyn {
 		);
 
 
-		// TODO: Check for later Roslyn versions & use http://source.roslyn.codeplex.com/#Microsoft.CodeAnalysis.Workspaces.Desktop/Utilities/Documentation/FileBasedXmlDocumentationProvider.cs,13
-		static readonly Func<string, DocumentationProvider> CreateXmlDocumentationProvider =
-			(Func<string, DocumentationProvider>)Delegate.CreateDelegate(
-				typeof(Func<string, DocumentationProvider>),
-				typeof(Workspace).Assembly.GetType("Microsoft.CodeAnalysis.XmlDocumentationProvider")
-					.GetMethod("Create", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string) }, null)
-			);
+		static readonly Type xmlDocProvider = typeof(MSBuildWorkspace).Assembly
+			.GetType("Microsoft.CodeAnalysis.FileBasedXmlDocumentationProvider");
 		public MetadataReference CreateFrameworkReference(string assemblyName) {
 			return MetadataReference.CreateFromFile(
 				Path.Combine(referenceAssemblyPath, assemblyName + ".dll"),
 				MetadataReferenceProperties.Assembly,
-				CreateXmlDocumentationProvider(Path.Combine(referenceAssemblyPath, assemblyName + ".xml"))
+				(DocumentationProvider)Activator.CreateInstance(xmlDocProvider, Path.Combine(referenceAssemblyPath, assemblyName + ".xml"))
 			);
 		}
 

@@ -28,7 +28,8 @@ If you create a Roslyn-powered buffer and do not link it to a workspace, I have 
 
 #Caveats
  - The end-user must have a version (2012+) of Visual Studio (including Express editions) installed for this to run.
- - The Roslyn editor services will only work if Dev14 (any version) is installed.
+ - The Roslyn editor services will only work if VS2015 Preview (or later builds) is installed.
+  - To make it support older Dev14 CTPs, use Reflection to call `MefHostService` if `MefV1HostServices` does not exist, and re-add the older `XmlDocumentationProvider` code that was replaced in this commit.
  - If Visual Studio 2012 assemblies are in the GAC, other versions will not load properly.
  - Code snippets are not implemented.
  - Peek does not work.
