@@ -190,7 +190,15 @@ namespace VSEmbed {
 				new MEFv3.AttributedPartDiscoveryV1()
 			);
 			public override VsMefContainerBuilder WithCatalog(IEnumerable<Type> types) {
-				return new V3(catalog.WithParts(partDiscovery.CreatePartsAsync(types).GetAwaiter().GetResult().ThrowOnErrors()));
+				// Consumers are expected to build their MEF catalogs before setting
+				// up the UI thread, so this should not create async deadlocks under
+				// normal usage.
+				return new V3(catalog.WithParts(
+					partDiscovery.CreatePartsAsync(types)
+						.GetAwaiter()
+						.GetResult()
+						.ThrowOnErrors()
+				));
 			}
 
 			protected override IComponentModel BuildCore() {
