@@ -15,6 +15,10 @@ namespace VSEmbed.DemoApp {
 		public App() {
 			VsLoader.Load(new Version(14, 0, 0, 0));
 			VsServiceProvider.Initialize();
+			BuildContainer();
+		}
+		// Must be JITted after VsLoader.Load so we can load ComponentModelHost
+		void BuildContainer() { 
 			VsMefContainerBuilder.CreateDefault().Build();
 		}
 		protected override void OnStartup(StartupEventArgs e) {

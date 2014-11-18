@@ -175,7 +175,9 @@ namespace VSEmbed {
 
 		class V3 : VsMefContainerBuilder {
 			internal static new VsMefContainerBuilder Create() {
-				return new V3(MEFv3.ComposableCatalog.Create());
+				return new V3(MEFv3.ComposableCatalog.Create())
+					// Needed for ExportMetadataViewInterfaceEmitProxy to support editor metadata types.
+					.WithFilteredCatalogs(Assembly.Load("Microsoft.VisualStudio.Composition.Configuration")); ;
 			}
 			readonly MEFv3.ComposableCatalog catalog;
 			private V3(MEFv3.ComposableCatalog catalog) {
@@ -188,7 +190,7 @@ namespace VSEmbed {
 				new MEFv3.AttributedPartDiscoveryV1()
 			);
 			public override VsMefContainerBuilder WithCatalog(IEnumerable<Type> types) {
-				return new V3(catalog.WithParts(partDiscovery.CreatePartsAsync(types).GetAwaiter().GetResult()));
+				return new V3(catalog.WithParts(partDiscovery.CreatePartsAsync(types).GetAwaiter().GetResult().ThrowOnErrors()));
 			}
 
 			protected override IComponentModel BuildCore() {

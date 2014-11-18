@@ -127,6 +127,7 @@ del "$(TargetDir)Microsoft.VisualStudio.Settings.11.0.dll"
 del "$(TargetDir)Microsoft.VisualStudio.Text.Internal.dll"
 del "$(TargetDir)Newtonsoft.Json.dll"
 del "$(TargetDir)Microsoft.VisualStudio.Platform.VSEditor.dll"
+del "$(TargetDir)Microsoft.VisualStudio.ComponentModelHost.dll"
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
