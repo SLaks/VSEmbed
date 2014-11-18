@@ -27,6 +27,7 @@
         <PropertyValue name="BringUpOnOverride">1</PropertyValue>
         <PropertyValue name="BringUpOnPartial">1</PropertyValue>
         <PropertyValue name="BringUpOnSpace">1</PropertyValue>
+        <PropertyValue name="ClosedFileDiagnostics">0</PropertyValue>
         <PropertyValue name="CodeDefinitionWindow_DocumentationComment_IndentBase">1</PropertyValue>
         <PropertyValue name="CodeDefinitionWindow_DocumentationComment_IndentOffset">2</PropertyValue>
         <PropertyValue name="CodeDefinitionWindow_DocumentationComment_WrapLength">80</PropertyValue>
@@ -38,9 +39,11 @@
         <PropertyValue name="CompleteOnSpace">1</PropertyValue>
         <PropertyValue name="CompletionCommitCharacters">{}[]().,:;+-*/%&amp;|^!~=&lt;&gt;?@#'"\</PropertyValue>
         <PropertyValue name="DelayBeforeShowingErrors">1500</PropertyValue>
+        <PropertyValue name="DisplayLineSeparators">0</PropertyValue>
         <PropertyValue name="EditAndContinueEnabled">1</PropertyValue>
         <PropertyValue name="EditAndContinueReportEnterBreakStateFailure">1</PropertyValue>
         <PropertyValue name="EditAndContinueReportOpenScopeFailure">0</PropertyValue>
+        <PropertyValue name="EnableHighlightRelatedKeywords">1</PropertyValue>
         <PropertyValue name="EnableProgressDialogOnWaitForBackground">1</PropertyValue>
         <PropertyValue name="EncapsulateField_PreviewReferenceChanges">1</PropertyValue>
         <PropertyValue name="EncapsulateField_SearchInComments">0</PropertyValue>
@@ -48,6 +51,8 @@
         <PropertyValue name="EncapsulateField_UpdateAllReferences">0</PropertyValue>
         <PropertyValue name="EnterOutliningModeOnOpen">0</PropertyValue>
         <PropertyValue name="ExtractInterface_SelectAll">0</PropertyValue>
+        <PropertyValue name="ExtractMethod_AllowMovingDeclaration">0</PropertyValue>
+        <PropertyValue name="ExtractMethod_DoNotPutOutOrRefOnStruct">1</PropertyValue>
         <PropertyValue name="FilterKeywordsContextually">1</PropertyValue>
         <PropertyValue name="FilterToAllowableTypes">1</PropertyValue>
         <PropertyValue name="Formatting_TriggerOnBlockCompletion">1</PropertyValue>
@@ -61,7 +66,7 @@
         <PropertyValue name="Indent_BlockContents">1</PropertyValue>
         <PropertyValue name="Indent_Braces">0</PropertyValue>
         <PropertyValue name="Indent_CaseContents">1</PropertyValue>
-        <PropertyValue name="Indent_CaseLabels">0</PropertyValue>
+        <PropertyValue name="Indent_CaseLabels">1</PropertyValue>
         <PropertyValue name="Indent_FlushLabelsLeft">0</PropertyValue>
         <PropertyValue name="Indent_UnindentLabels">2</PropertyValue>
         <PropertyValue name="InsertNewlineOnEnterWithWholeWord">0</PropertyValue>
@@ -126,6 +131,10 @@
         <PropertyValue name="Space_WithinSquares">0</PropertyValue>
         <PropertyValue name="Squiggles">1</PropertyValue>
         <PropertyValue name="Squiggles_SemanticAnalysis">1</PropertyValue>
+        <PropertyValue name="Style_PreferIntrinsicPredefinedTypeKeywordInDeclaration">1</PropertyValue>
+        <PropertyValue name="Style_PreferIntrinsicPredefinedTypeKeywordInMemberAccess">1</PropertyValue>
+        <PropertyValue name="Style_QualifyMemberAccessWithThisOrMe">0</PropertyValue>
+        <PropertyValue name="Style_UseVarWhenDeclaringLocals">1</PropertyValue>
         <PropertyValue name="TrackMostRecentlyUsed">1</PropertyValue>
         <PropertyValue name="UnboundItemSmartTagEnabled">1</PropertyValue>
         <PropertyValue name="UnboundItem_ExactMatches">5</PropertyValue>
