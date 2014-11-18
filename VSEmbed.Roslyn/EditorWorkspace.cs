@@ -47,7 +47,7 @@ namespace VSEmbed.Roslyn {
 					.GetMethod("Create", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string) }, null)
 			);
 		public MetadataReference CreateFrameworkReference(string assemblyName) {
-			return new MetadataFileReference(
+			return MetadataReference.CreateFromFile(
 				Path.Combine(referenceAssemblyPath, assemblyName + ".dll"),
 				MetadataReferenceProperties.Assembly,
 				CreateXmlDocumentationProvider(Path.Combine(referenceAssemblyPath, assemblyName + ".xml"))

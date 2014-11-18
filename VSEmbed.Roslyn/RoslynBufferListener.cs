@@ -40,7 +40,7 @@ namespace VSEmbed.Roslyn {
 
 			// Initialize the base Workspace only (to set Services)
 			typeof(Workspace).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)[0]
-				.Invoke(vsWorkspace, new object[] { MefHostServices.Create(container), "FakeWorkspace" });
+				.Invoke(vsWorkspace, new object[] { MefV1HostServices.Create(container), "FakeWorkspace" });
 			container.ComposeExportedValue<VisualStudioWorkspace>(vsWorkspace);
 		}
 
@@ -55,7 +55,7 @@ namespace VSEmbed.Roslyn {
 				if (buffer.GetWorkspace() != null)
 					continue;
 				var componentModel = (IComponentModel)ExportProvider.GetService(typeof(SComponentModel));
-				var workspace = new EditorWorkspace(MefHostServices.Create(componentModel.DefaultExportProvider));
+				var workspace = new EditorWorkspace(MefV1HostServices.Create(componentModel.DefaultExportProvider));
 
 				var project = workspace.AddProject("Sample Project", contentTypeLanguages[buffer.ContentType.DisplayName]);
 				workspace.TryApplyChanges(workspace.CurrentSolution.AddMetadataReferences(project.Id,
