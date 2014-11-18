@@ -193,7 +193,7 @@ namespace VSEmbed {
 
 			protected override IComponentModel BuildCore() {
 				var exportProvider = MEFv3.RuntimeComposition
-					.CreateRuntimeComposition(MEFv3.CompositionConfiguration.Create(catalog))
+					.CreateRuntimeComposition(MEFv3.CompositionConfiguration.Create(catalog).ThrowOnErrors())
 					.CreateExportProviderFactory()
 					.CreateExportProvider();
 				return new ComponentModel(exportProvider);
