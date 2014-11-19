@@ -47,7 +47,8 @@ namespace VSEmbed {
 				VsLoader.Load(new Version(11, 0, 0, 0));
 
 			var esm = ExternalSettingsManager.CreateForApplication(Path.Combine(VsLoader.InstallationDirectory, "devenv.exe"));
-			var sp = new VsServiceProvider {
+			var sp = new VsServiceProvider
+			{
 				UIShell = new ThemedVsUIShell(),
 				serviceInstances = {
 					// Used by Shell.ServiceProvider initialization
@@ -77,6 +78,7 @@ namespace VSEmbed {
 
 					// Used by VsTaskSchedulerService; see below
 					{ typeof(SVsShell).GUID, new StubVsShell() },
+
 				}
 			};
 
@@ -87,6 +89,7 @@ namespace VSEmbed {
 
 			// Add services that use IServiceProvider here
 			sp.AddTaskSchedulerService();
+			sp.AddAsyncServiceProvider();
 
 			// The designer loads Microsoft.VisualStudio.Shell.XX.0,
 			// which we cannot reference directly (to avoid breaking
@@ -113,6 +116,19 @@ namespace VSEmbed {
 			// used.
 			// Used by JoinableTaskFactory
 			AddService(typeof(SVsTaskSchedulerService), Activator.CreateInstance(typeof(VsMenu).Assembly.GetType("Microsoft.VisualStudio.Services.VsTaskSchedulerService")));
+		}
+
+		private void AddAsyncServiceProvider() {
+			var type = Type.GetType("Microsoft.VisualStudio.Services.AsyncQueryService.AsyncServiceProvider, "
+								  + "Microsoft.VisualStudio.Shell.UI.Internal");
+			if (type == null)
+				return;
+			// Used by VsImageService
+			AddService(new Guid("944774C9-7422-4E87-B01C-189182C779A6"), Activator.CreateInstance(
+				type,
+				BindingFlags.NonPublic | BindingFlags.Instance, null,
+				new object[] { this, this },
+				null));
 		}
 
 		///<summary>Gets the MEF IComponentModel installed in this ServiceProvider, if any.</summary>
