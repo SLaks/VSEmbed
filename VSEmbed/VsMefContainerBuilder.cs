@@ -107,7 +107,10 @@ namespace VSEmbed {
 				// only because it uses VS icons, so I can use it as-is.
 				// Removed in VS2015 Preview
 				Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.CodeFixPreview.CodeFixPreviewService, "
-						   + "Microsoft.VisualStudio.LanguageServices")
+						   + "Microsoft.VisualStudio.LanguageServices"),
+				// VS2015 Preview version of above type.
+				Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.PreviewPane.PreviewPaneService, "
+						   + "Microsoft.VisualStudio.LanguageServices"),
 				}.Where(t => t != null));
 
 		}
