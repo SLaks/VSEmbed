@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 
 namespace VSEmbed.Services {
@@ -35,6 +36,59 @@ namespace VSEmbed.Services {
 		}
 
 		public int LogEntryPath([ComAliasName("Microsoft.VisualStudio.Shell.Interop.ACTIVITYLOG_ENTRYTYPE")]uint actType, [ComAliasName("Microsoft.VisualStudio.OLE.Interop.LPCOLESTR")]string pszSource, [ComAliasName("Microsoft.VisualStudio.OLE.Interop.LPCOLESTR")]string pszDescription, [ComAliasName("Microsoft.VisualStudio.OLE.Interop.LPCOLESTR")]string pszPath) {
+			return 0;
+		}
+	}
+
+	class StubVsShell : IVsShell {
+		public int AdviseBroadcastMessages(IVsBroadcastMessageEvents pSink, out uint pdwCookie) {
+			pdwCookie = 42;
+			return 0;
+		}
+
+		public int AdviseShellPropertyChanges(IVsShellPropertyEvents pSink, out uint pdwCookie) {
+			pdwCookie = 42;
+			return 0;
+		}
+
+		public int GetPackageEnum(out IEnumPackages ppenum) {
+			throw new NotImplementedException();
+		}
+
+		public int GetProperty(int propid, out object pvar) {
+			pvar = null;
+			return VSConstants.E_NOTIMPL;
+		}
+
+		public int IsPackageInstalled(ref Guid guidPackage, out int pfInstalled) {
+			throw new NotImplementedException();
+		}
+
+		public int IsPackageLoaded(ref Guid guidPackage, out IVsPackage ppPackage) {
+			throw new NotImplementedException();
+		}
+
+		public int LoadPackage(ref Guid guidPackage, out IVsPackage ppPackage) {
+			throw new NotImplementedException();
+		}
+
+		public int LoadPackageString(ref Guid guidPackage, uint resid, out string pbstrOut) {
+			throw new NotImplementedException();
+		}
+
+		public int LoadUILibrary(ref Guid guidPackage, uint dwExFlags, out uint phinstOut) {
+			throw new NotImplementedException();
+		}
+
+		public int SetProperty(int propid, object var) {
+			throw new NotImplementedException();
+		}
+
+		public int UnadviseBroadcastMessages(uint dwCookie) {
+			return 0;
+		}
+
+		public int UnadviseShellPropertyChanges(uint dwCookie) {
 			return 0;
 		}
 	}

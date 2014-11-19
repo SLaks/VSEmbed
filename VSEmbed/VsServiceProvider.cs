@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -73,6 +74,9 @@ namespace VSEmbed {
 
 					// Used by DocumentPeekResult; service is SVsUIThreadInvokerPrivate
 					{ new Guid("72FD1033-2341-4249-8113-EF67745D84EA"), new AppDispatcherInvoker() },
+
+					// Used by VsTaskSchedulerService; see below
+					{ typeof(SVsShell).GUID, new StubVsShell() },
 				}
 			};
 
@@ -80,6 +84,18 @@ namespace VSEmbed {
 
 			Shell.ServiceProvider.CreateFromSetSite(sp);
 			Instance = sp;
+
+			// Force its singleton instance property, used by VsTaskSchedulerService, to be set
+			var package = new Microsoft.VisualStudio.Services.TaskSchedulerPackage();
+			((IVsPackage)package).SetSite(sp);
+
+			// This ctor calls other services from the ServiceProvider, so it must be added after initialization.
+			// VsIdleTimeScheduler uses VsShell.ShellPropertyChanged to wait for an OleComponentManager to exist,
+			// then calls FRegisterComponent().  I don't know how to implement that, so my VsShell will not raise
+			// event, leaving it in limbo.  This means that idle processing won't work; I don't know where that's
+			// used.
+			// Used by JoinableTaskFactory
+			sp.AddService(typeof(SVsTaskSchedulerService), Activator.CreateInstance(typeof(VsMenu).Assembly.GetType("Microsoft.VisualStudio.Services.VsTaskSchedulerService")));
 
 			// The designer loads Microsoft.VisualStudio.Shell.XX.0,
 			// which we cannot reference directly (to avoid breaking
