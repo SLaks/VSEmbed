@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Services;
@@ -178,17 +179,23 @@ namespace VSEmbed.Roslyn {
 
 		[ImportingConstructor]
 		public RoslynKeyProcessorProvider(SVsServiceProvider sp) {
-			// This is necessary for icons in IntelliSense
-			var imageService = new VsImageService(sp);
-			imageService.InitializeLibrary();
-
 			var mySP = (VsServiceProvider)sp;
 			componentModel = mySP.ComponentModel;
 
-			// This is necessary for preview icons in CTP3, which doesn't
-			// have a singleton CrispImage.DefaultImageLibrary.  The GUID
-			// is from SVsImageService, which has a private PIA.
-			mySP.AddService(new Guid("ACC9EB93-CAD8-41DE-80DA-BD35CC5112AE"), imageService);
+			// This is necessary for icons in IntelliSense
+			// The initialization is re-entrant, which can
+			// make MEF try to create this class again and
+			// throw a re-entrancy exception from Lazy<T>.
+			// I therefore initialize this asynchronously.
+			Dispatcher.CurrentDispatcher.BeginInvoke(new Action(delegate {
+				var imageService = new VsImageService(sp);
+				imageService.InitializeLibrary();
+
+				// This is necessary for preview icons in CTP3, which doesn't
+				// have a singleton CrispImage.DefaultImageLibrary.  The GUID
+				// is from SVsImageService, which has a private PIA.
+				mySP.AddService(new Guid("ACC9EB93-CAD8-41DE-80DA-BD35CC5112AE"), imageService);
+			}));
 		}
 
 		public ChainedKeyProcessor GetProcessor(IWpfTextView wpfTextView) {
