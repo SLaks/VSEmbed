@@ -14,10 +14,13 @@ To initialize Visual Studio, you need the following code:
 ```C#
 VsLoader.LoadLatest();    // Or .Load(new Version(...))
 VsServiceProvider.Initialize();
-VsMefContainerBuilder.CreateDefaultContainer(); // Only needed for editor embedding
+VsMefContainerBuilder.CreateDefault().Build(); // Only needed for editor embedding
 ```
 
-If you're already using MEF, you can use the other methods in `VsMefContainerBuilder` to add the editor services to your MEF container.
+The last line can only be JITted after initializing VsLoader (because `Build()` returns an `IComponentModel`, which is defined in a VS assembly), so you should put it in a separate method and call that method after setting up VsLoader.
+
+You _must_ create the MEF container using `VsMefContainerBuilder`; it will use Visual Studio 2015's [new version of MEF](http://blog.slaks.net/2014-11-16/mef2-roslyn-visual-studio-compatibility/) (where available) to support Roslyn's MEF2 exports.  
+If you're already using MEF, you can call `WithFilteredCatalogs(assemblies)` or `WithCatalog(types)` to add your own assemblies to the MEF container.   Note that `VsMefContainerBuilder` is immutable; these methods return new instances with the new catalogs added.
 
 #Using Roslyn
 After loading Dev14, you can set the ContentType of an ITextBuffer to `C#` or `VisualBasic` to activate the Roslyn editors.  However, you will also need to link the ITextBuffer to a Roslyn [Workspace](http://source.roslyn.codeplex.com/#Microsoft.CodeAnalysis.Workspaces/Workspace/Workspace.cs) to activate the language services.  In addition, the workspace must have an `IWorkCoordinatorRegistrationService` registered to run diagnostics in the background.
@@ -30,6 +33,8 @@ If you create a Roslyn-powered buffer and do not link it to a workspace, I have 
  - The end-user must have a version (2012+) of Visual Studio (including Express editions) installed for this to run.
  - The Roslyn editor services will only work if VS2015 Preview (or later builds) is installed.
   - To make it support older Dev14 CTPs, use Reflection to call `MefHostService` if `MefV1HostServices` does not exist, and re-add the older `XmlDocumentationProvider` code that was replaced in this commit.
+ - XML doc comments are not shown
+  - This is caused by https://roslyn.codeplex.com/workitem/406
  - If Visual Studio 2012 assemblies are in the GAC, other versions will not load properly.
  - Code snippets are not implemented.
  - Peek does not work.
