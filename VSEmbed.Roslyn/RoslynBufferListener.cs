@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -46,6 +49,28 @@ namespace VSEmbed.Roslyn {
 			// older Dev14 CTPs; that could be fixed by reflection.
 			typeof(Workspace).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)[0]
 				.Invoke(vsWorkspace, new object[] { MefV1HostServices.Create(componentModel.DefaultExportProvider), "FakeWorkspace" });
+
+			var diagnosticService = typeof(IComponentModel)
+				.GetMethod("GetService")
+				.MakeGenericMethod(Type.GetType("Microsoft.CodeAnalysis.Diagnostics.IDiagnosticAnalyzerService, "
+											  + "Microsoft.CodeAnalysis.Features"))
+				.Invoke(componentModel, null);
+
+			// Roslyn loads analyzers from DLL filenames that come from the VS-layer
+			// IWorkspaceDiagnosticAnalyzerProviderService. This uses internal types
+			// which I cannot provide. Instead, I inject the standard analyzers into
+			// DiagnosticAnalyzerService myself, after it's created.
+			diagnosticService.GetType()
+				.GetField("workspaceAnalyzers", BindingFlags.NonPublic | BindingFlags.Instance)
+				.SetValue(diagnosticService, new[] {
+					"Microsoft.CodeAnalysis.Features.dll",
+					"Microsoft.CodeAnalysis.EditorFeatures.dll",
+					"Microsoft.CodeAnalysis.CSharp.Features.dll",
+					"Microsoft.CodeAnalysis.CSharp.EditorFeatures.dll",
+					"Microsoft.CodeAnalysis.VisualBasic.Features.dll",
+					"Microsoft.CodeAnalysis.VisualBasic.EditorFeatures.dll",
+				}.Select(name => new AnalyzerFileReference(Path.Combine(VsLoader.RoslynAssemblyPath, name), Assembly.LoadFile))
+				 .ToImmutableArray<AnalyzerReference>());
 		}
 
 		static readonly Dictionary<string, string> contentTypeLanguages = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
