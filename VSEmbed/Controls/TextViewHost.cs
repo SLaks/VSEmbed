@@ -32,6 +32,16 @@ namespace VSEmbed.Controls {
 			TextView.TextBuffer.Changed += (s, e) => Text = TextView.TextSnapshot.GetText();
 		}
 
+		private static Lazy<IReadOnlyList<string>> availableContentTypes = new Lazy<IReadOnlyList<string>>(() =>
+			VsServiceProvider.Instance.ComponentModel
+				.GetService<IContentTypeRegistryService>()
+				.ContentTypes
+				.Select(c => c.DisplayName)
+				.ToList()
+				.AsReadOnly()
+		);
+		public static IReadOnlyList<string> AvailableContentTypes { get { return availableContentTypes.Value; } }
+
 
 		public string ContentType {
 			get { return (string)GetValue(ContentTypeProperty); }

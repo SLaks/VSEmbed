@@ -65,10 +65,17 @@ namespace VSEmbed.Roslyn {
 			buffer.Changed += delegate { OnDocumentContextUpdated(id); };
 			return CurrentSolution.GetDocument(id);
 		}
-
+		public override void CloseDocument(DocumentId documentId) {
+			var document = CurrentSolution.GetDocument(documentId);
+			OnDocumentClosed(documentId, TextLoader.From(TextAndVersion.Create(document.GetTextAsync().Result, document.GetTextVersionAsync().Result)));
+		}
 		protected override void AddMetadataReference(ProjectId projectId, MetadataReference metadataReference) {
 			OnMetadataReferenceAdded(projectId, metadataReference);
 		}
+		protected override void RemoveDocument(DocumentId documentId) {
+			OnDocumentRemoved(documentId);
+		}
+
 		protected override void ChangedDocumentText(DocumentId id, SourceText text) {
 			OnDocumentTextChanged(id, text, PreservationMode.PreserveValue);
 			UpdateText(text, documentBuffers[id], EditOptions.DefaultMinimalChange);
@@ -90,13 +97,13 @@ namespace VSEmbed.Roslyn {
 				case ApplyChangesKind.AddMetadataReference:
 				case ApplyChangesKind.RemoveMetadataReference:
 				case ApplyChangesKind.ChangeDocument:
+				case ApplyChangesKind.RemoveDocument:
 					return true;
 				case ApplyChangesKind.AddProject:
 				case ApplyChangesKind.RemoveProject:
 				case ApplyChangesKind.AddProjectReference:
 				case ApplyChangesKind.RemoveProjectReference:
 				case ApplyChangesKind.AddDocument:
-				case ApplyChangesKind.RemoveDocument:
 				default:
 					return false;
 			}

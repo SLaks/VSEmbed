@@ -146,6 +146,10 @@
 		</ComboBox>
 		<Button DockPanel.Dock="Top">Button</Button>
 		<CheckBox DockPanel.Dock="Top">Checkbox</CheckBox>
-		<vscontrols:TextViewHost Text="Hi, everyone!" ContentType="CSharp" />
+		<ComboBox Name="ContentType"
+				  DockPanel.Dock="Top"
+				  ItemsSource="{x:Static vscontrols:TextViewHost.AvailableContentTypes}"
+				  SelectedItem="CSharp" />
+		<vscontrols:TextViewHost Text="Hi, everyone!" ContentType="{Binding ElementName=ContentType, Path=SelectedItem, Mode=TwoWay}" />
 	</DockPanel>
 </vsc:CustomChromeWindow>

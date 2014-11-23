@@ -80,21 +80,39 @@ namespace VSEmbed.Roslyn {
 		public async void SubjectBuffersConnected(IWpfTextView textView, ConnectionReason reason, Collection<ITextBuffer> subjectBuffers) {
 			// Give the code that created the buffer a chance to attach its own workspace
 			await Task.Yield();
-			foreach (var buffer in subjectBuffers) {
-				if (buffer.GetWorkspace() != null)
-					continue;
-				var componentModel = (IComponentModel)ExportProvider.GetService(typeof(SComponentModel));
-				var workspace = new EditorWorkspace(MefV1HostServices.Create(componentModel.DefaultExportProvider));
 
-				var project = workspace.AddProject("Sample Project", contentTypeLanguages[buffer.ContentType.DisplayName]);
-				workspace.TryApplyChanges(workspace.CurrentSolution.AddMetadataReferences(project.Id,
-					new[] { "mscorlib", "System", "System.Core", "System.Xml.Linq" }.Select(workspace.CreateFrameworkReference)
-				));
-				workspace.CreateDocument(project.Id, buffer);
+			foreach (var buffer in subjectBuffers) {
+				CreateWorkspace(buffer);
+				buffer.ContentTypeChanged += (s, e) => {
+					var workspace = buffer.GetWorkspace();
+					if (workspace != null) {
+						foreach (var document in buffer.GetRelatedDocuments()) {
+							workspace.CloseDocument(document.Id);
+						}
+					}
+					CreateWorkspace(buffer);
+				};
 			}
+		}
+		void CreateWorkspace(ITextBuffer buffer) {
+			if (buffer.GetWorkspace() != null || !buffer.ContentType.IsOfType("Roslyn Languages"))
+				return;
+			var componentModel = (IComponentModel)ExportProvider.GetService(typeof(SComponentModel));
+			var workspace = new EditorWorkspace(MefV1HostServices.Create(componentModel.DefaultExportProvider));
+
+			var project = workspace.AddProject("Sample Project", contentTypeLanguages[buffer.ContentType.DisplayName]);
+			workspace.TryApplyChanges(workspace.CurrentSolution.AddMetadataReferences(project.Id,
+				new[] { "mscorlib", "System", "System.Core", "System.Xml.Linq" }.Select(workspace.CreateFrameworkReference)
+			));
+			workspace.CreateDocument(project.Id, buffer);
 		}
 
 		public void SubjectBuffersDisconnected(IWpfTextView textView, ConnectionReason reason, Collection<ITextBuffer> subjectBuffers) {
+			foreach (var buffer in subjectBuffers) {
+				foreach (var document in buffer.GetRelatedDocuments()) {
+					buffer.GetWorkspace().CloseDocument(document.Id);
+				}
+			}
 		}
 	}
 }
