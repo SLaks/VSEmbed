@@ -19,6 +19,12 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
 namespace VSEmbed.Roslyn {
+	///<summary>An [Export] attribute that can export an inaccessible interface.</summary>
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true, Inherited = false)]
+	sealed class HackyExportAttribute : ExportAttribute {
+		public HackyExportAttribute(string qualifiedTypeName) : base(Type.GetType(qualifiedTypeName)) { }
+	}
+
 	[Export(typeof(IWpfTextViewConnectionListener))]
 	[ContentType("Roslyn Languages")]
 	[TextViewRole(PredefinedTextViewRoles.Editable)]
@@ -36,6 +42,14 @@ namespace VSEmbed.Roslyn {
 		static readonly VisualStudioWorkspace vsWorkspace =
 			(VisualStudioWorkspace)FormatterServices.GetSafeUninitializedObject(vswType);
 
+		// Roslyn loads analyzers from DLL filenames that come from this VS service,
+		// which gets DLL location VS's extension manager service.  I inject a faked
+		// instance which just provides the DLLs containing Roslyn's own analyzers.
+		//[HackyExport("Microsoft.CodeAnalysis.Diagnostics.IWorkspaceDiagnosticAnalyzerProviderService, Microsoft.CodeAnalysis.Features")]
+		static readonly object analyzerProvider = FormatterServices.GetSafeUninitializedObject(
+			Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.Diagnostics.VisualStudioWorkspaceDiagnosticAnalyzerProviderService, "
+					   + "Microsoft.VisualStudio.LanguageServices"));
+
 		[ImportingConstructor]
 		public RoslynBufferListener(SVsServiceProvider exportProvider) {
 			ExportProvider = exportProvider;
@@ -46,6 +60,16 @@ namespace VSEmbed.Roslyn {
 			// older Dev14 CTPs; that could be fixed by reflection.
 			typeof(Workspace).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)[0]
 				.Invoke(vsWorkspace, new object[] { MefV1HostServices.Create(componentModel.DefaultExportProvider), "FakeWorkspace" });
+
+			analyzerProvider.GetType().GetField("workspaceAnalyzerAssemblies", BindingFlags.NonPublic | BindingFlags.Instance)
+				.SetValue(analyzerProvider, new string[] {
+					"Microsoft.CodeAnalysis.Features",
+					"Microsoft.CodeAnalysis.EditorFeatures",
+					"Microsoft.CodeAnalysis.CSharp.Features",
+					"Microsoft.CodeAnalysis.CSharp.EditorFeatures",
+					"Microsoft.CodeAnalysis.VisualBasic.Features",
+					"Microsoft.CodeAnalysis.VisualBasic.EditorFeatures",
+				});
 		}
 
 		static readonly Dictionary<string, string> contentTypeLanguages = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
