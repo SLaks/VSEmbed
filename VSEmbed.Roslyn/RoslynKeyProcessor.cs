@@ -170,7 +170,7 @@ namespace VSEmbed.Roslyn {
 
 	[Export(typeof(IChainedKeyProcessorProvider))]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
-	[ContentType("text")]
+	[ContentType("Roslyn Languages")]
 	[Order(Before = "Standard KeyProcessor")]
 	[Name("Roslyn KeyProcessor")]
 	sealed class RoslynKeyProcessorProvider : IChainedKeyProcessorProvider {
