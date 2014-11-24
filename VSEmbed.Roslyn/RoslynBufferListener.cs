@@ -50,11 +50,8 @@ namespace VSEmbed.Roslyn {
 			typeof(Workspace).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)[0]
 				.Invoke(vsWorkspace, new object[] { MefV1HostServices.Create(componentModel.DefaultExportProvider), "FakeWorkspace" });
 
-			var diagnosticService = typeof(IComponentModel)
-				.GetMethod("GetService")
-				.MakeGenericMethod(Type.GetType("Microsoft.CodeAnalysis.Diagnostics.IDiagnosticAnalyzerService, "
-											  + "Microsoft.CodeAnalysis.Features"))
-				.Invoke(componentModel, null);
+			var diagnosticService = componentModel.DefaultExportProvider
+				.GetExport<object>("Microsoft.CodeAnalysis.Diagnostics.IDiagnosticAnalyzerService").Value;
 
 			// Roslyn loads analyzers from DLL filenames that come from the VS-layer
 			// IWorkspaceDiagnosticAnalyzerProviderService. This uses internal types
