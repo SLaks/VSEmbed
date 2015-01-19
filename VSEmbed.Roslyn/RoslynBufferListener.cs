@@ -62,8 +62,10 @@ namespace VSEmbed.Roslyn {
 				.SetValue(diagnosticService, new[] {
 					"Microsoft.CodeAnalysis.Features.dll",
 					"Microsoft.CodeAnalysis.EditorFeatures.dll",
+					"Microsoft.CodeAnalysis.CSharp.dll",
 					"Microsoft.CodeAnalysis.CSharp.Features.dll",
 					"Microsoft.CodeAnalysis.CSharp.EditorFeatures.dll",
+					"Microsoft.CodeAnalysis.VisualBasic.dll",
 					"Microsoft.CodeAnalysis.VisualBasic.Features.dll",
 					"Microsoft.CodeAnalysis.VisualBasic.EditorFeatures.dll",
 				}.Select(name => new AnalyzerFileReference(Path.Combine(VsLoader.RoslynAssemblyPath, name), Assembly.LoadFile))
