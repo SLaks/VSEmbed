@@ -69,15 +69,8 @@ namespace VSEmbed.Roslyn {
 			var document = CurrentSolution.GetDocument(documentId);
 			OnDocumentClosed(documentId, TextLoader.From(TextAndVersion.Create(document.GetTextAsync().Result, document.GetTextVersionAsync().Result)));
 		}
-		protected override void AddMetadataReference(ProjectId projectId, MetadataReference metadataReference) {
-			OnMetadataReferenceAdded(projectId, metadataReference);
-		}
-		protected override void RemoveDocument(DocumentId documentId) {
-			OnDocumentRemoved(documentId);
-		}
 
-		protected override void ChangedDocumentText(DocumentId id, SourceText text) {
-			OnDocumentTextChanged(id, text, PreservationMode.PreserveValue);
+		protected override void ApplyDocumentTextChanged(DocumentId id, SourceText text) {
 			UpdateText(text, documentBuffers[id], EditOptions.DefaultMinimalChange);
 		}
 
