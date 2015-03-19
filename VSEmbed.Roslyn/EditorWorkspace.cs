@@ -40,13 +40,11 @@ namespace VSEmbed.Roslyn {
 		);
 
 
-		static readonly Type xmlDocProvider = typeof(MSBuildWorkspace).Assembly
-			.GetType("Microsoft.CodeAnalysis.FileBasedXmlDocumentationProvider");
 		public MetadataReference CreateFrameworkReference(string assemblyName) {
 			return MetadataReference.CreateFromFile(
 				Path.Combine(referenceAssemblyPath, assemblyName + ".dll"),
 				MetadataReferenceProperties.Assembly,
-				(DocumentationProvider)Activator.CreateInstance(xmlDocProvider, Path.Combine(referenceAssemblyPath, assemblyName + ".xml"))
+				new XmlDocumentationProvider(Path.Combine(referenceAssemblyPath, assemblyName + ".xml"))
 			);
 		}
 
