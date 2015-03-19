@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>$id$</id>
+		<version>$version$-beta</version>
+		<title>$title$</title>
+		<authors>$author$</authors>
+		<owners>$author$</owners>
+		<licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+		<projectUrl>https://github.com/SLaks/VSEmbed/</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>$description$</description>
+		<releaseNotes>Initial Release.</releaseNotes>
+		<copyright>Copyright 2015 SLaks</copyright>
+		<tags>Roslyn Visual-Studio</tags>
+	</metadata>
+	<files>
+		<file src="..\VSEmbed.Roslyn\bin\Release\VSEmbed.Roslyn.dll" target="lib\net45" />
+	</files>
+</package>

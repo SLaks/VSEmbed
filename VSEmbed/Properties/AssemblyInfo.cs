@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("VSEmbed")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Embeds Visual Studio's editor and theming system in standalone projects.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("SLaks")]
 [assembly: AssemblyProduct("VSEmbed")]
 [assembly: AssemblyCopyright("Copyright © SLaks 2014")]
 [assembly: AssemblyTrademark("")]
@@ -32,5 +32,9 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+
+[assembly: AssemblyVersion(ProductVersion.Current)]
+[assembly: AssemblyFileVersion(ProductVersion.Current)]
+[assembly: AssemblyInformationalVersion(ProductVersion.Current)]
+static class ProductVersion { public const string Current = "1.0.0"; }
+

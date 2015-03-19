@@ -1,13 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22013.1
+VisualStudioVersion = 14.0.22609.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSEmbed.DemoApp", "VSEmbed.DemoApp\VSEmbed.DemoApp.csproj", "{E50D3C83-0E7C-41C3-8B2D-35F84017E220}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSEmbed.Roslyn", "VSEmbed.Roslyn\VSEmbed.Roslyn.csproj", "{102CB436-A268-4084-9D56-A2131763CC28}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSEmbed", "VSEmbed\VSEmbed.csproj", "{93BBEB44-6849-423E-A5C1-440558661B5C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{686D462E-50AA-4EC3-B5D1-ED8DBE123B15}"
+	ProjectSection(SolutionItems) = preProject
+		VSEmbed\VSEmbed.nuspec = VSEmbed\VSEmbed.nuspec
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
