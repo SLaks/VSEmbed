@@ -10,11 +10,12 @@
 		<projectUrl>https://github.com/SLaks/VSEmbed/</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>$description$</description>
-		<releaseNotes>Initial Release.</releaseNotes>
+		<releaseNotes>XML doc comments, performance improvements, and a better Roslyn API.</releaseNotes>
 		<copyright>Copyright 2015 SLaks</copyright>
 		<tags>Roslyn Visual-Studio</tags>
 	</metadata>
 	<files>
 		<file src="..\VSEmbed.Roslyn\bin\Release\VSEmbed.Roslyn.dll" target="lib\net45" />
+		<file src="..\VSEmbed.Roslyn\bin\Release\VSEmbed.Roslyn.xml" target="lib\net45" />
 	</files>
 </package>

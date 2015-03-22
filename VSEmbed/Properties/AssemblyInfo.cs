@@ -36,5 +36,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion(ProductVersion.Current)]
 [assembly: AssemblyFileVersion(ProductVersion.Current)]
 [assembly: AssemblyInformationalVersion(ProductVersion.Current)]
-static class ProductVersion { public const string Current = "1.0.0"; }
+static class ProductVersion { public const string Current = "1.1.0"; }
 
