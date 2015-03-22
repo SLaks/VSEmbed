@@ -10,7 +10,7 @@
 		<projectUrl>https://github.com/SLaks/VSEmbed/</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>$description$</description>
-		<releaseNotes>XML doc comments, performance improvements, and a better Roslyn API.</releaseNotes>
+		<releaseNotes>XML doc comments, performance improvements, support for rename in projection buffers, and a better Roslyn API.</releaseNotes>
 		<copyright>Copyright 2015 SLaks</copyright>
 		<tags>Roslyn Visual-Studio</tags>
 	</metadata>
