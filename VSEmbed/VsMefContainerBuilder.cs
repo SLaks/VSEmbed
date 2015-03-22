@@ -90,7 +90,9 @@ namespace VSEmbed {
 				return this;
 
 			return WithFilteredCatalogs(
-				Directory.EnumerateFiles(VsLoader.RoslynAssemblyPath, "Microsoft.CodeAnalysis*.dll")	// Leave out the . to catch Microsoft.CodeAnalysis.dll too
+				// Only include assemblies that actually export useful MEF types.
+				Directory.EnumerateFiles(VsLoader.RoslynAssemblyPath, "Microsoft.CodeAnalysis.*.dll")
+					.Where(a => new[] { "Features", "Workspaces" }.Any(Path.GetFileName(a).Contains))
 					.Select(Assembly.LoadFile))
 				.WithFilteredCatalogs(Assembly.Load("VSEmbed.Roslyn"))
 				.WithCatalog(new[] {
