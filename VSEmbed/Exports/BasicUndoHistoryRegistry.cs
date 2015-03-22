@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
+using Microsoft.VisualStudio.Text.Projection;
 using Microsoft.VisualStudio.Utilities;
 
 namespace VSEmbed.Exports {
@@ -16,6 +17,12 @@ namespace VSEmbed.Exports {
 	/// don't have a built-in undo mechanism.
 	/// Stolen from @JaredPar, and modified to behave like Roslyn's sane implementation 
 	/// rather than VS's insane OLE-backed implementation.
+	/// 
+	/// I also modified it to attach each undo history to the entire graph
+	/// of source buffers for a projection buffer. This enables renames in
+	/// Roslyn projection buffers, where the Roslyn document buffer is not
+	/// the buffer displayed in the text view.
+	/// http://source.roslyn.io/#Microsoft.VisualStudio.LanguageServices/Implementation/Venus/ContainedDocument.cs,1153
 	/// </summary>
 	[Export(typeof(ITextUndoHistoryRegistry))]
 	internal sealed class BasicTextUndoHistoryRegistry : ITextUndoHistoryRegistry {
@@ -23,6 +30,15 @@ namespace VSEmbed.Exports {
 
 		private bool TryGetHistory(object context, out ITextUndoHistory basicUndoHistory) {
 			return _map.TryGetValue(context, out basicUndoHistory);
+		}
+
+		///<summary>Gets all contexts (eg, source buffers for a projection buffer) that a context includes (including the original context).</summary>
+		static IEnumerable<object> GetDependentContexts(object context) {
+			var projectionBuffer = context as IProjectionBufferBase;
+			if (projectionBuffer == null)
+				return new[] { context };
+			return new[] { context }
+				.Concat(projectionBuffer.SourceBuffers.SelectMany(GetDependentContexts));
 		}
 
 		#region ITextUndoHistoryRegistry
@@ -44,7 +60,9 @@ namespace VSEmbed.Exports {
 			ITextUndoHistory history;
 			if (!_map.TryGetValue(context, out history)) {
 				history = new BasicUndoHistory(context);
-				_map.Add(context, history);
+				foreach (var c in GetDependentContexts(context)) {
+					_map.Add(c, history);
+				}
 			}
 			return history;
 		}
@@ -52,7 +70,9 @@ namespace VSEmbed.Exports {
 		void ITextUndoHistoryRegistry.RemoveHistory(ITextUndoHistory history) {
 			var basicUndoHistory = history as BasicUndoHistory;
 			if (basicUndoHistory != null) {
-				_map.Remove(basicUndoHistory.Context);
+				foreach (var c in GetDependentContexts(basicUndoHistory.Context)) {
+					_map.Remove(c);
+				}
 				basicUndoHistory.Clear();
 			}
 		}
