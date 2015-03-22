@@ -30,6 +30,7 @@ namespace VSEmbed {
 	public class VsServiceProvider : OLE.IServiceProvider, SVsServiceProvider {
 		// Based on Microsoft.VisualStudio.ComponentModelHost.ComponentModel.DefaultCompositionContainer.
 		// By implementing SVsServiceProvider myself, I skip an unnecessary call to GetIUnknownForObject.
+		///<summary>Gets the singleton service provider instance.  This is exported to MEF.</summary>
 		[Export(typeof(SVsServiceProvider))]
 		public static VsServiceProvider Instance { get; private set; }
 
@@ -144,6 +145,7 @@ namespace VSEmbed {
 			AddService(typeof(SComponentModel), ComponentModel);
 		}
 
+		///<summary>Gets the <see cref="IVsUIShell"/> implementation exported by this provider.  The <see cref="ThemedVsUIShell.Theme"/> property must be kept in sync with the display theme for calls from VS services.</summary>
 		public ThemedVsUIShell UIShell { get; private set; }
 
 		readonly Dictionary<Guid, object> serviceInstances = new Dictionary<Guid, object>();
@@ -177,6 +179,7 @@ namespace VSEmbed {
 			return VSConstants.S_OK;
 		}
 
+		///<summary>Gets the specified service from the provider, or null if it has not been registered.</summary>
 		public object GetService(Type serviceType) {
 			object result;
 			serviceInstances.TryGetValue(serviceType.GUID, out result);

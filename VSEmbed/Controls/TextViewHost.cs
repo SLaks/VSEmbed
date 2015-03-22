@@ -12,8 +12,11 @@ using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
 
 namespace VSEmbed.Controls {
+	///<summary>A WPF control that embeds a Visual Studio editor.</summary>
 	public class TextViewHost : ContentPresenter {
+		///<summary>Gets the <see cref="IWpfTextView"/> displayed by the control.</summary>
 		public IWpfTextView TextView { get; private set; }
+		///<summary>Creates a <see cref="TextViewHost"/>.  <see cref="VsMefContainerBuilder"/> must be set up before creating this.</summary>
 		public TextViewHost() {
 			if (VsServiceProvider.Instance.ComponentModel == null) {
 				if (VsLoader.IsDesignMode)
@@ -40,14 +43,17 @@ namespace VSEmbed.Controls {
 				.ToList()
 				.AsReadOnly()
 		);
+		///<summary>Gets all content types registered by the editor.</summary>
 		public static IReadOnlyList<string> AvailableContentTypes { get { return availableContentTypes.Value; } }
 
 
+		///<summary>Gets or sets the ContentType of the embedded <see cref="ITextBuffer"/>.</summary>
 		public string ContentType {
 			get { return (string)GetValue(ContentTypeProperty); }
 			set { SetValue(ContentTypeProperty, value); }
 		}
 
+		///<summary>Identifies the <see cref="ContentType"/> dependency property.</summary>
 		public static readonly DependencyProperty ContentTypeProperty =
 			DependencyProperty.Register("ContentType", typeof(string), typeof(TextViewHost), new PropertyMetadata(ContentType_Changed));
 		private static void ContentType_Changed(DependencyObject d, DependencyPropertyChangedEventArgs e) {
@@ -61,12 +67,13 @@ namespace VSEmbed.Controls {
 			instance.TextView.TextBuffer.ChangeContentType(contentType, null);
 		}
 
+		///<summary>Gets or sets the content of the embedded <see cref="ITextBuffer"/>.</summary>
 		public string Text {
 			get { return (string)GetValue(TextProperty); }
 			set { SetValue(TextProperty, value); }
 		}
 
-		// Using a DependencyProperty as the backing store for Text.  This enables animation, styling, binding, etc...
+		///<summary>Identifies the <see cref="Text"/> dependency property.</summary>
 		public static readonly DependencyProperty TextProperty =
 			DependencyProperty.Register("Text", typeof(string), typeof(TextViewHost), new PropertyMetadata(Text_Changed));
 		private static void Text_Changed(DependencyObject d, DependencyPropertyChangedEventArgs e) {

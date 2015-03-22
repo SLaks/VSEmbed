@@ -22,6 +22,7 @@ namespace VSEmbed.Controls {
 	public partial class VsResizeGrip : ResizeGrip {
 		private const int SizeBottomLeft = 7;
 		private const int SizeBottomRight = 8;
+		///<summary>Forwards mouse events to the underlying window.</summary>
 		protected override void OnMouseDown(MouseButtonEventArgs e) {
 			base.OnMouseDown(e);
 			if (e.ChangedButton == MouseButton.Left) {

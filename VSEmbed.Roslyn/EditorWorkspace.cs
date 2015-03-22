@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 
 namespace VSEmbed.Roslyn {
-	///<summary>A Roslyn Workspace that contains documents linked to ITextBuffers.</summary>
+	///<summary>A Roslyn Workspace that contains documents linked to <see cref="ITextBuffer"/>s.</summary>
 	public class EditorWorkspace : Workspace {
 		// TODO: Add an optional parameter to pass changes through to an existing MSBuildWorkspace
 
@@ -68,6 +68,7 @@ namespace VSEmbed.Roslyn {
 			documentBuffers.Remove(documentId);
 		}
 
+		///<summary>Applies document text changes to documents backed by <see cref="ITextBuffer"/>s.</summary>
 		protected override void ApplyDocumentTextChanged(DocumentId id, SourceText text) {
 			ITextBuffer buffer;
 			if (documentBuffers.TryGetValue(id, out buffer))

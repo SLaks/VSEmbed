@@ -247,6 +247,7 @@ namespace VSEmbed {
 			return container;
 		}
 
+		///<summary>Builds the described MEF container and wraps it in a Visual Studio <see cref="IComponentModel"/> implementation.</summary>
 		protected abstract IComponentModel BuildCore();
 
 	}

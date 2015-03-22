@@ -25,7 +25,7 @@ namespace VSEmbed.Roslyn {
 	[Export(typeof(IWpfTextViewConnectionListener))]
 	[ContentType("Roslyn Languages")]
 	[TextViewRole(PredefinedTextViewRoles.Editable)]
-	public class RoslynBufferListener : IWpfTextViewConnectionListener {
+	class RoslynBufferListener : IWpfTextViewConnectionListener {
 		public SVsServiceProvider ExportProvider { get; private set; }
 
 		// VisualStudioWaitIndicator imports VisualStudioWorkspace explicitly, and its ctor tries to use SQM.

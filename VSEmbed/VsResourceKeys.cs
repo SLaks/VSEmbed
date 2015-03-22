@@ -13,14 +13,18 @@ namespace VSEmbed {
 	/// depending on the loaded VS version.
 	///</remarks>
 	public static class VsResourceKeys {
+		///<summary>Indicates whether the loaded Visual Studio version has built-in themes for standard controls.</summary>
 		public static bool HasDefaultStyles { get { return VsLoader.VsVersion.Major >= 14; } }
 
+		///<summary>Gets a resource key for a VS-themed style for a <see cref="System.Windows.Controls.ComboBox"/>.</summary>
 		public static string ComboBoxStyleKey {
 			get { return HasDefaultStyles ? "VsComboBoxStyleKey" : "SLaks.ComboBoxStyleKey"; }
 		}
+		///<summary>Gets a resource key for a VS-themed style for a <see cref="System.Windows.Controls.Button"/>.</summary>
 		public static string ButtonStyleKey {
 			get { return HasDefaultStyles ? "VsButtonStyleKey" : "SLaks.ButtonStyleKey"; }
 		}
+		///<summary>Gets a resource key for a VS-themed style for a <see cref="System.Windows.Controls.CheckBox"/>.</summary>
 		public static string CheckBoxStyleKey {
 			get { return HasDefaultStyles ? "VsCheckBoxStyleKey" : "SLaks.CheckBoxStyleKey"; }
 		}

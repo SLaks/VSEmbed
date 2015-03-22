@@ -18,34 +18,44 @@ namespace VSEmbed.Exports {
 	public abstract class BaseShortcutKeyProcessor : ChainedKeyProcessor {
 		readonly Dictionary<Tuple<ModifierKeys, Key>, Func<bool>> shortcuts = new Dictionary<Tuple<ModifierKeys, Key>, Func<bool>>();
 
+		///<summary>Wraps a void-returning method in an <see cref="Action{Boolean}"/> for the AddCommand methods.</summary>
 		protected static Func<bool> WithTrue(Action method) { return () => { method(); return true; }; }
+		///<summary>Binds a key which will be invoked with a boolean indicating the state of the Shift key.  This should be used for cursor movement commands.</summary>
 		protected void AddExtendableCommand(Key key, Action<bool> method) {
 			AddCommand(key, WithTrue(() => method(false)));
 			AddShiftCommand(key, WithTrue(() => method(true)));
 		}
+		///<summary>Binds a key with the Control key, which will be invoked with a boolean indicating the state of the Shift key.  This should be used for cursor movement commands.</summary>
 		protected void AddControlExtendableCommand(Key key, Action<bool> method) {
 			AddControlCommand(key, WithTrue(() => method(false)));
 			AddControlShiftCommand(key, WithTrue(() => method(true)));
 		}
+		///<summary>Binds a single key.</summary>
 		protected void AddCommand(Key key, Func<bool> method) {
 			AddCommand(ModifierKeys.None, key, method);
 		}
+		///<summary>Binds a key with Shift held down.</summary>
 		protected void AddShiftCommand(Key key, Func<bool> method) {
 			AddCommand(ModifierKeys.Shift, key, method);
 		}
+		///<summary>Binds a key with Control held down.</summary>
 		protected void AddControlCommand(Key key, Func<bool> method) {
 			AddCommand(ModifierKeys.Control, key, method);
 		}
+		///<summary>Binds a key with Control+Shift held down.</summary>
 		protected void AddControlShiftCommand(Key key, Func<bool> method) {
 			AddCommand(ModifierKeys.Control | ModifierKeys.Shift, key, method);
 		}
+		///<summary>Binds a key with Alt+Shift held down.</summary>
 		protected void AddAltShiftCommand(Key key, Func<bool> method) {
 			AddCommand(ModifierKeys.Alt | ModifierKeys.Shift, key, method);
 		}
+		///<summary>Binds a key with the specified modifiers held down.</summary>
 		protected void AddCommand(ModifierKeys modifiers, Key key, Func<bool> method) {
 			shortcuts.Add(new Tuple<ModifierKeys, Key>(modifiers, key), method);
 		}
 
+		///<summary>Handles the KeyDown event if the pressed key has been bound.</summary>
 		public override void KeyDown(KeyEventArgs args, ITextBuffer targetBuffer, Action next) {
 			Func<bool> method;
 			if (!shortcuts.TryGetValue(Tuple.Create(args.KeyboardDevice.Modifiers, args.Key), out method)

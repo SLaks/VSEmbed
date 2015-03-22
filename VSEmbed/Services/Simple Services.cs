@@ -19,10 +19,11 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace VSEmbed.Services {
 	// This file contains services that are more than stubs, but are not very complicated.
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member; consult MSDN on the base interfaces.
 
 	///<summary>An IVsUIShell that loads colors from an active VsThemeDictionary.</summary>
 	public class ThemedVsUIShell : IVsUIShell5 {
-		///<summary>Gets or sets the theme dictionary to load colors from.</summary>
+		///<summary>Gets or sets the theme dictionary to load colors from.  This must be kept in sync with the display theme for calls from VS services.</summary>
 		public VsThemeDictionary Theme { get; set; }
 		public uint GetThemedColor(ref Guid colorCategory, string colorName, uint colorType) {
 			var color = Theme[new ThemeResourceKey(
@@ -114,7 +115,7 @@ namespace VSEmbed.Services {
 
 #pragma warning disable 0436	// Tell the non-Roslyn compiler to ignore conflicts with inaccessible NoPIA types
 	// This class can only be used if VS is set up after the UI thread is created.
-	public class SyncContextInvoker : IVsInvokerPrivate {
+	class SyncContextInvoker : IVsInvokerPrivate {
 		readonly SynchronizationContext syncContext;
 		public SyncContextInvoker(SynchronizationContext syncContext) { this.syncContext = syncContext; }
 
@@ -123,7 +124,7 @@ namespace VSEmbed.Services {
 			return 0;
 		}
 	}
-	public class AppDispatcherInvoker : IVsInvokerPrivate {
+	class AppDispatcherInvoker : IVsInvokerPrivate {
 		public int Invoke([In, MarshalAs(UnmanagedType.Interface)]IVsInvokablePrivate pInvokable) {
 			return Application.Current.Dispatcher.Invoke(new Func<int>(pInvokable.Invoke));
 		}
@@ -237,3 +238,4 @@ namespace Microsoft.Internal.VisualStudio.Shell.Interop {
 		int Invoke();
 	}
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

@@ -15,6 +15,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 #pragma warning disable 0436	// Tell the non-Roslyn compiler to ignore conflicts with inaccessible NoPIA types
 namespace VSEmbed {
+	///<summary>A <see cref="ResourceDictionary"/> that exposes resource keys for a Visual Studio color theme.</summary>
 	public class VsThemeDictionary : ResourceDictionary {
 
 		// We must access everything from these classes using dynamic due to NoPIA conflicts.
@@ -24,6 +25,7 @@ namespace VSEmbed {
 		static readonly Assembly WindowManagement = typeof(Microsoft.VisualStudio.Platform.WindowManagement.WindowFrame).Assembly;
 		dynamic currentTheme;
 		readonly dynamic service;
+		///<summary>Creates a new <see cref="VsThemeDictionary"/>, initializing the <see cref="VsServiceProvider"/> if it has not been initialized.</summary>
 		public VsThemeDictionary() {
 			if (ServiceProvider.GlobalProvider.GetService(typeof(SVsFrameworkMultiTargeting)) != null)
 				return;	// Do nothing when hosted in VS
@@ -63,19 +65,23 @@ namespace VSEmbed {
 			}
 		}
 
+		///<summary>Gets all available themes.</summary>
 		public ReadOnlyCollection<ColorTheme> Themes { get; private set; }
+
+		///<summary>Gets or sets the currently selected theme.</summary>
 		public ColorTheme CurrentTheme {
 			get { return Themes[ThemeIndex]; }
 			set { ThemeIndex = value.Index; }
 		}
 
 		int themeIndex;
+		///<summary>Gets or sets the index of the currently selected theme.</summary>
 		public int ThemeIndex {
 			get { return themeIndex; }
 			set { themeIndex = value; LoadTheme(value); }
 		}
 
-		public void LoadTheme(int index) {
+		void LoadTheme(int index) {
 			if (service == null || (DesignerOnly && VsLoader.IsDesignMode))
 				return;
 			var newDictionary = new ResourceDictionary();
@@ -222,8 +228,9 @@ namespace VSEmbed {
 		}
 		#endregion
 	}
+	///<summary>Wraps a Visual Studio color theme, to bind to a WPF ComboBox.</summary>
 	public class ColorTheme {
-		public ColorTheme(int index, object theme) {
+		internal ColorTheme(int index, object theme) {
 			Index = index;
 
 			// The VS ColorTheme.Name property tries to read the translated
@@ -239,11 +246,14 @@ namespace VSEmbed {
 			}
 			Name = nameId;
 		}
+		///<summary>Gets the index of this theme within the collection of supported themes.</summary>
 		public int Index { get; private set; }
+		///<summary>Gets the theme's display name.</summary>
 		public string Name { get; private set; }
 	}
 }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member; no need to document NoPIA interfaces
 namespace Microsoft.Internal.VisualStudio.Shell.Interop {
 	[CompilerGenerated, Guid("413D8344-C0DB-4949-9DBC-69C12BADB6AC"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), TypeIdentifier]
 	[ComImport]
@@ -280,3 +290,4 @@ namespace Microsoft.Internal.VisualStudio.Shell.Interop {
 		public string Name;
 	}
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

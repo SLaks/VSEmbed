@@ -14,6 +14,7 @@ namespace VSEmbed.Roslyn {
 	/// A <see cref="DocumentationProvider"/> that correctly returns XML tags in the content, working around https://roslyn.codeplex.com/workitem/406. 
 	///</summary>
 	public class XmlDocumentationProvider : DocumentationProvider {
+		#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member; consult the Roslyn sources.
 		private volatile Dictionary<string, string> _docComments;
 
 		private readonly string _filePath;
