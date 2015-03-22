@@ -20,6 +20,7 @@ namespace VSEmbed.Roslyn {
 		static readonly Type IWorkCoordinatorRegistrationService = Type.GetType("Microsoft.CodeAnalysis.SolutionCrawler.IWorkCoordinatorRegistrationService, Microsoft.CodeAnalysis.Features");
 
 		readonly Dictionary<DocumentId, ITextBuffer> documentBuffers = new Dictionary<DocumentId, ITextBuffer>();
+		///<summary>Creates an <see cref="EditorWorkspace"/> powered by the specified MEF host services.</summary>
 		public EditorWorkspace(HostServices host) : base(host, WorkspaceKind.Host) {
 			var wcrService = typeof(HostWorkspaceServices)
 				.GetMethod("GetService")
@@ -28,19 +29,15 @@ namespace VSEmbed.Roslyn {
 
 			IWorkCoordinatorRegistrationService.GetMethod("Register").Invoke(wcrService, new[] { this });
 		}
-		public Project AddProject(string name, string language) {
-			ProjectInfo projectInfo = ProjectInfo.Create(ProjectId.CreateNewId(null), VersionStamp.Create(), name, name, language);
-			OnProjectAdded(projectInfo);
-			return CurrentSolution.GetProject(projectInfo.Id);
-		}
 
+		// TODO: Let callers pick a framework version
 		static readonly string referenceAssemblyPath = Path.Combine(
 			Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
 			@"Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5"
 		);
 
-
-		public MetadataReference CreateFrameworkReference(string assemblyName) {
+		///<summary>Creates a <see cref="MetadataReference"/> to a BCL assembly, with XML documentation.</summary>
+		public static MetadataReference CreateFrameworkReference(string assemblyName) {
 			return MetadataReference.CreateFromFile(
 				Path.Combine(referenceAssemblyPath, assemblyName + ".dll"),
 				MetadataReferenceProperties.Assembly,
@@ -48,28 +45,35 @@ namespace VSEmbed.Roslyn {
 			);
 		}
 
-
 		///<summary>Creates a new document linked to an existing text buffer.</summary>
-		public Document CreateDocument(ProjectId projectId, ITextBuffer buffer) {
-			var id = DocumentId.CreateNewId(projectId);
-			documentBuffers.Add(id, buffer);
+		public DocumentId CreateDocument(ProjectId projectId, ITextBuffer buffer, string debugName = null) {
+			var id = DocumentId.CreateNewId(projectId, debugName);
 
-			var docInfo = DocumentInfo.Create(id, "Sample Document",
-				loader: TextLoader.From(buffer.AsTextContainer(), VersionStamp.Create()),
-				sourceCodeKind: SourceCodeKind.Script
-			);
-			OnDocumentAdded(docInfo);
-			OnDocumentOpened(id, buffer.AsTextContainer());
-			buffer.Changed += delegate { OnDocumentContextUpdated(id); };
-			return CurrentSolution.GetDocument(id);
+			TryApplyChanges(CurrentSolution.AddDocument(id, debugName ?? "Sample Document", TextLoader.From(buffer.AsTextContainer(), VersionStamp.Create())));
+			OpenDocument(id, buffer);
+			return id;
 		}
+
+		///<summary>Links an existing <see cref="Document"/> to an <see cref="ITextBuffer"/>, synchronizing their contents.</summary>
+		public void OpenDocument(DocumentId documentId, ITextBuffer buffer) {
+			documentBuffers.Add(documentId, buffer);
+			OnDocumentOpened(documentId, buffer.AsTextContainer());
+			buffer.Changed += delegate { OnDocumentContextUpdated(documentId); };
+		}
+
+		///<summary>Unlinks an opened <see cref="Document"/> from its <see cref="ITextBuffer"/>.</summary>
 		public override void CloseDocument(DocumentId documentId) {
 			var document = CurrentSolution.GetDocument(documentId);
 			OnDocumentClosed(documentId, TextLoader.From(TextAndVersion.Create(document.GetTextAsync().Result, document.GetTextVersionAsync().Result)));
+			documentBuffers.Remove(documentId);
 		}
 
 		protected override void ApplyDocumentTextChanged(DocumentId id, SourceText text) {
-			UpdateText(text, documentBuffers[id], EditOptions.DefaultMinimalChange);
+			ITextBuffer buffer;
+			if (documentBuffers.TryGetValue(id, out buffer))
+				UpdateText(text, buffer, EditOptions.DefaultMinimalChange);
+			else
+				base.ApplyDocumentTextChanged(id, text);
 		}
 
 		// Stolen from Microsoft.VisualStudio.LanguageServices.Implementation.ProjectSystem.DocumentProvider.StandardTextDocument
@@ -83,21 +87,9 @@ namespace VSEmbed.Roslyn {
 			}
 		}
 
+		///<summary><see cref="EditorWorkspace"/> can apply any kind of change.</summary>
 		public override bool CanApplyChange(ApplyChangesKind feature) {
-			switch (feature) {
-				case ApplyChangesKind.AddMetadataReference:
-				case ApplyChangesKind.RemoveMetadataReference:
-				case ApplyChangesKind.ChangeDocument:
-				case ApplyChangesKind.RemoveDocument:
-					return true;
-				case ApplyChangesKind.AddProject:
-				case ApplyChangesKind.RemoveProject:
-				case ApplyChangesKind.AddProjectReference:
-				case ApplyChangesKind.RemoveProjectReference:
-				case ApplyChangesKind.AddDocument:
-				default:
-					return false;
-			}
+			return true;
 		}
 	}
 }

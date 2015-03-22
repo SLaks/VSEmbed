@@ -99,10 +99,13 @@ namespace VSEmbed.Roslyn {
 			var componentModel = (IComponentModel)ExportProvider.GetService(typeof(SComponentModel));
 			var workspace = new EditorWorkspace(MefV1HostServices.Create(componentModel.DefaultExportProvider));
 
-			var project = workspace.AddProject("Sample Project", contentTypeLanguages[buffer.ContentType.DisplayName]);
-			workspace.TryApplyChanges(workspace.CurrentSolution.AddMetadataReferences(project.Id,
-				new[] { "mscorlib", "System", "System.Core", "System.Xml.Linq" }.Select(workspace.CreateFrameworkReference)
-			));
+			var project = workspace.CurrentSolution
+				.AddProject("Sample Project", "SampleProject", contentTypeLanguages[buffer.ContentType.DisplayName])
+				.AddMetadataReferences(new[] { "mscorlib", "System", "System.Core", "System.Xml.Linq" }
+					.Select(EditorWorkspace.CreateFrameworkReference)
+				);
+			project = project.WithParseOptions(project.ParseOptions.WithKind(SourceCodeKind.Script));
+			workspace.TryApplyChanges(project.Solution);
 			workspace.CreateDocument(project.Id, buffer);
 		}
 
