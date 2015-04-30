@@ -57,9 +57,12 @@ namespace VSEmbed.Roslyn {
 			// IWorkspaceDiagnosticAnalyzerProviderService. This uses internal types
 			// which I cannot provide. Instead, I inject the standard analyzers into
 			// DiagnosticAnalyzerService myself, after it's created.
-			diagnosticService.GetType()
-				.GetField("workspaceAnalyzers", BindingFlags.NonPublic | BindingFlags.Instance)
-				.SetValue(diagnosticService, new[] {
+			var analyzerManager = diagnosticService.GetType()
+				.GetField("_hostAnalyzerManager", BindingFlags.NonPublic | BindingFlags.Instance)
+				.GetValue(diagnosticService);
+			analyzerManager.GetType()
+				.GetField("_hostAnalyzerReferencesMap", BindingFlags.NonPublic | BindingFlags.Instance)
+				.SetValue(analyzerManager, new[] {
 					"Microsoft.CodeAnalysis.Features.dll",
 					"Microsoft.CodeAnalysis.EditorFeatures.dll",
 					"Microsoft.CodeAnalysis.CSharp.dll",
@@ -68,8 +71,12 @@ namespace VSEmbed.Roslyn {
 					"Microsoft.CodeAnalysis.VisualBasic.dll",
 					"Microsoft.CodeAnalysis.VisualBasic.Features.dll",
 					"Microsoft.CodeAnalysis.VisualBasic.EditorFeatures.dll",
-				}.Select(name => new AnalyzerFileReference(Path.Combine(VsLoader.RoslynAssemblyPath, name), Assembly.LoadFile))
-				 .ToImmutableArray<AnalyzerReference>());
+				}.Select(name => new AnalyzerFileReference(
+					Path.Combine(VsLoader.RoslynAssemblyPath, name), 
+					p => Assembly.Load(AssemblyName.GetAssemblyName(p))
+				))
+				 .ToImmutableDictionary<AnalyzerReference, string>(a => a.Display));
+			// Based on HostAnalyzerManager.CreateAnalyzerReferencesMap
 		}
 
 		static readonly Dictionary<string, string> contentTypeLanguages = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {

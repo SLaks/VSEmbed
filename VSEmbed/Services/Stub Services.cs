@@ -56,7 +56,14 @@ namespace VSEmbed.Services {
 		}
 
 		public int GetProperty(int propid, out object pvar) {
-			pvar = null;
+			switch (propid) {
+				case -9002: // VirtualRegistryRoot; used by VsImageServiceTelemetryLogger.GetRootSuffix
+					pvar = "";
+					return VSConstants.S_OK;
+				default:
+					pvar = null;
+					break;
+			}
 			return VSConstants.E_NOTIMPL;
 		}
 

@@ -17,17 +17,17 @@ namespace VSEmbed.Roslyn {
 	public class EditorWorkspace : Workspace {
 		// TODO: Add an optional parameter to pass changes through to an existing MSBuildWorkspace
 
-		static readonly Type IWorkCoordinatorRegistrationService = Type.GetType("Microsoft.CodeAnalysis.SolutionCrawler.IWorkCoordinatorRegistrationService, Microsoft.CodeAnalysis.Features");
+		static readonly Type ISolutionCrawlerRegistrationService = Type.GetType("Microsoft.CodeAnalysis.SolutionCrawler.ISolutionCrawlerRegistrationService, Microsoft.CodeAnalysis.Features");
 
 		readonly Dictionary<DocumentId, ITextBuffer> documentBuffers = new Dictionary<DocumentId, ITextBuffer>();
 		///<summary>Creates an <see cref="EditorWorkspace"/> powered by the specified MEF host services.</summary>
 		public EditorWorkspace(HostServices host) : base(host, WorkspaceKind.Host) {
-			var wcrService = typeof(HostWorkspaceServices)
+			var scrService = typeof(HostWorkspaceServices)
 				.GetMethod("GetService")
-				.MakeGenericMethod(IWorkCoordinatorRegistrationService)
+				.MakeGenericMethod(ISolutionCrawlerRegistrationService)
 				.Invoke(Services, null);
 
-			IWorkCoordinatorRegistrationService.GetMethod("Register").Invoke(wcrService, new[] { this });
+			ISolutionCrawlerRegistrationService.GetMethod("Register").Invoke(scrService, new[] { this });
 		}
 
 		// TODO: Let callers pick a framework version
