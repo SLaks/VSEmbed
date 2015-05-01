@@ -72,11 +72,17 @@ namespace VSEmbed.Roslyn {
 					"Microsoft.CodeAnalysis.VisualBasic.Features.dll",
 					"Microsoft.CodeAnalysis.VisualBasic.EditorFeatures.dll",
 				}.Select(name => new AnalyzerFileReference(
-					Path.Combine(VsLoader.RoslynAssemblyPath, name), 
+					Path.Combine(VsLoader.RoslynAssemblyPath, name),
 					p => Assembly.Load(AssemblyName.GetAssemblyName(p))
 				))
 				 .ToImmutableDictionary<AnalyzerReference, string>(a => a.Display));
 			// Based on HostAnalyzerManager.CreateAnalyzerReferencesMap
+
+			var packageType = Type.GetType("Microsoft.VisualStudio.LanguageServices.Setup.RoslynPackage, Roslyn.VisualStudio.Setup");
+			var package = Activator.CreateInstance(packageType, nonPublic: true);
+			// Bind Roslyn UI to VS theme colors
+			packageType.GetMethod("InitializeColors", BindingFlags.Instance | BindingFlags.NonPublic)
+					   .Invoke(package, null);
 		}
 
 		static readonly Dictionary<string, string> contentTypeLanguages = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {

@@ -133,6 +133,7 @@ namespace VSEmbed {
 		}
 		static readonly string[] RoslynAssemblyPrefixes = {
 			"Microsoft.CodeAnalysis",
+			"Roslyn.",  // For package assemblies like Roslyn.VisualStudio.Setup
 			"System.Reflection.Metadata",
 			"Microsoft.VisualStudio.LanguageServices",
 			"Esent.Interop",
