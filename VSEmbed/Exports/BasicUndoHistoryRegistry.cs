@@ -61,7 +61,10 @@ namespace VSEmbed.Exports {
 			if (!_map.TryGetValue(context, out history)) {
 				history = new BasicUndoHistory(context);
 				foreach (var c in GetDependentContexts(context)) {
-					_map.Add(c, history);
+					// If this context already has an attached history, don't replace it.
+					// This happens for ephemeral projection buffers for previews created
+					// by the diff for a quick fix.
+					_map.GetValue(c, _ => history);
 				}
 			}
 			return history;

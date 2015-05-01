@@ -77,6 +77,9 @@ namespace VSEmbed {
 					// Used by DocumentPeekResult; service is SVsUIThreadInvokerPrivate
 					{ new Guid("72FD1033-2341-4249-8113-EF67745D84EA"), new AppDispatcherInvoker() },
 
+					// Used by KeyBindingHelper.GetKeyBinding, which is used by VSLightBulbPresenterStyle.
+					{ typeof(SDTE).GUID, new StubDTE() },
+
 					// Used by VsTaskSchedulerService; see below
 					{ typeof(SVsShell).GUID, new StubVsShell() },
 
