@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Host;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -73,7 +74,7 @@ namespace VSEmbed.Roslyn {
 					"Microsoft.CodeAnalysis.VisualBasic.EditorFeatures.dll",
 				}.Select(name => new AnalyzerFileReference(
 					Path.Combine(VsLoader.RoslynAssemblyPath, name),
-					p => Assembly.Load(AssemblyName.GetAssemblyName(p))
+					vsWorkspace.Services.GetService<IAnalyzerService>().GetLoader()
 				))
 				 .ToImmutableDictionary<AnalyzerReference, string>(a => a.Display));
 			// Based on HostAnalyzerManager.CreateAnalyzerReferencesMap
@@ -117,7 +118,8 @@ namespace VSEmbed.Roslyn {
 				.AddMetadataReferences(new[] { "mscorlib", "System", "System.Core", "System.Xml.Linq" }
 					.Select(EditorWorkspace.CreateFrameworkReference)
 				);
-			project = project.WithParseOptions(project.ParseOptions.WithKind(SourceCodeKind.Script));
+			// This feature was removed in RTM; https://github.com/dotnet/roslyn/pull/2897
+			// project = project.WithParseOptions(project.ParseOptions.WithKind(SourceCodeKind.Script));
 			workspace.TryApplyChanges(project.Solution);
 			workspace.CreateDocument(project.Id, buffer);
 		}

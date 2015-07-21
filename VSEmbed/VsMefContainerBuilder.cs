@@ -180,7 +180,7 @@ namespace VSEmbed {
 
 		class V3 : VsMefContainerBuilder {
 			internal static new VsMefContainerBuilder Create() {
-				return new V3(MEFv3.ComposableCatalog.Create())
+				return new V3(MEFv3.ComposableCatalog.Create(Resolver.DefaultInstance))
 					// Needed for ExportMetadataViewInterfaceEmitProxy to support editor metadata types.
 					.WithFilteredCatalogs(Assembly.Load("Microsoft.VisualStudio.Composition.Configuration")); ;
 			}
@@ -191,14 +191,14 @@ namespace VSEmbed {
 
 
 			static readonly MEFv3.PartDiscovery partDiscovery = MEFv3.PartDiscovery.Combine(
-				new MEFv3.AttributedPartDiscovery { IsNonPublicSupported = true },
-				new MEFv3.AttributedPartDiscoveryV1()
+				new MEFv3.AttributedPartDiscovery(Resolver.DefaultInstance, isNonPublicSupported: true),
+				new MEFv3.AttributedPartDiscoveryV1(Resolver.DefaultInstance)
 			);
 			public override VsMefContainerBuilder WithCatalog(IEnumerable<Type> types) {
 				// Consumers are expected to build their MEF catalogs before setting
 				// up the UI thread, so this should not create async deadlocks under
 				// normal usage.
-				return new V3(catalog.WithParts(
+				return new V3(catalog.AddParts(
 					partDiscovery.CreatePartsAsync(types)
 						.GetAwaiter()
 						.GetResult()
