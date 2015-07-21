@@ -76,10 +76,10 @@ namespace VSEmbed.Roslyn {
 					Path.Combine(VsLoader.RoslynAssemblyPath, name),
 					vsWorkspace.Services.GetService<IAnalyzerService>().GetLoader()
 				))
-				 .ToImmutableDictionary<AnalyzerReference, string>(a => a.Display));
+				 .ToImmutableDictionary<AnalyzerReference, object>(a => a.Id));
 			// Based on HostAnalyzerManager.CreateAnalyzerReferencesMap
 
-			var packageType = Type.GetType("Microsoft.VisualStudio.LanguageServices.Setup.RoslynPackage, Roslyn.VisualStudio.Setup");
+			var packageType = Type.GetType("Microsoft.VisualStudio.LanguageServices.Setup.RoslynPackage, Microsoft.VisualStudio.LanguageServices");
 			var package = Activator.CreateInstance(packageType, nonPublic: true);
 			// Bind Roslyn UI to VS theme colors
 			packageType.GetMethod("InitializeColors", BindingFlags.Instance | BindingFlags.NonPublic)
