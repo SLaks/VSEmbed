@@ -73,16 +73,22 @@ namespace VSEmbed.Roslyn {
 					"Microsoft.CodeAnalysis.VisualBasic.EditorFeatures.dll",
 				}.Select(name => new AnalyzerFileReference(
 					Path.Combine(VsLoader.RoslynAssemblyPath, name),
-					p => Assembly.Load(AssemblyName.GetAssemblyName(p))
+					new AnalyzerLoader()
 				))
-				 .ToImmutableDictionary<AnalyzerReference, string>(a => a.Display));
+				 .ToImmutableDictionary<AnalyzerReference, object>(a => a.Id));
 			// Based on HostAnalyzerManager.CreateAnalyzerReferencesMap
 
-			var packageType = Type.GetType("Microsoft.VisualStudio.LanguageServices.Setup.RoslynPackage, Roslyn.VisualStudio.Setup");
+			var packageType = Type.GetType("Microsoft.VisualStudio.LanguageServices.Setup.RoslynPackage, Microsoft.VisualStudio.LanguageServices");
 			var package = Activator.CreateInstance(packageType, nonPublic: true);
 			// Bind Roslyn UI to VS theme colors
 			packageType.GetMethod("InitializeColors", BindingFlags.Instance | BindingFlags.NonPublic)
 					   .Invoke(package, null);
+		}
+
+		class AnalyzerLoader : IAnalyzerAssemblyLoader {
+			public void AddDependencyLocation(string fullPath) { }
+
+			public Assembly LoadFromPath(string fullPath) => Assembly.Load(AssemblyName.GetAssemblyName(fullPath));
 		}
 
 		static readonly Dictionary<string, string> contentTypeLanguages = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
