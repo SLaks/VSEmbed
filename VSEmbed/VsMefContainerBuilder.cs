@@ -114,6 +114,9 @@ namespace VSEmbed {
 				// VS2015 Preview version of above type.
 				Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.PreviewPane.PreviewPaneService, "
 						   + "Microsoft.VisualStudio.LanguageServices"),
+				// Necessary (together with ugly Reflection) to use WorkCoordinator.HighPriorityProcessor.
+				Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.VisualStudioDocumentTrackingServiceFactory, "
+						   + "Microsoft.VisualStudio.LanguageServices"),
 				}.Where(t => t != null));
 
 		}

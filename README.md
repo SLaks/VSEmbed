@@ -25,7 +25,7 @@ If you're already using MEF, you can call `WithFilteredCatalogs(assemblies)` or 
 #Using Roslyn
 After loading Dev14, you can set the ContentType of an ITextBuffer to `C#` or `VisualBasic` to activate the Roslyn editors.  However, you will also need to link the ITextBuffer to a Roslyn [Workspace](http://source.roslyn.codeplex.com/#Microsoft.CodeAnalysis.Workspaces/Workspace/Workspace.cs) to activate the language services.  In addition, the workspace must have an `IWorkCoordinatorRegistrationService` registered to run diagnostics in the background.
 
-To do all this, use my `EditorWorkspace` class, and call `CreateDocument()` to create a new document linked to a text buffer, or `OpenDocument()` to link an existing document (which is already in the Workspace) to a text buffer.  You can also inherit this class to provide additional behavior.
+To do all this, use my `EditorWorkspace` class, and call `CreateDocument()` to create a new document linked to a text buffer, or `OpenDocument()` to link an existing document (which is already in the Workspace) to a text buffer.  You can also inherit this class to provide additional behavior.  You should also set `ActiveDocumentId` to the document ID for the document being edited in the current text view, for quicker live error checking.
 
 To add references to framework assemblies, call `CreateFrameworkReference()`, which will locate the XML doc comment files for full IntelliSense.
 

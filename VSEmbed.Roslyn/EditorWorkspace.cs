@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 
 namespace VSEmbed.Roslyn {
@@ -16,16 +18,92 @@ namespace VSEmbed.Roslyn {
 		// TODO: Add an optional parameter to pass changes through to an existing MSBuildWorkspace
 
 		static readonly Type ISolutionCrawlerRegistrationService = Type.GetType("Microsoft.CodeAnalysis.SolutionCrawler.ISolutionCrawlerRegistrationService, Microsoft.CodeAnalysis.Features");
+		static readonly Type IDocumentTrackingService = Type.GetType("Microsoft.CodeAnalysis.IDocumentTrackingService, Microsoft.CodeAnalysis.Features");
 
 		readonly Dictionary<DocumentId, ITextBuffer> documentBuffers = new Dictionary<DocumentId, ITextBuffer>();
 		///<summary>Creates an <see cref="EditorWorkspace"/> powered by the specified MEF host services.</summary>
 		public EditorWorkspace(HostServices host) : base(host, WorkspaceKind.Host) {
-			var scrService = typeof(HostWorkspaceServices)
-				.GetMethod("GetService")
-				.MakeGenericMethod(ISolutionCrawlerRegistrationService)
-				.Invoke(Services, null);
+			ISolutionCrawlerRegistrationService.GetMethod("Register")
+				.Invoke(GetInternalService(ISolutionCrawlerRegistrationService), new[] { this });
 
-			ISolutionCrawlerRegistrationService.GetMethod("Register").Invoke(scrService, new[] { this });
+			// TODO: http://source.roslyn.codeplex.com/#Microsoft.CodeAnalysis.EditorFeatures/Implementation/Workspaces/ProjectCacheService.cs,63?
+		}
+
+		///<summary>Gets a non-public <see cref="IWorkspaceService"/> from this instance.</summary>
+		private object GetInternalService(Type interfaceType) {
+			return typeof(HostWorkspaceServices)
+				.GetMethod("GetService")
+				.MakeGenericMethod(interfaceType)
+				.Invoke(Services, null);
+		}
+
+		DocumentId activeDocumentId;
+
+		class FakeVsWindowFrame : IVsWindowFrame, IVsWindowFrame2 {
+			public int ActivateOwnerDockedWindow() {
+				throw new NotImplementedException();
+			}
+
+			public int Advise(IVsWindowFrameNotify pNotify, out uint pdwCookie) {
+				pdwCookie = 0;
+				return 0;
+			}
+
+			public int CloseFrame(uint grfSaveOptions) {
+				throw new NotImplementedException();
+			}
+
+			public int GetFramePos(VSSETFRAMEPOS[] pdwSFP, out Guid pguidRelativeTo, out int px, out int py, out int pcx, out int pcy) {
+				throw new NotImplementedException();
+			}
+
+			public int GetGuidProperty(int propid, out Guid pguid) {
+				throw new NotImplementedException();
+			}
+
+			public int GetProperty(int propid, out object pvar) {
+				throw new NotImplementedException();
+			}
+
+			public int Hide() {
+				throw new NotImplementedException();
+			}
+
+			public int IsOnScreen(out int pfOnScreen) {
+				throw new NotImplementedException();
+			}
+
+			public int IsVisible() {
+				throw new NotImplementedException();
+			}
+
+			public int QueryViewInterface(ref Guid riid, out IntPtr ppv) {
+				throw new NotImplementedException();
+			}
+
+			public int SetFramePos(VSSETFRAMEPOS dwSFP, ref Guid rguidRelativeTo, int x, int y, int cx, int cy) {
+				throw new NotImplementedException();
+			}
+
+			public int SetGuidProperty(int propid, ref Guid rguid) {
+				throw new NotImplementedException();
+			}
+
+			public int SetProperty(int propid, object var) {
+				throw new NotImplementedException();
+			}
+
+			public int Show() {
+				throw new NotImplementedException();
+			}
+
+			public int ShowNoActivate() {
+				throw new NotImplementedException();
+			}
+
+			public int Unadvise(uint dwCookie) {
+				throw new NotImplementedException();
+			}
 		}
 
 		// TODO: Let callers pick a framework version
@@ -33,6 +111,36 @@ namespace VSEmbed.Roslyn {
 			Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
 			@"Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5"
 		);
+
+		static readonly Type VisualStudioDocumentTrackingService = Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.VisualStudioDocumentTrackingService, Microsoft.VisualStudio.LanguageServices");
+		static readonly Type FrameListener = Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.VisualStudioDocumentTrackingService+FrameListener, Microsoft.VisualStudio.LanguageServices");
+		static readonly FieldInfo activeFrameField = VisualStudioDocumentTrackingService.GetField("_activeFrame", BindingFlags.NonPublic | BindingFlags.Instance);
+		static readonly FieldInfo visibleFramesField = VisualStudioDocumentTrackingService.GetField("_visibleFrames", BindingFlags.NonPublic | BindingFlags.Instance);
+		static readonly MethodInfo CreateImmutableList = new Func<int, ImmutableList<int>>(ImmutableList.Create)
+			.Method
+			.GetGenericMethodDefinition()
+			.MakeGenericMethod(FrameListener);
+
+		///<summary>Gets or sets the document that the user is editing.  Set this property to speed up semantic processing (live error checking).</summary>
+		public DocumentId ActiveDocumentId {
+			get { return activeDocumentId; }
+			set {
+				if (ActiveDocumentId == value) return;
+				activeDocumentId = value;
+				// This is completely coupled to http://source.roslyn.codeplex.com/#Microsoft.VisualStudio.LanguageServices/Implementation/Workspace/VisualStudioDocumentTrackingService.cs
+				// This is necessary to force edits to be processed by the WorkCoordinator.HighPriorityProcessor.
+				var docTracker = GetInternalService(IDocumentTrackingService);
+				if (value == null)
+					activeFrameField.SetValue(docTracker, null);
+				else {
+					var frame = new FakeVsWindowFrame();
+					activeFrameField.SetValue(docTracker, frame);
+
+					var listener = Activator.CreateInstance(FrameListener, docTracker, frame, value);
+					visibleFramesField.SetValue(docTracker, CreateImmutableList.Invoke(null, new[] { listener }));
+				}
+			}
+		}
 
 		///<summary>Creates a <see cref="MetadataReference"/> to a BCL assembly, with XML documentation.</summary>
 		public static MetadataReference CreateFrameworkReference(string assemblyName) {
@@ -57,6 +165,7 @@ namespace VSEmbed.Roslyn {
 			documentBuffers.Add(documentId, buffer);
 			OnDocumentOpened(documentId, buffer.AsTextContainer());
 			buffer.Changed += delegate { OnDocumentContextUpdated(documentId); };
+			ActiveDocumentId = documentId;
 		}
 
 		///<summary>Unlinks an opened <see cref="Document"/> from its <see cref="ITextBuffer"/>.</summary>
