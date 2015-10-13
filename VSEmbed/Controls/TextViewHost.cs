@@ -29,6 +29,7 @@ namespace VSEmbed.Controls {
 				bufferFactory.CreateTextBuffer(),
 				editorFactory.AllPredefinedRoles
 			);
+			TextView.Options.SetOptionValue("TextViewHost/SuggestionMargin", true);
 			Content = editorFactory.CreateTextViewHost(TextView, false).HostControl;
 
 			TextView.TextBuffer.ContentTypeChanged += (s, e) => ContentType = TextView.TextBuffer.ContentType.DisplayName;
