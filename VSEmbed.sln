@@ -11,6 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSEmbed", "VSEmbed\VSEmbed.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{686D462E-50AA-4EC3-B5D1-ED8DBE123B15}"
 	ProjectSection(SolutionItems) = preProject
+		CommonAssemblyInfo.cs = CommonAssemblyInfo.cs
 		README.md = README.md
 		VSEmbed\VSEmbed.nuspec = VSEmbed\VSEmbed.nuspec
 	EndProjectSection

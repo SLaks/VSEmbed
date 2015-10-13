@@ -136,6 +136,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Dev14KeyProcessor.cs" />
     <Compile Include="RoslynBufferListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
