@@ -4,10 +4,9 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host;
+using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
@@ -23,6 +22,8 @@ namespace VSEmbed.Roslyn {
 		readonly Dictionary<DocumentId, ITextBuffer> documentBuffers = new Dictionary<DocumentId, ITextBuffer>();
 		///<summary>Creates an <see cref="EditorWorkspace"/> powered by the specified MEF host services.</summary>
 		public EditorWorkspace(HostServices host) : base(host, WorkspaceKind.Host) {
+			(host as MefV1HostServices)?.GetExports<RoslynSetup>().Single().Value.ToString();
+
 			ISolutionCrawlerRegistrationService.GetMethod("Register")
 				.Invoke(GetInternalService(ISolutionCrawlerRegistrationService), new[] { this });
 
