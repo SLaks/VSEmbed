@@ -10,12 +10,15 @@
 		<projectUrl>https://github.com/SLaks/VSEmbed/</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>$description$</description>
-		<releaseNotes>XML doc comments, performance improvements, support for rename in projection buffers, and a better Roslyn API.</releaseNotes>
+		<releaseNotes>Support for VS 2015 Update 1 CTP.</releaseNotes>
 		<copyright>Copyright 2015 SLaks</copyright>
 		<tags>Roslyn Visual-Studio</tags>
 	</metadata>
+	<references>
+		<reference file="VSEmbed.Roslyn.dll" />
+	</references>
 	<files>
-		<file src="..\VSEmbed.Roslyn\bin\Release\VSEmbed.Roslyn.dll" target="lib\net45" />
-		<file src="..\VSEmbed.Roslyn\bin\Release\VSEmbed.Roslyn.xml" target="lib\net45" />
+		<file src="..\VSEmbed.Roslyn\bin\Release\VSEmbed.Roslyn.dll" target="lib\net46" />
+		<file src="..\VSEmbed.Roslyn\bin\Release\VSEmbed.Roslyn.xml" target="lib\net46" />
 	</files>
 </package>
