@@ -1,1 +1,1 @@
-nuget pack -p Configuration=Release
+nuget pack -p Configuration=Release -Symbols
