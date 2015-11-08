@@ -135,6 +135,7 @@ namespace VSEmbed {
 			"Microsoft.CodeAnalysis",
 			"Roslyn.",  // For package assemblies like Roslyn.VisualStudio.Setup
 			"System.Reflection.Metadata",
+			"System.Collections.Immutable",
 			"Microsoft.VisualStudio.LanguageServices",
 			"Esent.Interop",
 			"System.Composition.AttributedModel",		// New to VS2015 Preview

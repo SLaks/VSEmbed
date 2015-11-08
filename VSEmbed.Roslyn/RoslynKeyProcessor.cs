@@ -133,7 +133,7 @@ namespace VSEmbed.Roslyn {
 			AddControlCommand(Key.A, "ExecuteSelectAll");
 			#endregion
 
-			AddCommand(Key.F12, "ExecuteGotoDefinition");
+			AddCommand(Key.F12, "ExecuteGoToDefinition");
 			AddCommand(Key.F2, "ExecuteRename");
 			AddCommand(Key.Escape, "ExecuteCancel");
 			AddControlShiftCommand(Key.Space, "ExecuteParameterInfo");
