@@ -2,7 +2,7 @@
 <package >
 	<metadata>
 		<id>$id$</id>
-		<version>$version$-beta</version>
+		<version>$version$</version>
 		<title>$title$</title>
 		<authors>$author$</authors>
 		<owners>$author$</owners>
@@ -10,7 +10,7 @@
 		<projectUrl>https://github.com/SLaks/VSEmbed/</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>$description$</description>
-		<releaseNotes>Support for VS 2015 Update 1 CTP.</releaseNotes>
+		<releaseNotes>Support for VS 2015 Update 1 RTM.</releaseNotes>
 		<copyright>Copyright 2015 SLaks</copyright>
 		<tags>Roslyn Visual-Studio</tags>
 	</metadata>

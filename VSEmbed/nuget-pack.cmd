@@ -1,1 +1,1 @@
-nuget pack -p Configuration=Release -Symbols
+nuget pack -p Configuration=Release -Symbols VSEmbed.csproj
