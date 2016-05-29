@@ -40,7 +40,7 @@ namespace VSEmbed.Roslyn {
 		static readonly Type oleCommandTargetType = Type.GetType("Microsoft.VisualStudio.LanguageServices.Implementation.StandaloneCommandFilter`3, "
 															   + "Microsoft.VisualStudio.LanguageServices")
 			.MakeGenericType(packageType, languageServiceType,
-				Type.GetType("Microsoft.VisualStudio.LanguageServices.CSharp.ProjectSystemShim.CSharpProject, Microsoft.VisualStudio.LanguageServices.CSharp")
+				Type.GetType("Microsoft.VisualStudio.LanguageServices.CSharp.ProjectSystemShim.CSharpProjectShim, Microsoft.VisualStudio.LanguageServices.CSharp")
 			);
 
 		public RoslynKeyProcessor(IWpfTextView wpfTextView, IComponentModel mef) {
