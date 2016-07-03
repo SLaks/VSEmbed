@@ -16,7 +16,7 @@ namespace VSEmbed.Roslyn {
 	public class EditorWorkspace : Workspace {
 		// TODO: Add an optional parameter to pass changes through to an existing MSBuildWorkspace
 
-		static readonly Type ISolutionCrawlerRegistrationService = Type.GetType("Microsoft.CodeAnalysis.SolutionCrawler.ISolutionCrawlerRegistrationService, Microsoft.CodeAnalysis.Features");
+		static readonly Type ISolutionCrawlerRegistrationService = Type.GetType("Microsoft.CodeAnalysis.SolutionCrawler.ISolutionCrawlerRegistrationService, Microsoft.CodeAnalysis.Workspaces");
 		static readonly Type IDocumentTrackingService = Type.GetType("Microsoft.CodeAnalysis.IDocumentTrackingService, Microsoft.CodeAnalysis.Features");
 
 		readonly Dictionary<DocumentId, ITextBuffer> documentBuffers = new Dictionary<DocumentId, ITextBuffer>();
