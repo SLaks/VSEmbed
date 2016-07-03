@@ -10,11 +10,13 @@
 		<projectUrl>https://github.com/SLaks/VSEmbed/</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>$description$</description>
-		<releaseNotes>Support for VS 2015 Update 1 RTM.</releaseNotes>
+		<releaseNotes>Support for VS 2015 Update 2 RTM.</releaseNotes>
 		<copyright>Copyright 2015 SLaks</copyright>
 		<tags>Roslyn Visual-Studio</tags>
 	</metadata>
 	<files>
+		<file src="bin\Release\VSEmbed.dll" target="lib\net46" />
+		<file src="bin\Release\VSEmbed.xml" target="lib\net46" />
 		<file src="..\VSEmbed.Roslyn\bin\Release\VSEmbed.Roslyn.dll" target="lib\net46" />
 		<file src="..\VSEmbed.Roslyn\bin\Release\VSEmbed.Roslyn.xml" target="lib\net46" />
 	</files>
