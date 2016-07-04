@@ -7,4 +7,4 @@
 [assembly: AssemblyVersion(ProductVersion.Current)]
 [assembly: AssemblyFileVersion(ProductVersion.Current)]
 [assembly: AssemblyInformationalVersion(ProductVersion.Current)]
-static class ProductVersion { public const string Current = "1.5.1"; }
+static class ProductVersion { public const string Current = "1.6"; }
