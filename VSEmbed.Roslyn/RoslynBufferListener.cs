@@ -57,7 +57,7 @@ namespace VSEmbed.Roslyn {
 				.AddMetadataReferences(new[] { "mscorlib", "System", "System.Core", "System.Xml.Linq" }
 					.Select(EditorWorkspace.CreateFrameworkReference)
 				);
-			project = project.WithParseOptions(project.ParseOptions.WithKind(SourceCodeKind.Script));
+
 			workspace.TryApplyChanges(project.Solution);
 			workspace.CreateDocument(project.Id, buffer);
 		}
