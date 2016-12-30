@@ -29,6 +29,7 @@ namespace VSEmbed.Roslyn {
 			{ "CSharp", LanguageNames.CSharp },
 			{ "Basic", LanguageNames.VisualBasic }
 		};
+
 		public async void SubjectBuffersConnected(IWpfTextView textView, ConnectionReason reason, Collection<ITextBuffer> subjectBuffers) {
 			// Give the code that created the buffer a chance to attach its own workspace
 			await Task.Yield();
@@ -46,6 +47,7 @@ namespace VSEmbed.Roslyn {
 				};
 			}
 		}
+
 		void CreateWorkspace(ITextBuffer buffer) {
 			if (buffer.GetWorkspace() != null || !buffer.ContentType.IsOfType("Roslyn Languages"))
 				return;

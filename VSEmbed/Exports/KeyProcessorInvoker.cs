@@ -51,24 +51,6 @@ namespace VSEmbed.Exports {
 		public override void KeyDown(KeyEventArgs args) {
 			args.Handled = InvokeChain((processor, buffer, next) => processor.KeyDown(args, buffer, next));
 		}
-		public override void KeyUp(KeyEventArgs args) {
-			args.Handled = InvokeChain((processor, buffer, next) => processor.KeyUp(args, buffer, next));
-		}
-		public override void PreviewKeyDown(KeyEventArgs args) {
-			args.Handled = InvokeChain((processor, buffer, next) => processor.PreviewKeyDown(args, buffer, next));
-		}
-		public override void PreviewKeyUp(KeyEventArgs args) {
-			args.Handled = InvokeChain((processor, buffer, next) => processor.PreviewKeyUp(args, buffer, next));
-		}
-		public override void PreviewTextInput(TextCompositionEventArgs args) {
-			args.Handled = InvokeChain((processor, buffer, next) => processor.PreviewTextInput(args, buffer, next));
-		}
-		public override void PreviewTextInputStart(TextCompositionEventArgs args) {
-			args.Handled = InvokeChain((processor, buffer, next) => processor.PreviewTextInputStart(args, buffer, next));
-		}
-		public override void PreviewTextInputUpdate(TextCompositionEventArgs args) {
-			args.Handled = InvokeChain((processor, buffer, next) => processor.PreviewTextInputUpdate(args, buffer, next));
-		}
 		public override void TextInput(TextCompositionEventArgs args) {
 			args.Handled = InvokeChain((processor, buffer, next) => processor.TextInput(args, buffer, next));
 		}
