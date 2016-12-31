@@ -194,8 +194,18 @@ namespace VSEmbed.Roslyn {
 			}));
 		}
 
-		public ChainedKeyProcessor GetProcessor(IWpfTextView wpfTextView) {
-			return new RoslynKeyProcessor(wpfTextView, componentModel);
+
+		//I'm limiting us to a single keyprocessor and therefore a single wpfTextView
+		private RoslynKeyProcessor keyProcessor = null;
+
+		public ChainedKeyProcessor GetProcessor(IWpfTextView wpfTextView)
+		{
+			if (keyProcessor == null)
+			{
+				return new RoslynKeyProcessor(wpfTextView, componentModel);
+			}
+
+			return keyProcessor;
 		}
 	}
 }
