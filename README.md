@@ -43,5 +43,5 @@ If you create a Roslyn-powered buffer and do not link it to a workspace, I have 
  - To make this work, implement `IVsPreviewChangesService` and add it to the ServiceProvider.
 
   
- +#License
- +[MIT](http://opensource.org/licenses/MIT)
+# License
+[MIT](http://opensource.org/licenses/MIT)
