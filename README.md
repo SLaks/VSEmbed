@@ -41,3 +41,7 @@ If you create a Roslyn-powered buffer and do not link it to a workspace, I have 
   - To make Peek work, implement & export `IPeekResultPresenter` & `IPeekResultPresentation`, and create a WpfTextViewHost in `Create()`.  Note that peek only operates on file paths.
 - Rename with preview does not work.
  - To make this work, implement `IVsPreviewChangesService` and add it to the ServiceProvider.
+
+  
+ +#License
+ +[MIT](http://opensource.org/licenses/MIT)
