@@ -45,8 +45,8 @@ namespace VSEmbed.Roslyn {
 				}
 			}
 
-			string docComment;
-			return _docComments.TryGetValue(documentationMemberID, out docComment) ? docComment : "";
+			string docComment = null;
+			return _docComments?.TryGetValue(documentationMemberID, out docComment) == true ? docComment : "";
 		}
 	}
 }
