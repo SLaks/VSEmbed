@@ -158,10 +158,6 @@
     <Compile Include="VsThemeDictionary.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Controls\ComboBoxStyles.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Controls\VsResizeGrip.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

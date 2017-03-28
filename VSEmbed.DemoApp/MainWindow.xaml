@@ -19,7 +19,6 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="/Microsoft.VisualStudio.Shell.UI.Internal;component/Themes/Generic.xaml" />
 				<ResourceDictionary Source="/Microsoft.VisualStudio.Platform.WindowManagement;component/Themes/Resources.xaml" />
-				<ResourceDictionary Source="/VSEmbed;component/Controls/ComboBoxStyles.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 
 			<!-- TODO: Create themed styles for Dev12. -->
@@ -33,7 +32,6 @@
 			<!-- Create default styles that inherit the standard styles (Dev14) or my styles (older versions) -->
 			<Style BasedOn="{StaticResource {x:Static vsembed:VsResourceKeys.ButtonStyleKey}}"   x:Key="{x:Type Button}"   TargetType="Button"   />
 			<Style BasedOn="{StaticResource {x:Static vsembed:VsResourceKeys.CheckBoxStyleKey}}" x:Key="{x:Type CheckBox}" TargetType="CheckBox" />
-			<Style BasedOn="{StaticResource {x:Static vsembed:VsResourceKeys.ComboBoxStyleKey}}" x:Key="{x:Type ComboBox}" TargetType="ComboBox" />
 		</ResourceDictionary>
 	</vsc:CustomChromeWindow.Resources>
 
@@ -138,18 +136,10 @@
 		</ControlTemplate>
 	</vsc:CustomChromeWindow.Template>
 	<DockPanel LastChildFill="True">
-		<!-- Style="{StaticResource {x:Static vsfx:VsResourceKeys.ComboBoxStyleKey}}"-->
-		<ComboBox DockPanel.Dock="Top"
-				  DataContext="{Binding Resources.MergedDictionaries[0], Source={x:Static Application.Current}}"
-				  SelectedItem="{Binding CurrentTheme}" DisplayMemberPath="Name"
-				  ItemsSource="{Binding Themes}">
-		</ComboBox>
-		<Button DockPanel.Dock="Top">Button</Button>
-		<CheckBox DockPanel.Dock="Top">Checkbox</CheckBox>
 		<ComboBox Name="ContentType"
 				  DockPanel.Dock="Top"
 				  ItemsSource="{x:Static vscontrols:TextViewHost.AvailableContentTypes}"
 				  SelectedItem="CSharp" />
-		<vscontrols:TextViewHost Text="Hi, everyone!" ContentType="{Binding ElementName=ContentType, Path=SelectedItem, Mode=TwoWay}" />
+		<vscontrols:TextViewHost ContentType="{Binding ElementName=ContentType, Path=SelectedItem, Mode=TwoWay}" />
 	</DockPanel>
 </vsc:CustomChromeWindow>

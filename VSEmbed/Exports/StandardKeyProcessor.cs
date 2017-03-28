@@ -184,8 +184,17 @@ namespace VSEmbed.Exports {
 		[Import]
 		public ITextUndoHistoryRegistry UndoHistoryRegistry { get; set; }
 
-		public ChainedKeyProcessor GetProcessor(IWpfTextView wpfTextView) {
-			return new StandardKeyProcessor(wpfTextView, EditorOperationsFactory.GetEditorOperations(wpfTextView), UndoHistoryRegistry.GetHistory(wpfTextView.TextBuffer));
+		//I'm limiting us to a single keyprocessor and therefore a single wpfTextView
+		private StandardKeyProcessor keyProcessor = null;
+
+		public ChainedKeyProcessor GetProcessor(IWpfTextView wpfTextView)
+		{
+			if (keyProcessor == null)
+			{
+				keyProcessor = new StandardKeyProcessor(wpfTextView, EditorOperationsFactory.GetEditorOperations(wpfTextView), UndoHistoryRegistry.GetHistory(wpfTextView.TextBuffer));
+			}
+
+			return keyProcessor;
 		}
 	}
 }

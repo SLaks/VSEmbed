@@ -86,8 +86,17 @@ namespace VSEmbed.Roslyn {
 		[Import]
 		public IPeekBroker PeekBroker { get; set; }
 
-		public ChainedKeyProcessor GetProcessor(IWpfTextView wpfTextView) {
-			return new Dev14KeyProcessor(wpfTextView, LightBulbBroker, SuggestedActionCategoryRegistryService, SmartTagBroker, PeekBroker);
+		//I'm limiting us to a single keyprocessor and therefore a single wpfTextView
+		private Dev14KeyProcessor keyProcessor = null;
+
+		public ChainedKeyProcessor GetProcessor(IWpfTextView wpfTextView)
+		{
+			if (keyProcessor == null)
+			{
+				return new Dev14KeyProcessor(wpfTextView, LightBulbBroker, SuggestedActionCategoryRegistryService, SmartTagBroker, PeekBroker);
+			}
+
+			return keyProcessor;
 		}
 	}
 }
